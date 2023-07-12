@@ -1,6 +1,7 @@
 {
   "name": "detailers-den",
-  "version": "0.2.0",
+  "description": "Landing page for Detailers Den",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
