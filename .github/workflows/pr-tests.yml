@@ -1,0 +1,32 @@
+name: 'PR Tests'
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  pr-lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 8.3.1
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 18.13.0
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run lint and type checks
+        run: |
+          pnpm concurrently -g \
+          "pnpm lint" \
+          "pnpm check:types" \
+          "pnpm prettier --check --ignore-unknown ./" \
+          "pnpm cspell ./ --no-progress --no-must-find-files"

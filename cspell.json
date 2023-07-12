@@ -1,0 +1,29 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "commitlint",
+    "tailwindcss",
+    "nextjs",
+    "tsbuildinfo",
+    "svgr",
+    "roboto",
+    "daisyui",
+    "noninteractive",
+    "tanstack"
+  ],
+  "ignorePaths": [
+    "node_modules/",
+    "**/fixtures/**",
+    "build/",
+    ".husky",
+    ".sst",
+    ".next",
+    ".open-next",
+    "*.svg",
+    "pnpm-lock.yaml",
+    "package.json",
+    "eslint-config-base/",
+    "*.tsbuildinfo"
+  ]
+}

@@ -1,0 +1,16 @@
+# directories
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.open-next/
+.sst/
+
+# logs
+*-error.log
+
+# misc
+.eslintcache
+*-lock.yaml
+package.json

@@ -14,10 +14,13 @@
 
 # production
 /build
+.sst
+.open-next
 
 # misc
 .DS_Store
 *.pem
+.eslintcache
 
 # debug
 npm-debug.log*
