@@ -1,9 +1,7 @@
+import Header from 'src/components/common/header';
 import './globals.css';
-import { Inter } from 'next/font/google';
 
 import type { Metadata } from 'next';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: '185 Detailers Den',
@@ -13,7 +11,10 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="en">
-    <body className={inter.className}>{children}</body>
+    <body className="h-full w-full">
+      <Header />
+      {children}
+    </body>
   </html>
 );
 

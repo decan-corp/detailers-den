@@ -10,7 +10,11 @@
     "roboto",
     "daisyui",
     "noninteractive",
-    "tanstack"
+    "tanstack",
+    "bebas",
+    "neue",
+    "merriweather",
+    "noto"
   ],
   "ignorePaths": [
     "node_modules/",
