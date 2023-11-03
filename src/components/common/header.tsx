@@ -37,7 +37,7 @@ const Header = () => {
   return (
     <div className="relative flex h-[120px] justify-end bg-black">
       <Link href={Route.Home}>
-        <AppLogo className="absolute left-[123px] top-[13px] h-[322px] w-[322px]" />
+        <AppLogo className="absolute left-[123px] top-[13px] z-10 h-[322px] w-[322px]" />
       </Link>
       <div className="mr-[68px] mt-[70px] flex justify-between gap-[119px] text-white">
         <div className="flex flex-row gap-5">
