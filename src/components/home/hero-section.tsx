@@ -28,8 +28,8 @@ const HeroSection = () => (
       <div
         className={twJoin(
           bebasNeue.className,
-          'z-10 text-[90px] leading-[115px] tracking-[1.8px] text-white [text-shadow:_0px_4px_4px_rgba(0,0,0,0.25)] md:text-9xl md:leading-[180px] lg:text-[200px] lg:leading-[260px] lg:tracking-[4px]',
-          'mt-[150px] flex px-40 text-center md:mt-[210px]'
+          'text-[90px] leading-[115px] tracking-[1.8px] text-white [text-shadow:_0px_4px_4px_rgba(0,0,0,0.25)] md:text-9xl md:leading-[180px] lg:text-[200px] lg:leading-[260px] lg:tracking-[4px]',
+          'z-10 mt-[150px] px-40 text-center md:mt-[210px]'
         )}
       >
         SERVING YOU SOON..
