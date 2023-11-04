@@ -2,6 +2,8 @@ import './globals.css';
 import Footer from 'src/components/common/footer';
 import Header from 'src/components/common/header';
 
+import { Analytics } from '@vercel/analytics/react';
+
 import type { Metadata, Viewport } from 'next';
 
 export const viewport: Viewport = {
@@ -32,6 +34,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
     <body className="h-full w-full">
       <Header />
       {children}
+      <Analytics />
       <Footer />
     </body>
   </html>
