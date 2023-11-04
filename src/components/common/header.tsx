@@ -1,5 +1,6 @@
 'use client';
 
+import BurgerIcon from 'public/icons/burger.svg';
 import HeartIcon from 'public/icons/heart.svg';
 import ManIcon from 'public/icons/man.svg';
 import AppLogo from 'public/images/app-logo.svg';
@@ -35,12 +36,20 @@ const Header = () => {
   const pathname = usePathname() as Route;
 
   return (
-    // <div className="sticky top-0 z-20 flex h-[120px] justify-end bg-black"> // TODO: make header sticky but currently it has issues due to the app logo
-    <div className="relative flex h-[120px] justify-end bg-black">
+    // <div className="sticky top-0 z-20 flex h-[90px] lg:h-[120px] lg:justify-end bg-black"> // TODO: make header sticky but currently it has issues due to the app logo
+    <div className="relative flex h-[90px] bg-black lg:h-[120px] lg:justify-end">
       <Link href={Route.Home}>
-        <AppLogo className="absolute left-[123px] top-[13px] z-20 h-[322px] w-[322px]" />
+        <AppLogo className="absolute right-[35px] z-20 h-[235px] w-[235px] lg:left-[123px] lg:top-[13px] lg:h-[322px] lg:w-[322px]" />
       </Link>
-      <div className="mr-[68px] mt-[70px] flex justify-between gap-[119px] text-white">
+
+      {/* Mobile Menu */}
+      <div className="cursor-pointer px-[30px] pt-[30px] text-white lg:hidden">
+        <BurgerIcon className="h-[15px] w-5" />
+        {/* TODO: mobile app drawer */}
+      </div>
+
+      {/* Desktop Menu */}
+      <div className="mr-[68px] mt-[70px] hidden justify-between gap-[119px] text-white lg:flex">
         <div className="flex flex-row gap-5">
           <NavMenu label="PRICING" route={Route.Pricing} isActive={pathname === Route.Pricing} />
           <NavMenu label="SERVICES" route={Route.Services} isActive={pathname === Route.Services} />

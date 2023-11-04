@@ -1,4 +1,4 @@
-import ScrollToTopWidget from 'src/components/common/scrollToTopWidget';
+import ScrollToTopWidget from 'src/components/common/scroll-to-top-widget';
 import HeroSection from 'src/components/home/hero-section';
 import ServiceSection from 'src/components/home/service-section';
 

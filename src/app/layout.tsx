@@ -5,6 +5,7 @@ import Header from 'src/components/common/header';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(`https://${process.env.VERCEL_URL}`),
   title: '185 Detailers Den',
   description:
     '185 Detailers Den is a car detailing and car wash business located in Caloocan City, Philippines.',

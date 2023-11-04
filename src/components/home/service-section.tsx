@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { twJoin } from 'tailwind-merge';
 
 const ServiceSection = () => (
-  <div className="relative flex flex-col items-center pb-[60px] pt-[30px]">
+  <div className="relative hidden flex-col items-center pb-[60px] pt-[30px] md:flex">
     <div className="flex">
       <Image src={serviceImage1} alt="service-image-1" />
       <div className="flex w-[560px] flex-col items-center justify-center">
