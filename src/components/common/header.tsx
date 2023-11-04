@@ -92,7 +92,7 @@ const Header = () => {
           <label htmlFor="menu-drawer" aria-label="close sidebar" className="drawer-overlay" />
           <div className="menu min-h-full w-80 bg-black/40 p-0 text-base-content backdrop-blur-md">
             {/* Sidebar content here */}
-            <div className="p-4">
+            <div className="p-8">
               <ArrowLeftIcon className="h-6 w-6 cursor-pointer" />
             </div>
             <div className="flex flex-col gap-4">
