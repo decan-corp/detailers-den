@@ -1,8 +1,8 @@
+import FacebookLogo from 'public/icons/fb-logo.svg';
+import InstagramLogo from 'public/icons/ig-logo.svg';
 import heroBackgroundImageMobile1 from 'public/images/hero-bg-mobile-1.png';
 import heroBackgroundImageMobile2 from 'public/images/hero-bg-mobile-2.png';
 import heroBackgroundImage from 'public/images/hero-bg.png';
-import FacebookLogo from 'src/assets/icons/fb-logo';
-import InstagramLogo from 'src/assets/icons/ig-logo';
 import { bebasNeue, cabin } from 'src/utils/fonts';
 
 import Image from 'next/image';
@@ -15,12 +15,14 @@ const HeroSection = () => (
         alt="background"
         src={heroBackgroundImage}
         className="absolute z-0 hidden h-full w-full object-cover md:block"
+        quality={100}
         placeholder="blur"
       />
       <Image
         alt="background"
         src={heroBackgroundImageMobile1}
         className="absolute z-0 h-full w-full object-cover md:hidden"
+        quality={100}
         placeholder="blur"
       />
       <div
@@ -84,7 +86,7 @@ const HeroSection = () => (
             ' text-center text-[26px] font-bold tracking-[3.12px] text-white'
           )}
         >
-          <FacebookLogo id="facebook-logo-mobile" className="h-[50px] w-[50px]" />
+          <FacebookLogo className="h-[50px] w-[50px]" />
           FOLLOW US ON FACEBOOK
         </a>
       </div>
@@ -98,7 +100,7 @@ const HeroSection = () => (
             'text-center text-[26px] font-bold tracking-[3.12px] text-white'
           )}
         >
-          <InstagramLogo id="instagram-logo-mobile" className="h-[50px] w-[50px]" />
+          <InstagramLogo className="h-[50px] w-[50px]" />
           FOLLOW US ON INSTAGRAM
         </a>
       </div>

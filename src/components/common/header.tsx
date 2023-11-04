@@ -8,6 +8,7 @@ import ArrowLeftIcon from 'public/icons/arrow-left.svg';
 import BurgerIcon from 'public/icons/burger.svg';
 import HeartIcon from 'public/icons/heart.svg';
 import ManIcon from 'public/icons/man.svg';
+import AppLongLogo from 'public/images/app-logo-long.svg';
 import AppLogo from 'public/images/app-logo.svg';
 import { Route } from 'src/constants/routes';
 import { notoSans } from 'src/utils/fonts';
@@ -70,7 +71,8 @@ const Header = () => {
   return (
     <div className="sticky top-0 z-20 flex h-[90px] bg-black/70 backdrop-blur lg:h-[120px] lg:justify-end">
       <Link href={Route.Home}>
-        <AppLogo className="absolute right-[35px] z-20 h-[235px] w-[235px] lg:left-[123px] lg:top-[13px] lg:h-[322px] lg:w-[322px]" />
+        <AppLongLogo className="absolute left-[0px] top-[81px] z-20 hidden h-[182px] w-[436px] lg:block" />
+        <AppLogo className="absolute right-[58px] top-[60px] z-20 h-[80px] w-[132px] lg:hidden" />
       </Link>
       {/* Mobile Menu */}
       <div className="drawer z-50 px-[30px] pt-[30px] lg:hidden">
