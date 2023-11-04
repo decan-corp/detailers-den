@@ -7,7 +7,7 @@ export const bebasNeue = Bebas_Neue({
 });
 
 export const cabin = Cabin({
-  weight: ['700'],
+  weight: ['400', '700'],
   display: 'swap',
   subsets: ['latin'],
 });

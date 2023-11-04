@@ -1,5 +1,6 @@
-import Header from 'src/components/common/header';
 import './globals.css';
+import Footer from 'src/components/common/footer';
+import Header from 'src/components/common/header';
 
 import type { Metadata } from 'next';
 
@@ -23,6 +24,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
     <body className="h-full w-full">
       <Header />
       {children}
+      <Footer />
     </body>
   </html>
 );

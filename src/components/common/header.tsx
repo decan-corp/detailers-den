@@ -35,9 +35,10 @@ const Header = () => {
   const pathname = usePathname() as Route;
 
   return (
+    // <div className="sticky top-0 z-20 flex h-[120px] justify-end bg-black"> // TODO: make header sticky but currently it has issues due to the app logo
     <div className="relative flex h-[120px] justify-end bg-black">
       <Link href={Route.Home}>
-        <AppLogo className="absolute left-[123px] top-[13px] z-10 h-[322px] w-[322px]" />
+        <AppLogo className="absolute left-[123px] top-[13px] z-20 h-[322px] w-[322px]" />
       </Link>
       <div className="mr-[68px] mt-[70px] flex justify-between gap-[119px] text-white">
         <div className="flex flex-row gap-5">
