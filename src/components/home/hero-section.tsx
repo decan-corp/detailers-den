@@ -10,7 +10,7 @@ import { twJoin } from 'tailwind-merge';
 
 const HeroSection = () => (
   <div>
-    <div className="relative flex h-[540px] flex-col justify-between md:h-[850px]">
+    <div className="relative flex h-[540px] flex-col items-center justify-between md:h-[850px]">
       <Image
         alt="background"
         src={heroBackgroundImage}
@@ -28,15 +28,15 @@ const HeroSection = () => (
       <div
         className={twJoin(
           bebasNeue.className,
-          'text-[90px] leading-[115px] tracking-[1.8px] text-white [text-shadow:_0px_4px_4px_rgba(0,0,0,0.25)] md:text-9xl md:leading-[180px] lg:text-[200px] lg:leading-[260px] lg:tracking-[4px]',
-          'z-10 mt-[150px] px-40 text-center md:mt-[210px]'
+          'w-[293px] text-[90px] leading-normal tracking-[1.8px] text-white [text-shadow:_0px_4px_4px_rgba(0,0,0,0.25)] sm:w-full md:text-9xl md:leading-[180px] lg:text-[200px] lg:leading-[260px] lg:tracking-[4px]',
+          'z-10 mt-[150px] px-[50px] text-center sm:px-16 md:mt-[210px] md:px-40'
         )}
       >
         SERVING YOU SOON..
       </div>
 
       {/* Desktop View for Social Links */}
-      <div className="z-10 hidden h-[120px] grid-cols-2 bg-black/20 md:grid">
+      <div className="z-10 hidden h-[120px] w-full grid-cols-2 bg-black/20 md:grid">
         <a
           href="https://www.facebook.com/185dd"
           target="_blank"
