@@ -15,14 +15,12 @@ const HeroSection = () => (
         alt="background"
         src={heroBackgroundImage}
         className="absolute z-0 hidden h-full w-full object-cover md:block"
-        quality={100}
         placeholder="blur"
       />
       <Image
         alt="background"
         src={heroBackgroundImageMobile1}
         className="absolute z-0 h-full w-full object-cover md:hidden"
-        quality={100}
         placeholder="blur"
       />
       <div
@@ -32,7 +30,7 @@ const HeroSection = () => (
           'z-10 mt-[150px] text-center sm:max-w-[600px]  sm:px-16 md:mt-[210px] md:max-w-[900px] lg:max-w-[1120px]'
         )}
       >
-        SERVING YOU SOON..
+        SERVING YOU SOON
       </div>
 
       {/* Desktop View for Social Links */}

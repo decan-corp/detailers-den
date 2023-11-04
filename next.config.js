@@ -1,9 +1,5 @@
 /** @type {import('next').NextConfig} */
-const wordpressApiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || '';
 const nextConfig = {
-  images: {
-    domains: [wordpressApiUrl.replace('https://', '')],
-  },
   webpack: (config) => {
     const fileLoaderRule = config.module.rules.find(
       (rule) => rule.test && rule.test?.test?.('.svg')
