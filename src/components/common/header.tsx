@@ -75,7 +75,13 @@ const Header = () => {
 
       {/* Mobile Menu */}
       <div className="drawer z-50 px-[30px] pt-[30px] lg:hidden">
-        <input id="menu-drawer" type="checkbox" className="drawer-toggle" checked={showDrawer} />
+        <input
+          id="menu-drawer"
+          type="checkbox"
+          className="drawer-toggle"
+          checked={showDrawer}
+          readOnly
+        />
         <div className="drawer-content">
           {/* Toggle button here */}
           <label htmlFor="menu-drawer">
