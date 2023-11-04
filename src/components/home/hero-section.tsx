@@ -26,7 +26,7 @@ const HeroSection = () => (
     </div>
     <div className="z-10 grid h-[120px] grid-cols-2 bg-black/20">
       <a
-        href="https://facebook.com"
+        href="https://www.facebook.com/185dd"
         target="_blank"
         rel="noreferrer"
         className={twJoin(
@@ -38,7 +38,7 @@ const HeroSection = () => (
         FOLLOW US ON FACEBOOK
       </a>
       <a
-        href="https://instagram.com"
+        href="https://www.instagram.com/detailersdenph"
         target="_blank"
         rel="noreferrer"
         className={twJoin(
