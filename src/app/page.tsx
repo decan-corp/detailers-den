@@ -3,7 +3,7 @@ import HeroSection from 'src/components/home/hero-section';
 import ServiceSection from 'src/components/home/service-section';
 
 const Home = () => (
-  <main className="flex flex-col">
+  <main className="flex flex-col bg-white">
     <HeroSection />
     <ServiceSection />
     <ScrollToTopWidget />

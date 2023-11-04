@@ -1,8 +1,8 @@
+import FacebookLogo from 'public/icons/fb-logo.svg';
+import InstagramLogo from 'public/icons/ig-logo.svg';
 import heroBackgroundImageMobile1 from 'public/images/hero-bg-mobile-1.png';
 import heroBackgroundImageMobile2 from 'public/images/hero-bg-mobile-2.png';
 import heroBackgroundImage from 'public/images/hero-bg.png';
-import FacebookLogo from 'src/assets/icons/fb-logo';
-import InstagramLogo from 'src/assets/icons/ig-logo';
 import { bebasNeue, cabin } from 'src/utils/fonts';
 
 import Image from 'next/image';
@@ -32,7 +32,7 @@ const HeroSection = () => (
           'z-10 mt-[150px] text-center sm:max-w-[600px]  sm:px-16 md:mt-[210px] md:max-w-[900px] lg:max-w-[1120px]'
         )}
       >
-        SERVING YOU SOON..
+        SERVING YOU SOON
       </div>
 
       {/* Desktop View for Social Links */}
@@ -86,7 +86,7 @@ const HeroSection = () => (
             ' text-center text-[26px] font-bold tracking-[3.12px] text-white'
           )}
         >
-          <FacebookLogo id="facebook-logo-mobile" className="h-[50px] w-[50px]" />
+          <FacebookLogo className="h-[50px] w-[50px]" />
           FOLLOW US ON FACEBOOK
         </a>
       </div>
@@ -100,7 +100,7 @@ const HeroSection = () => (
             'text-center text-[26px] font-bold tracking-[3.12px] text-white'
           )}
         >
-          <InstagramLogo id="instagram-logo-mobile" className="h-[50px] w-[50px]" />
+          <InstagramLogo className="h-[50px] w-[50px]" />
           FOLLOW US ON INSTAGRAM
         </a>
       </div>

@@ -8,7 +8,7 @@ import { twJoin } from 'tailwind-merge';
 const ServiceSection = () => (
   <div className="relative hidden flex-col items-center pb-[60px] pt-[30px] md:flex">
     <div className="flex">
-      <Image src={serviceImage1} alt="service-image-1" />
+      <Image src={serviceImage1} alt="service-image-1" placeholder="blur" />
       <div className="flex w-[560px] flex-col items-center justify-center">
         <div
           className={twJoin(
@@ -67,7 +67,7 @@ const ServiceSection = () => (
           Learn More
         </button>
       </div>
-      <Image src={serviceImage2} alt="service-image-2" />
+      <Image src={serviceImage2} alt="service-image-2" placeholder="blur" />
     </div>
   </div>
 );

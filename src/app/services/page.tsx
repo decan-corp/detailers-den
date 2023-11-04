@@ -3,7 +3,7 @@ import { bebasNeue } from 'src/utils/fonts';
 import { twJoin } from 'tailwind-merge';
 
 const Services = () => (
-  <div className="flex h-screen items-start justify-center px-10">
+  <main className="flex h-screen items-start justify-center bg-white px-10">
     <div
       className={twJoin(
         bebasNeue.className,
@@ -12,7 +12,7 @@ const Services = () => (
     >
       Exciting Content in Progress - Check Back Soon!
     </div>
-  </div>
+  </main>
 );
 
 export default Services;
