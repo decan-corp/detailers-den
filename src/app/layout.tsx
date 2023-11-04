@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="en" data-theme="light">
-    <body className="h-full w-full">
+    <body className="h-full w-full bg-black">
       <Header />
       {children}
       <Analytics />

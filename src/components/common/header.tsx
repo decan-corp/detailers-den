@@ -66,13 +66,14 @@ const Header = () => {
   const toggleDrawer = useCallback(() => {
     setShowDrawer((prevState) => !prevState);
   }, []);
+
+  // TODO: TODO: make header sticky but currently it has issues due to the app logo
+  // <div className="sticky top-0 z-20 flex h-[90px] bg-black/70 backdrop-blur lg:h-[120px] lg:justify-end">
   return (
-    // <div className="sticky top-0 z-20 flex h-[90px] lg:h-[120px] lg:justify-end bg-black"> // TODO: make header sticky but currently it has issues due to the app logo
     <div className="relative flex h-[90px] bg-black lg:h-[120px] lg:justify-end">
       <Link href={Route.Home}>
         <AppLogo className="absolute right-[35px] z-20 h-[235px] w-[235px] lg:left-[123px] lg:top-[13px] lg:h-[322px] lg:w-[322px]" />
       </Link>
-
       {/* Mobile Menu */}
       <div className="drawer z-50 px-[30px] pt-[30px] lg:hidden">
         <input
@@ -126,7 +127,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-
       {/* Desktop Menu */}
       <div className="mr-[68px] mt-[70px] hidden justify-between gap-[119px] text-white lg:flex">
         <div className="flex flex-row gap-5">
