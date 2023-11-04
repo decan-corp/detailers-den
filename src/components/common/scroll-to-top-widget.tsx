@@ -34,7 +34,7 @@ const ScrollToTopWidget = () => {
       type="button"
       className={twJoin(
         cabin.className,
-        'fixed bottom-7 right-5 z-50 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#D9D9D9]',
+        'fixed bottom-7 right-5 z-40 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#D9D9D9]',
         'outline-none',
         'transition-all duration-300 ease-in-out',
         // 'transition-all duration-1000 ease-in-out hover:scale-105 hover:brightness-110',
