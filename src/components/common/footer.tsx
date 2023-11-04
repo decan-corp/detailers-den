@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { twJoin } from 'tailwind-merge';
 
 const Footer = () => (
-  <div className="flex h-[180px] flex-col-reverse justify-between bg-black px-[50px] pt-[21px] md:flex-row md:gap-3 md:px-16 lg:px-40">
+  <div className="flex h-[180px] flex-col-reverse justify-between bg-black px-8 pt-[21px] md:flex-row md:gap-3 md:px-16 lg:px-40">
     <div className="md:w-[360px]">
       <div
         className={twJoin(
