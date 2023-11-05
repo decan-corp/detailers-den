@@ -3,7 +3,7 @@
 import { cabin } from 'src/utils/fonts';
 
 import { throttle } from 'lodash';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 
 const ScrollToTopWidget = () => {
@@ -49,4 +49,4 @@ const ScrollToTopWidget = () => {
   );
 };
 
-export default ScrollToTopWidget;
+export default memo(ScrollToTopWidget);
