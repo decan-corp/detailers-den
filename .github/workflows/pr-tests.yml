@@ -20,6 +20,12 @@ jobs:
           node-version: 18.13.0
           # cache: 'bun' # TODO: bun cache is not yet supported
 
+      # TODO: temporary support for caching dependencies
+      - uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          path: ~/.bun/install/cache
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
