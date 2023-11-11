@@ -6,7 +6,7 @@ import { Route } from 'src/constants/routes';
 
 import { throttle } from 'lodash';
 import Link from 'next/link';
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 const AppLogo = () => {
@@ -48,4 +48,4 @@ const AppLogo = () => {
   );
 };
 
-export default memo(AppLogo);
+export default AppLogo;
