@@ -16,7 +16,8 @@
     "merriweather",
     "noto",
     "lockb",
-    "planetscale"
+    "planetscale",
+    "paralleldrive"
   ],
   "ignorePaths": [
     "node_modules/",
@@ -30,6 +31,7 @@
     "bun.lockb",
     "package.json",
     "eslint-config-base/",
-    "*.tsbuildinfo"
+    "*.tsbuildinfo",
+    "drizzle/**"
   ]
 }
