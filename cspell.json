@@ -15,7 +15,8 @@
     "neue",
     "merriweather",
     "noto",
-    "lockb"
+    "lockb",
+    "planetscale"
   ],
   "ignorePaths": [
     "node_modules/",
