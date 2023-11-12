@@ -1,15 +1,30 @@
 import { serverEnv } from 'src/env/server';
 
 import { drizzle } from 'drizzle-orm/mysql2';
-import { createConnection } from 'mysql2';
+import { ConnectionOptions, createConnection } from 'mysql2';
 
-const connection = createConnection({
-  host: serverEnv.DB_HOST,
-  user: serverEnv.DB_USERNAME,
-  password: serverEnv.DB_PASSWORD,
-  ssl: {
-    rejectUnauthorized: true,
-  },
-});
+let connectionOptions: ConnectionOptions;
+
+const { NODE_ENV } = process.env;
+
+if (NODE_ENV === 'production') {
+  connectionOptions = {
+    host: serverEnv.DB_HOST,
+    user: serverEnv.DB_USERNAME,
+    password: serverEnv.DB_PASSWORD,
+    ssl: {
+      rejectUnauthorized: true,
+    },
+  };
+} else {
+  connectionOptions = {
+    host: serverEnv.DB_HOST,
+    user: serverEnv.DB_USERNAME,
+    password: serverEnv.DB_PASSWORD,
+    database: serverEnv.DB_NAME || '',
+  };
+}
+
+const connection = createConnection(connectionOptions);
 
 export const db = drizzle(connection);
