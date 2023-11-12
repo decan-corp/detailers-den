@@ -42,10 +42,84 @@ jobs:
           "bun lint" \
           "bun typecheck"
 
+  db-migration-dev:
+    name: Run Database Migration in Dev
+    if: github.event.ref == 'refs/heads/develop'
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ${{ github.ref }} branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.13.0
+          # cache: 'bun' # TODO: bun cache is not yet supported
+
+      # TODO: temporary support for caching dependencies
+      - uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          path: ~/.bun/install/cache
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Get Environment Variables from Vercel
+        run: |
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull
+
+      - name: Run Database Migration
+        run: bun drizzle:migrate
+
+  db-migration-prod:
+    name: Run Database Migration in Production
+    if: github.event.ref == 'refs/heads/main'
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ${{ github.ref }} branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.13.0
+          # cache: 'bun' # TODO: bun cache is not yet supported
+
+      # TODO: temporary support for caching dependencies
+      - uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          path: ~/.bun/install/cache
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Get Environment Variables from Vercel
+        run: |
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes --environment=production
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull --environment=production
+
+      - name: Run Database Migration
+        run: bun drizzle:migrate
+
   release:
     name: Release
     if: github.event.ref == 'refs/heads/main'
-    needs: lint-and-test
+    needs: [lint-and-test, db-migration-prod]
     runs-on: ubuntu-latest
     outputs:
       skipped: ${{ steps.changelog.outputs.skipped }}
