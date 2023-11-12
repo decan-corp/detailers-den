@@ -11,7 +11,7 @@ import ManIcon from 'public/icons/man.svg';
 import { Route } from 'src/constants/routes';
 import { notoSans } from 'src/utils/fonts';
 
-import AppLogo from './app-logo';
+import AppLogo from '../common/app-logo';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
