@@ -25,7 +25,7 @@ const init = async () => {
     console.log('Success migrating to database');
     process.exit(0);
   } catch (err) {
-    console.error('Failed to database migration', err);
+    console.error('Failed migrating to database', err);
     process.exit(1);
   }
 };
