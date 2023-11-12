@@ -1,23 +1,11 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable no-console */
-/* eslint-disable import/no-extraneous-dependencies */
-import { serverEnv } from 'src/env/server';
 
-import { drizzle } from 'drizzle-orm/mysql2';
+import { db } from 'src/utils/db';
+
 import { migrate } from 'drizzle-orm/mysql2/migrator';
-import { createConnection } from 'mysql2';
 
 import path from 'path';
-
-const connection = createConnection({
-  host: serverEnv.DB_HOST,
-  user: serverEnv.DB_USERNAME,
-  password: serverEnv.DB_PASSWORD,
-  ssl: {
-    rejectUnauthorized: true,
-  },
-});
-const db = drizzle(connection);
 
 const init = async () => {
   try {

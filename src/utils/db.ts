@@ -1,13 +1,15 @@
 import { serverEnv } from 'src/env/server';
 
-import { connect } from '@planetscale/database';
-import { drizzle } from 'drizzle-orm/planetscale-serverless';
+import { drizzle } from 'drizzle-orm/mysql2';
+import { createConnection } from 'mysql2';
 
-// create the connection
-const connection = connect({
+const connection = createConnection({
   host: serverEnv.DB_HOST,
-  username: serverEnv.DB_USERNAME,
+  user: serverEnv.DB_USERNAME,
   password: serverEnv.DB_PASSWORD,
+  ssl: {
+    rejectUnauthorized: true,
+  },
 });
 
 export const db = drizzle(connection);
