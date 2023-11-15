@@ -11,34 +11,85 @@ import {
 
 import type { AdapterAccount } from '@auth/core/adapters';
 
-export const transactions = mysqlTable('transactions', {
-  id: varchar('id', { length: 128 })
-    .$defaultFn(() => createId())
-    .primaryKey(),
+const commonSchema = {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).onUpdateNow(),
   deletedAt: timestamp('deleted_at', { mode: 'date' }),
-  customerName: varchar('customer_name', { length: 256 }).notNull(),
-  status: varchar('status', { length: 64, enum: ['PAID', 'PENDING', 'CANCELLED', 'REFUNDED'] })
+  createdById: varchar('created_by_id', { length: 255 }),
+  updatedById: varchar('updated_by_id', { length: 255 }),
+  deletedById: varchar('deleted_by_id', { length: 255 }),
+};
+
+export const transactions = mysqlTable('transactions', {
+  id: varchar('id', { length: 255 })
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  customerName: varchar('customer_name', { length: 255 }).notNull(),
+  status: varchar('status', {
+    length: 64,
+    enum: ['PAID', 'PENDING', 'CANCELLED', 'REFUNDED', 'VOID'],
+  })
     .notNull()
     .default('PENDING'),
-  totalPrice: decimal('total_price', { scale: 2, precision: 5 }),
+  totalPrice: decimal('total_price', { scale: 2, precision: 5 }).notNull(),
   note: text('note'),
+  plateNumber: varchar('plate_number', { length: 7 }),
+  vehicleType: varchar('vehicle_type', {
+    length: 24,
+    enum: ['mc', 'small', 'medium', 'large', 'x-large'],
+  }).notNull(),
+  discount: decimal('discount', { scale: 2, precision: 5 }),
+  // files: // TODO: array of files
+  ...commonSchema,
+});
+
+export const services = mysqlTable('services', {
+  id: varchar('id', { length: 255 })
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  serviceName: varchar('service_name', { length: 255 }).notNull(),
+  price: decimal('price', { scale: 2, precision: 5 }),
+  description: text('description'),
+  serviceCutPercentage: int('service_cut_percentage').notNull(), // TODO:
+  ...commonSchema,
 });
 
 export const users = mysqlTable('user', {
-  id: varchar('id', { length: 128 })
+  id: varchar('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),
-  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date' }).onUpdateNow(),
-  deletedAt: timestamp('deleted_at', { mode: 'date' }),
+  role: varchar('role', {
+    length: 64,
+    enum: ['stay-in-crew', 'crew', 'cashier', 'accounting', 'detailer', 'admin'],
+  }).notNull(),
+  serviceCutPercentage: int('service_cut_percentage'), // TODO:
   name: varchar('name', { length: 255 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   emailVerified: timestamp('emailVerified', { mode: 'date', fsp: 3 }).defaultNow(),
   password: text('password'),
   image: varchar('image', { length: 255 }),
+  ...commonSchema,
 });
+
+export const transaction_services = mysqlTable(
+  'transaction_services',
+  {
+    id: varchar('id', { length: 255 })
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    transactionId: varchar('transaction_id', { length: 255 })
+      .references(() => transactions.id)
+      .notNull(),
+    serviceId: varchar('service_id', { length: 255 })
+      .references(() => services.id)
+      .notNull(),
+    serviceById: varchar('service_by_id', { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+    ...commonSchema,
+  },
+  () => ({})
+);
 
 export const accounts = mysqlTable(
   'account',

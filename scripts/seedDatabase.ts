@@ -16,6 +16,7 @@ const seedDatabase = async () => {
     email: 'emnnipal@gmail.com',
     name: 'Emman',
     password: saltedPassword,
+    role: 'admin',
   });
 
   console.log('Success seeding database');
