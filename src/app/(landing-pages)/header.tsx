@@ -8,10 +8,9 @@ import ArrowLeftIcon from 'public/icons/arrow-left.svg';
 import BurgerIcon from 'public/icons/burger.svg';
 import HeartIcon from 'public/icons/heart.svg';
 import ManIcon from 'public/icons/man.svg';
+import AppLogo from 'src/components/logo/app-logo';
 import { Route } from 'src/constants/routes';
 import { notoSans } from 'src/utils/fonts';
-
-import AppLogo from '../common/app-logo';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
