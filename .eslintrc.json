@@ -99,6 +99,7 @@
       {
         "checksVoidReturn": false
       }
-    ]
+    ],
+    "jsx-a11y/label-has-associated-control": "off"
   }
 }
