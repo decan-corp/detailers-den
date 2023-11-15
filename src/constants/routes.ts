@@ -6,3 +6,7 @@ export enum Route {
   Faq = '/faq',
   AboutUs = '/about-us',
 }
+
+export enum AdminRoute {
+  Home = '/admin',
+}

@@ -14,8 +14,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(`https://${process.env.VERCEL_URL}`),
-  title: '185 Detailers Den',
+  metadataBase: new URL(`https://${process.env.VERCEL_URL}}`),
+  title: {
+    template: '%s | 185 Detailers Den',
+    default: '185 Detailers Den',
+  },
   description:
     '185 Detailers Den is a car detailing and car wash business located in Caloocan City, Philippines.',
   keywords: ['car wash', 'detailing', 'cleaning', 'caloocan', 'car'],

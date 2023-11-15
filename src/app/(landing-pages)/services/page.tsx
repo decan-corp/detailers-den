@@ -1,8 +1,13 @@
 import { bebasNeue } from 'src/utils/fonts';
 
+import { Metadata } from 'next';
 import { twJoin } from 'tailwind-merge';
 
-const Faq = () => (
+export const metadata: Metadata = {
+  title: 'Services',
+};
+
+const Services = () => (
   <main className="flex h-screen items-start justify-center bg-white px-10">
     <div
       className={twJoin(
@@ -15,4 +20,4 @@ const Faq = () => (
   </main>
 );
 
-export default Faq;
+export default Services;

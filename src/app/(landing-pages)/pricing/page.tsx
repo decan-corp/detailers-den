@@ -1,6 +1,11 @@
 import { bebasNeue } from 'src/utils/fonts';
 
+import { Metadata } from 'next';
 import { twJoin } from 'tailwind-merge';
+
+export const metadata: Metadata = {
+  title: 'Pricing',
+};
 
 const Pricing = () => (
   <main className="flex h-screen items-start justify-center bg-white px-10">

@@ -10,7 +10,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Admin - 185 Detailers Den',
+  title: {
+    template: '%s | 185 Detailers Den',
+    default: '185 Detailers Den',
+  },
   description: 'Admin page of 185 Detailers Den',
 };
 
