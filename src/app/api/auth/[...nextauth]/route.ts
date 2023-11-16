@@ -54,7 +54,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 604800, // 7 days
+    maxAge: 60 * 60 * 24 * 14, // 14 days
   },
   callbacks: {
     jwt({ token, user }) {
@@ -64,6 +64,7 @@ export const authOptions: NextAuthOptions = {
         token.role = userFromDb.role;
         token.image = userFromDb.image;
       }
+
       return token;
     },
     session({ session, token }) {
