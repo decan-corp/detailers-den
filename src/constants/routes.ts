@@ -8,5 +8,6 @@ export enum Route {
 }
 
 export enum AdminRoute {
+  Login = '/auth/login',
   Home = '/admin',
 }

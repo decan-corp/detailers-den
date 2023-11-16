@@ -4,13 +4,11 @@ import { db } from 'src/utils/db';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 // TODO: create register api
-// TODO: when in login page, redirect to admin home page if user is already authenticated
-// TODO: when in protected page, redirect to login page if user is not authenticated
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db),
   providers: [
     CredentialsProvider({
@@ -54,14 +52,31 @@ const handler = NextAuth({
       },
     }),
   ],
+  session: {
+    strategy: 'jwt',
+    maxAge: 604800, // 7 days
+  },
   callbacks: {
-    jwt({ token }) {
+    jwt({ token, user }) {
+      const userFromDb = user as typeof users.$inferSelect;
+
+      if (userFromDb) {
+        token.role = userFromDb.role;
+        token.image = userFromDb.image;
+      }
       return token;
+    },
+    session({ session, token }) {
+      session.user.role = token.role;
+      session.user.image = token.image;
+
+      return session;
     },
   },
   pages: {
     signIn: '/auth/login',
   },
-});
+};
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

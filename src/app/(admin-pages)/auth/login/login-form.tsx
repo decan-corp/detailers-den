@@ -23,6 +23,7 @@ const LoginForm = () => {
       password,
       redirect: false,
     });
+
     if (!results?.ok && results?.error) {
       setError(results.error);
     }

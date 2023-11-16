@@ -1,5 +1,7 @@
 import '../globals.css';
 
+import { NextAuthProvider } from 'src/components/provider/session-provider';
+
 import type { Metadata, Viewport } from 'next';
 
 export const viewport: Viewport = {
@@ -19,7 +21,9 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="en" data-theme="light">
-    <body className="h-full w-full bg-black">{children}</body>
+    <body className="h-full w-full">
+      <NextAuthProvider>{children}</NextAuthProvider>
+    </body>
   </html>
 );
 

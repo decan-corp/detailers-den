@@ -33,7 +33,8 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts",
     "public",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "types/**/*.ts"
   ],
   "files": ["global.d.ts"],
   "exclude": ["node_modules"]
