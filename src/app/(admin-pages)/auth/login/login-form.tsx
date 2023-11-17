@@ -28,7 +28,7 @@ const LoginForm = () => {
       setError(results.error);
     }
     if (results?.ok) {
-      router.replace(AdminRoute.Home);
+      router.replace(AdminRoute.Dashboard);
     }
   };
   return (

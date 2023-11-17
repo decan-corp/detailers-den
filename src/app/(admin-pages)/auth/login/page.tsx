@@ -1,3 +1,5 @@
+import AppLogo from 'public/images/app-logo.svg';
+
 import LoginForm from './login-form';
 
 import { Metadata } from 'next';
@@ -10,8 +12,8 @@ const Login = () => (
   <main className="hero min-h-screen bg-base-200">
     <div className="hero-content flex-col-reverse gap-6 lg:flex-row-reverse">
       <LoginForm />
-      <div className="max-w-xl text-center lg:text-right">
-        <h1 className="text-5xl font-bold">Login</h1>
+      <div className="flex max-w-xl flex-col items-center text-center lg:items-end lg:text-right">
+        <AppLogo className="w-52" />
         <p className="py-6">Welcome to 185 Detailers Den Admin Portal</p>
         <p className="hidden lg:block">
           Login using the provided credentials to manage and oversee administrative tasks with

@@ -15,7 +15,7 @@ const PublicRoute = async ({
   const session = await getServerSession(authOptions);
 
   if (session) {
-    return redirect(redirectTo || AdminRoute.Home);
+    return redirect(redirectTo || AdminRoute.Dashboard);
   }
 
   return <>{children}</>;

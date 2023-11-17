@@ -9,5 +9,9 @@ export enum Route {
 
 export enum AdminRoute {
   Login = '/auth/login',
-  Home = '/admin',
+  Dashboard = '/admin',
+  POS = '/admin/pos',
+  Settings = '/admin/settings',
+  ChangePassword = '/admin/settings/change-password',
+  Logout = '/logout',
 }

@@ -1,4 +1,10 @@
-import { Bebas_Neue, Cabin, Noto_Sans } from 'next/font/google';
+import { Bebas_Neue, Cabin, Noto_Sans, Inter } from 'next/font/google';
+
+export const inter = Inter({
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  subsets: ['latin'],
+});
 
 export const bebasNeue = Bebas_Neue({
   weight: ['400'],

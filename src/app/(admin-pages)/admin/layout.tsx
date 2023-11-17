@@ -1,5 +1,7 @@
 import ProtectedRoute from 'src/components/auth/protected-route';
 
+import Header from './header';
+
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -7,7 +9,10 @@ export const metadata: Metadata = {
 };
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedRoute>{children}</ProtectedRoute>
+  <ProtectedRoute>
+    <Header />
+    {children}
+  </ProtectedRoute>
 );
 
 export default AdminLayout;

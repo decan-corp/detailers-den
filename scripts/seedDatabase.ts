@@ -10,7 +10,7 @@ import bcrypt from 'bcryptjs';
 
 const seedDatabase = async () => {
   // Create default user
-  const password = 'P@ssw0rd!23';
+  const password = 'P@ssw0rd!23'; // user change the password afterwards
   const saltedPassword = await bcrypt.hash(password, serverEnv.SALT_ROUNDS);
   await db.insert(users).values({
     email: 'emnnipal@gmail.com',

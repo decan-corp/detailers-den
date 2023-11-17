@@ -1,4 +1,5 @@
 import { serverEnv } from 'src/env/server';
+import * as schema from 'src/schema';
 
 import { drizzle } from 'drizzle-orm/mysql2';
 import { ConnectionOptions, createConnection } from 'mysql2';
@@ -27,4 +28,4 @@ if (NODE_ENV === 'production') {
 
 const connection = createConnection(connectionOptions);
 
-export const db = drizzle(connection);
+export const db = drizzle(connection, { schema, mode: 'planetscale' });

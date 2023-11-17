@@ -1,6 +1,9 @@
 import '../globals.css';
 
 import { NextAuthProvider } from 'src/components/provider/session-provider';
+import { inter } from 'src/utils/fonts';
+
+import { twJoin } from 'tailwind-merge';
 
 import type { Metadata, Viewport } from 'next';
 
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="en" data-theme="light">
-    <body className="h-full w-full">
+    <body className={twJoin(inter.className, 'h-full w-full')}>
       <NextAuthProvider>{children}</NextAuthProvider>
     </body>
   </html>
