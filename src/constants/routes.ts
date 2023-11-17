@@ -8,8 +8,8 @@ export enum Route {
 }
 
 export enum AdminRoute {
-  Login = '/auth/login',
   Dashboard = '/admin',
+  Login = '/auth/login',
   POS = '/admin/pos',
   Settings = '/admin/settings',
   ChangePassword = '/admin/settings/change-password',
