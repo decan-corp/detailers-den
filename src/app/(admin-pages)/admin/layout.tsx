@@ -1,6 +1,6 @@
 import ProtectedRoute from 'src/components/auth/protected-route';
 
-import Header from './header';
+import Header from './components/header';
 
 import { Metadata } from 'next';
 

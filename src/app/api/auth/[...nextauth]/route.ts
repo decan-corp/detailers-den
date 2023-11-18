@@ -67,11 +67,13 @@ export const authOptions: NextAuthOptions = {
       if (userFromDb) {
         token.role = userFromDb.role;
         token.image = userFromDb.image;
+        token.id = userFromDb.id;
       }
 
       return token;
     },
     session({ session, token }) {
+      session.user.id = token.id;
       session.user.role = token.role;
       session.user.image = token.image;
 

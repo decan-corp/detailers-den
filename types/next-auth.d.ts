@@ -7,7 +7,7 @@ declare module 'next-auth' {
   interface Session {
     // define your custom fields here for token
     user: {
-      id: string;
+      id: UserType['id'];
       email: string;
       name: string;
       image: UserType['image'];
@@ -18,6 +18,7 @@ declare module 'next-auth' {
 
 declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
+    id: UserType['id'];
     role: UserType['role'];
     image: UserType['image'];
   }

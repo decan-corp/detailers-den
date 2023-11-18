@@ -18,7 +18,14 @@ const HeaderLink = ({
 }) => {
   const pathname = usePathname() as AdminRoute | Route;
   return (
-    <Link href={route} className={twMerge('', pathname === route && 'font-semibold', className)}>
+    <Link
+      href={route}
+      className={twMerge(
+        'text-sm  font-bold transition-colors hover:text-primary',
+        pathname !== route && 'font-medium text-muted-foreground',
+        className
+      )}
+    >
       {children}
     </Link>
   );

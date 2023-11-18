@@ -17,7 +17,8 @@
     "noto",
     "lockb",
     "planetscale",
-    "paralleldrive"
+    "paralleldrive",
+    "shadcn"
   ],
   "ignorePaths": [
     "node_modules/",

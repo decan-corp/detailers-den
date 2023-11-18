@@ -11,6 +11,7 @@ export enum AdminRoute {
   Login = '/auth/login',
   Logout = '/logout',
   Dashboard = '/admin',
+  Management = '/admin/management',
   POS = '/admin/pos',
   Settings = '/admin/settings',
   ChangePassword = '/admin/settings/change-password',
