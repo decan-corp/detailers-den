@@ -1,7 +1,7 @@
 import ScrollToTopWidget from 'src/components/widgets/scroll-to-top-widget';
 
-import HeroSection from './hero-section';
-import ServiceSection from './service-section';
+import HeroSection from './components/hero-section';
+import ServiceSection from './components/service-section';
 
 const Home = () => (
   <main className="flex flex-col bg-white">
