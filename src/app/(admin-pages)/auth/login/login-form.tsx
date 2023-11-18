@@ -30,8 +30,8 @@ const LoginForm = () => {
       redirect: false,
     });
 
-    setIsLoading(false);
     if (!results?.ok && results?.error) {
+      setIsLoading(false);
       setError(results.error);
     }
     if (results?.ok) {
@@ -43,7 +43,7 @@ const LoginForm = () => {
       <Alert
         variant="vibrant"
         className={twMerge(
-          'z-0 mb-2 min-h-[64px] transition-all duration-300 ease-in-out',
+          'pointer-events-none z-0 mb-2 min-h-[64px] transition-all duration-300 ease-in-out',
           error ? 'opacity-100' : 'absolute h-0 opacity-0'
         )}
       >
