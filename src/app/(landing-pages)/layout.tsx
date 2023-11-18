@@ -1,4 +1,4 @@
-import '../globals.css';
+import './globals.css';
 import Footer from 'src/app/(landing-pages)/footer';
 import Header from 'src/app/(landing-pages)/header';
 

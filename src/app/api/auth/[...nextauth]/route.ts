@@ -58,6 +58,10 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     jwt({ token, user }) {
+      // TODO: validate if user is still valid not deleted
+      // if so, remove cookies to force logout user.
+      // Check by adding timestamp on cookies,
+      // once expired, check user on database if still active or not.
       const userFromDb = user as typeof users.$inferSelect;
 
       if (userFromDb) {

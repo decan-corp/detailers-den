@@ -1,5 +1,9 @@
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Icons } from '@/components/ui/icons';
+import { Input } from '@/components/ui/input';
 import { AdminRoute } from 'src/constants/routes';
 
 import { useRouter } from 'next/navigation';
@@ -10,9 +14,11 @@ import { twMerge } from 'tailwind-merge';
 const LoginForm = () => {
   const router = useRouter();
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
     event.preventDefault(); // always add prevent default for onSubmit action
 
+    setIsLoading(true);
     const formData = new FormData(event.currentTarget);
 
     const email = formData.get('email');
@@ -24,6 +30,7 @@ const LoginForm = () => {
       redirect: false,
     });
 
+    setIsLoading(false);
     if (!results?.ok && results?.error) {
       setError(results.error);
     }
@@ -32,54 +39,42 @@ const LoginForm = () => {
     }
   };
   return (
-    <div className="card w-full max-w-sm flex-shrink-0 bg-base-100 shadow-2xl">
-      <form method="post" className="card-body" onSubmit={onSubmit}>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Email</span>
-          </label>
-          <input
-            type="email"
-            name="email"
-            placeholder="email"
-            className="input input-bordered"
-            required
-          />
-        </div>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Password</span>
-          </label>
-          <input
-            type="password"
-            name="password"
-            placeholder="password"
-            className="input input-bordered"
-            required
-          />
-          {/* <label className="label"> */}
-          {/*   <a href="#" className="link-hover link label-text-alt"> */}
-          {/*     Forgot password? */}
-          {/*   </a> */}
-          {/* </label> */}
-          <label className="label">
-            <span
-              className={twMerge(
-                'label-text h-1 text-red-500 transition-all duration-200 ease-in-out',
-                error ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              {error}
-            </span>
-          </label>
-        </div>
-        <div className="form-control mt-6">
-          <button type="submit" className="btn btn-neutral">
-            Login
-          </button>
-        </div>
-      </form>
-    </div>
+    <form method="post" className="relative mt-6" onSubmit={onSubmit}>
+      <Alert
+        variant="vibrant"
+        className={twMerge(
+          'z-0 mb-2 min-h-[64px] transition-all duration-300 ease-in-out',
+          error ? 'opacity-100' : 'absolute h-0 opacity-0'
+        )}
+      >
+        <AlertTitle>Login Failed</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+      <Input
+        className="relative z-10"
+        type="email"
+        name="email"
+        placeholder="Email"
+        autoCapitalize="none"
+        autoComplete="email"
+        autoCorrect="off"
+        required
+      />
+      <Input
+        className="z-10 mt-2"
+        type="password"
+        name="password"
+        placeholder="Password"
+        autoCapitalize="none"
+        autoComplete="email"
+        autoCorrect="off"
+        required
+      />
+      <Button className="z-10 mt-2 w-full font-semibold" type="submit" disabled={isLoading}>
+        {isLoading && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
+        Sign In
+      </Button>
+    </form>
   );
 };
 

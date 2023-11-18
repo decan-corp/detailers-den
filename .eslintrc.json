@@ -9,6 +9,14 @@
     "project": ["./tsconfig.eslint.json"]
   },
   "plugins": ["@typescript-eslint"],
+  "overrides": [
+    {
+      "files": ["@/**/*.ts", "@/**/*.tsx"],
+      "rules": {
+        "react/jsx-props-no-spreading": "off"
+      }
+    }
+  ],
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "next/core-web-vitals",
