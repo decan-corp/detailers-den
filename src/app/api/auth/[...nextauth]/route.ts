@@ -12,12 +12,7 @@ export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db),
   providers: [
     CredentialsProvider({
-      // The name to display on the sign in form (e.g. "Sign in with...")
       name: 'Credentials',
-      // `credentials` is used to generate a form on the sign in page.
-      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-      // e.g. domain, username, password, 2FA token, etc.
-      // You can pass any HTML attribute to the <input> tag through the object.
       credentials: {
         email: { label: 'Email', type: 'text', placeholder: 'Email' },
         password: { label: 'Password', type: 'password' },
@@ -31,7 +26,7 @@ export const authOptions: NextAuthOptions = {
         const [user] = await db.select().from(users).where(eq(users.email, email));
 
         if (!user) {
-          throw new Error("User doesn't exist");
+          throw new Error('Invalid credentials');
         }
 
         if (!user.password) {

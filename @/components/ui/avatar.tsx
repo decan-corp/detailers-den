@@ -1,5 +1,3 @@
-/* eslint-disable react/prop-types */
-
 'use client';
 
 import { cn } from '@/lib/utils';

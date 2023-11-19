@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 const Login = () => (
   <main className="grid min-h-screen lg:grid-cols-2">
-    <div className="hidden flex-col justify-between bg-muted p-10 text-white lg:flex">
+    <div className="hidden flex-col justify-between bg-muted p-10 lg:flex">
       <div className="text-lg">185 Detailers Den</div>
       <div className="text-lg">
         185 Detailers Den is a car detailing and car wash business located in Caloocan City,
