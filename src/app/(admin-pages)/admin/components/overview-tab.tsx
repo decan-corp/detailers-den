@@ -4,11 +4,11 @@ import PesoSignIcon from 'public/icons/peso-sign.svg';
 import ReceiptIcon from 'public/icons/receipt.svg';
 
 import CrewTransactions from './employee-transactions';
-import Overview from './overview';
+import OverviewChart from './overview-chart';
 
 import { DashboardTab } from '../page';
 
-const OverviewTabContent = () => (
+const OverviewTab = () => (
   <TabsContent value={DashboardTab.Overview} className="space-y-4">
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -49,7 +49,7 @@ const OverviewTabContent = () => (
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">Php 845,231.89</div>
+          <div className="text-2xl font-bold">Php 345,231.89</div>
         </CardContent>
       </Card>
       <Card>
@@ -80,7 +80,7 @@ const OverviewTabContent = () => (
           <CardDescription>Number of transactions for the last 14 days.</CardDescription>
         </CardHeader>
         <CardContent className="pl-2">
-          <Overview />
+          <OverviewChart />
         </CardContent>
       </Card>
       <Card className="col-span-3">
@@ -98,4 +98,4 @@ const OverviewTabContent = () => (
   </TabsContent>
 );
 
-export default OverviewTabContent;
+export default OverviewTab;

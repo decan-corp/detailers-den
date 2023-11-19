@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { useMemo } from 'react';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-const Overview = () => {
+const OverviewChart = () => {
   const data = useMemo(() => {
     const now = dayjs();
     const format = 'MM-DD';
@@ -40,4 +40,4 @@ const Overview = () => {
   );
 };
 
-export default Overview;
+export default OverviewChart;

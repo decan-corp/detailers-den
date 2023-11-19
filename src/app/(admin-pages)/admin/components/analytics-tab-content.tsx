@@ -5,20 +5,20 @@ import { DashboardTab } from '../page';
 
 const AnalyticsTabContent = () => (
   <TabsContent value={DashboardTab.Analytics} className="space-y-4">
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
       <Card className="col-span-4">
         <CardHeader>
           <CardTitle>Analytics</CardTitle>
           <CardDescription>WIP</CardDescription>
         </CardHeader>
-        <CardContent className="pl-2">{/* <Overview /> */}</CardContent>
+        <CardContent className="">WIP</CardContent>
       </Card>
-      <Card className="col-span-3">
+      <Card className="col-span-4">
         <CardHeader>
-          <CardTitle>Reports</CardTitle>
-          <CardDescription>WIP</CardDescription>
+          <CardTitle>Services</CardTitle>
+          <CardDescription>Services rank by number of transactions</CardDescription>
         </CardHeader>
-        <CardContent>{/* <RecentSales /> */}</CardContent>
+        <CardContent>WIP</CardContent>
       </Card>
     </div>
   </TabsContent>

@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useSetParams from 'src/hooks/use-set-params';
 
 import AnalyticsTabContent from './components/analytics-tab-content';
-import OverviewTabContent from './components/overview-tab-content';
+import OverviewTab from './components/overview-tab';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -46,7 +46,7 @@ const Home = () => {
             Reports (WIP)
           </TabsTrigger>
         </TabsList>
-        <OverviewTabContent />
+        <OverviewTab />
         <AnalyticsTabContent />
       </Tabs>
     </main>
