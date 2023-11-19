@@ -6,8 +6,8 @@ import UserNav from './user-nav';
 import Link from 'next/link';
 
 const Header = () => (
-  <div className="select-none border-b">
-    <div className="flex h-16 items-center gap-12 px-12">
+  <div className="sticky top-0 select-none border-b">
+    <div className="flex h-16 items-center gap-12 bg-background/30 px-12 backdrop-blur">
       <div className="font-bold">
         <Link href={AdminRoute.Dashboard}>185 Detailers Den</Link>
       </div>
