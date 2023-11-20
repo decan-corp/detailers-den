@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 
-import { DashboardTab } from '../page';
+import { DashboardTab } from './tabs-container';
 
 const AnalyticsTabContent = () => (
   <TabsContent value={DashboardTab.Analytics} className="space-y-4">

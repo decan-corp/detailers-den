@@ -33,6 +33,7 @@
     "package.json",
     "eslint-config-base/",
     "*.tsbuildinfo",
-    "drizzle/**"
+    "drizzle/**",
+    "@/components/**"
   ]
 }

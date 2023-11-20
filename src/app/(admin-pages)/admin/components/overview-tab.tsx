@@ -5,8 +5,7 @@ import ReceiptIcon from 'public/icons/receipt.svg';
 
 import CrewTransactions from './employee-transactions';
 import OverviewChart from './overview-chart';
-
-import { DashboardTab } from '../page';
+import { DashboardTab } from './tabs-container';
 
 const OverviewTab = () => (
   <TabsContent value={DashboardTab.Overview} className="space-y-4">
