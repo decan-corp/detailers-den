@@ -49,11 +49,11 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 60 * 60 * 24 * 14, // 14 days
+    maxAge: 60 * 60 * 24 * 7, // 7 days
   },
   callbacks: {
     jwt({ token, user }) {
-      // TODO: validate if user is still valid not deleted
+      // TODO: validate if user is still valid by checking if it is not deleted
       // if so, remove cookies to force logout user.
       // Check by adding timestamp on cookies,
       // once expired, check user on database if still active or not.
@@ -64,6 +64,9 @@ export const authOptions: NextAuthOptions = {
         token.image = userFromDb.image;
         token.id = userFromDb.id;
       }
+
+      // TODO: this is how you force logout user
+      // cookies().set('next-auth.session-token', '');
 
       return token;
     },

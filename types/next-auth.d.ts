@@ -18,6 +18,7 @@ declare module 'next-auth' {
 
 declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
+    exp: number;
     id: UserType['id'];
     role: UserType['role'];
     image: UserType['image'];
