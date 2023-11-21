@@ -52,10 +52,11 @@ export const login = action(
 );
 
 export const logout = authAction(z.object({}), async (_input, ctx) => {
-  const { sessionId } = ctx.session;
+  const { sessionId, user } = ctx.session;
 
   const authRequest = auth.handleRequest('POST', context);
   await auth.invalidateSession(sessionId);
+  await auth.deleteDeadUserSessions(user.userId);
   authRequest.setSession(null); // delete session cookie
   redirect(AdminRoute.Login);
 });
