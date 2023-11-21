@@ -6,7 +6,7 @@ import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
 import { action, authAction } from 'src/utils/safe-action';
 
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { LuciaError } from 'lucia';
 import * as context from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -21,7 +21,10 @@ export const login = action(
     try {
       const key = await auth.useKey('email', email, password);
 
-      const [user] = await db.select().from(users).where(eq(users.id, key.userId));
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(and(eq(users.id, key.userId), isNull(users.deletedAt)));
 
       if (!user) {
         throw Error("User doesn't exist");
