@@ -14,12 +14,12 @@ import { z } from 'zod';
 
 export const login = action(
   z.object({
-    email: z.string().email(),
+    email: z.string().email().toLowerCase(),
     password: z.string().min(1),
   }),
   async ({ email, password }) => {
     try {
-      const key = await auth.useKey('email', email.toLowerCase(), password);
+      const key = await auth.useKey('email', email, password);
 
       const [user] = await db.select().from(users).where(eq(users.id, key.userId));
 

@@ -6,8 +6,9 @@ import { Icons } from '@/components/ui/icons';
 import { logout } from 'src/app/(admin-pages)/auth/login/actions';
 
 import { useState } from 'react';
+import { twMerge } from 'tailwind-merge';
 
-const LogoutButton = () => {
+const LogoutButton = ({ className }: { className?: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const onClickLogout = async () => {
     setIsLoading(true);
@@ -21,7 +22,15 @@ const LogoutButton = () => {
     setIsLoading(false);
   };
   return (
-    <button type="button" onClick={onClickLogout} disabled={isLoading}>
+    <button
+      className={twMerge(
+        'flex w-full items-center disabled:cursor-not-allowed disabled:opacity-60',
+        className
+      )}
+      type="button"
+      onClick={onClickLogout}
+      disabled={isLoading}
+    >
       {isLoading && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
       Log out
     </button>

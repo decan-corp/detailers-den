@@ -41,8 +41,8 @@ const UserNav = async () => {
           <DropdownMenuItem className="cursor-pointer">Settings</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer">
-          <LogoutButton />
+        <DropdownMenuItem className="cursor-pointer p-0">
+          <LogoutButton className="px-2 py-1.5" />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
