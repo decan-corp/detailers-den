@@ -9,14 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { authOptions } from 'src/app/api/auth/[...nextauth]/route';
+import { getPageSession } from 'src/components/auth/get-page-session';
 import LogoutButton from 'src/components/button/logout';
 import { getInitials } from 'src/utils/formatters';
 
-import { getServerSession } from 'next-auth';
-
 const UserNav = async () => {
-  const session = await getServerSession(authOptions);
+  const session = await getPageSession();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

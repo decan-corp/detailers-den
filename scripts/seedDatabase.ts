@@ -2,21 +2,26 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable no-console */
 
-import { serverEnv } from 'src/env/server';
-import { users } from 'src/schema';
-import { db } from 'src/utils/db';
+import { ProviderId, auth } from 'src/utils/lucia';
 
-import bcrypt from 'bcryptjs';
+import cuid2 from '@paralleldrive/cuid2';
 
 const seedDatabase = async () => {
   // Create default user
   const password = 'P@ssw0rd!23'; // user change the password afterwards
-  const saltedPassword = await bcrypt.hash(password, serverEnv.SALT_ROUNDS);
-  await db.insert(users).values({
-    email: 'emnnipal@gmail.com',
-    name: 'Emman',
-    password: saltedPassword,
-    role: 'admin',
+  const email = 'emnnipal@gmail.com';
+  await auth.createUser({
+    key: {
+      password,
+      providerId: ProviderId.email,
+      providerUserId: email.toLowerCase(),
+    },
+    attributes: {
+      email,
+      name: 'Emman',
+      role: 'admin',
+    },
+    userId: cuid2.createId(),
   });
 
   console.log('Success seeding database');

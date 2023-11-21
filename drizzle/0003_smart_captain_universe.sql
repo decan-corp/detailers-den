@@ -1,0 +1,1 @@
+ALTER TABLE `users` MODIFY COLUMN `service_cut_percentage` int;

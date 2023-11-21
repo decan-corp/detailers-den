@@ -1,11 +1,19 @@
-import { authOptions } from 'src/app/api/auth/[...nextauth]/route';
+/* eslint-disable no-console */
+import { auth } from './lucia';
 
-import { getServerSession } from 'next-auth';
+import * as context from 'next/headers';
 import { createSafeActionClient } from 'next-safe-action';
+
+export const action = createSafeActionClient({
+  handleServerErrorLog: (error) => {
+    console.error('Action error', error);
+  },
+});
 
 export const authAction = createSafeActionClient({
   async middleware() {
-    const session = await getServerSession(authOptions);
+    const authRequest = auth.handleRequest('GET', context);
+    const session = await authRequest.validate();
 
     if (!session) {
       throw new Error('Session not found!');
@@ -14,7 +22,6 @@ export const authAction = createSafeActionClient({
     return { session };
   },
   handleServerErrorLog: (error) => {
-    // eslint-disable-next-line no-console
-    console.error('Action error', error);
+    console.error('Auth action error', error);
   },
 });

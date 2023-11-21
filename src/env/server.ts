@@ -7,9 +7,9 @@ export const serverEnv = createEnv({
     DB_USERNAME: z.string().min(1),
     DB_PASSWORD: z.string().min(1),
     DB_NAME: z.string().optional(), // used for db connection in local development
-    SALT_ROUNDS: z.coerce.number(),
-    NEXTAUTH_URL: z.string().url(),
-    NEXTAUTH_SECRET: z.string().min(1),
+    SALT_ROUNDS: z.coerce.number(), // TODO: remove
+    NEXTAUTH_URL: z.string().url(), // TODO: remove
+    NEXTAUTH_SECRET: z.string().min(1), // TODO: remove
   },
   experimental__runtimeEnv: {},
 });

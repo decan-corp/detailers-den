@@ -1,6 +1,5 @@
 import './globals.css';
 
-import { NextAuthProvider } from 'src/components/provider/session-provider';
 import { ThemeProvider } from 'src/components/themes/theme-provider';
 import { inter } from 'src/utils/fonts';
 import QueryProvider from 'src/utils/query-provider';
@@ -28,9 +27,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="en" data-theme="light" suppressHydrationWarning>
     <body className={twJoin(inter.className, 'h-screen w-full font-sans antialiased')}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <QueryProvider>
-          <NextAuthProvider>{children}</NextAuthProvider>
-        </QueryProvider>
+        <QueryProvider>{children}</QueryProvider>
       </ThemeProvider>
     </body>
   </html>

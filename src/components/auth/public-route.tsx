@@ -1,9 +1,9 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import { authOptions } from 'src/app/api/auth/[...nextauth]/route';
 import { AdminRoute } from 'src/constants/routes';
 
+import { getPageSession } from './get-page-session';
+
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
 
 const PublicRoute = async ({
   children,
@@ -12,7 +12,7 @@ const PublicRoute = async ({
   children: React.ReactNode;
   redirectTo?: AdminRoute;
 }) => {
-  const session = await getServerSession(authOptions);
+  const session = await getPageSession();
 
   if (session) {
     return redirect(redirectTo || AdminRoute.Dashboard);

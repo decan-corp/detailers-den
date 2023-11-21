@@ -4,40 +4,33 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
-import { AdminRoute } from 'src/constants/routes';
 
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { login } from '../actions';
+
 import { ComponentProps, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 const LoginForm = () => {
-  const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
   const onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
     event.preventDefault(); // always add prevent default for onSubmit action
 
     setIsLoading(true);
     const formData = new FormData(event.currentTarget);
 
-    const email = formData.get('email');
-    const password = formData.get('password');
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
 
-    const results = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    });
+    const { serverError, validationError } = await login({ email, password });
 
-    if (!results?.ok && results?.error) {
+    if (serverError || validationError) {
       setIsLoading(false);
-      setError(results.error);
-    }
-    if (results?.ok) {
-      router.replace(AdminRoute.Dashboard);
+      setError(serverError || 'Validation error');
     }
   };
+
   return (
     <form method="post" className="relative mt-6" onSubmit={onSubmit}>
       <Alert

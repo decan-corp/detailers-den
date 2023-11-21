@@ -2,14 +2,14 @@ import { serverEnv } from 'src/env/server';
 import * as schema from 'src/schema';
 
 import { drizzle } from 'drizzle-orm/mysql2';
-import { ConnectionOptions, createConnection } from 'mysql2';
+import { PoolOptions, createPool } from 'mysql2/promise';
 
-let connectionOptions: ConnectionOptions;
+let poolOptions: PoolOptions;
 
 const { NODE_ENV } = process.env;
 
 if (NODE_ENV === 'production') {
-  connectionOptions = {
+  poolOptions = {
     host: serverEnv.DB_HOST,
     user: serverEnv.DB_USERNAME,
     password: serverEnv.DB_PASSWORD,
@@ -18,7 +18,7 @@ if (NODE_ENV === 'production') {
     },
   };
 } else {
-  connectionOptions = {
+  poolOptions = {
     host: serverEnv.DB_HOST,
     user: serverEnv.DB_USERNAME,
     password: serverEnv.DB_PASSWORD,
@@ -26,6 +26,6 @@ if (NODE_ENV === 'production') {
   };
 }
 
-const connection = createConnection(connectionOptions);
+export const pool = createPool(poolOptions);
 
-export const db = drizzle(connection, { schema, mode: 'planetscale' });
+export const db = drizzle(pool, { schema, mode: 'planetscale' });
