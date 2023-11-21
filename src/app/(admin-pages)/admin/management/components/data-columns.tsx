@@ -42,7 +42,8 @@ export const userColumns: ColumnDef<
   {
     header: 'Updated At',
     accessorKey: 'updatedAt',
-    accessorFn: ({ updatedAt }) => dayjs(updatedAt).format('MMM DD YYYY hh:mm a'),
+    accessorFn: ({ updatedAt }) =>
+      updatedAt ? dayjs(updatedAt).format('MMM DD YYYY hh:mm a') : '',
   },
   {
     id: 'actions',
