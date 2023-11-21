@@ -13,7 +13,7 @@ const Header = () => (
       </div>
       <nav className="flex items-center space-x-4 lg:space-x-6">
         <HeaderLink route={AdminRoute.Dashboard}>Dashboard</HeaderLink>
-        <HeaderLink route={AdminRoute.UsersManagement}>Management</HeaderLink>
+        <HeaderLink route={AdminRoute.ManageUsers}>Manage</HeaderLink>
         <HeaderLink route={AdminRoute.POS}>POS</HeaderLink>
       </nav>
       <div className="ml-auto">

@@ -12,12 +12,12 @@ import { usePathname } from 'next/navigation';
 const sidebarNavItems = [
   {
     title: 'Users',
-    href: AdminRoute.UsersManagement,
+    href: AdminRoute.ManageUsers,
     icon: UserGroupIcon,
   },
   {
     title: 'Services',
-    href: AdminRoute.Services,
+    href: AdminRoute.ManageServices,
     icon: ToolboxIcon,
   },
 ];
