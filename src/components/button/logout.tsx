@@ -13,10 +13,10 @@ const LogoutButton = ({ className }: { className?: string }) => {
   const onClickLogout = async () => {
     setIsLoading(true);
 
-    const { serverError } = await logout({});
+    const result = await logout({});
 
-    if (serverError) {
-      alert(serverError); // TODO: replace with react toast
+    if (result?.serverError) {
+      alert(result?.serverError); // TODO: replace with react toast
       return;
     }
     setIsLoading(false);

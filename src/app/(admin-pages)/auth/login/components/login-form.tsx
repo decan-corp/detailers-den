@@ -23,11 +23,11 @@ const LoginForm = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    const { serverError, validationError } = await login({ email, password });
+    const result = await login({ email, password });
 
-    if (serverError || validationError) {
+    if (result?.serverError || result?.validationError) {
       setIsLoading(false);
-      setError(serverError || 'Validation error');
+      setError(result.serverError || 'Validation error');
     }
   };
 
