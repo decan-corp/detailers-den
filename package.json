@@ -46,7 +46,7 @@
     "cmdk": "^0.2.0",
     "daisyui": "^3.9.4",
     "dayjs": "^1.11.10",
-    "drizzle-orm": "^0.29.0",
+    "drizzle-orm": "^0.29.1",
     "lodash": "^4.17.21",
     "lucia": "^2.7.4",
     "lucide-react": "^0.292.0",

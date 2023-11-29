@@ -4,7 +4,7 @@ import { users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 
-import { sql } from 'drizzle-orm';
+import { count } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getUsers = authAction(z.object({}), (_, { session }) => {
@@ -33,11 +33,11 @@ export const getUsersCount = authAction(z.object({}), async (_, { session }) => 
     throw new Error('Forbidden access');
   }
 
-  const [{ count }] = await db
+  const [{ value }] = await db
     .select({
-      count: sql<number>`count(*)`.mapWith(Number),
+      value: count(),
     })
     .from(users);
 
-  return count;
+  return value;
 });
