@@ -18,13 +18,18 @@ import { getUsers, getUsersCount } from '../actions';
 
 import { useQuery } from '@tanstack/react-query';
 import {
+  SortingState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { useState } from 'react';
 
 const UsersTable = () => {
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const { data: users = [], isFetching } = useQuery({
     queryKey: [Entity.Users],
     queryFn: async () => {
@@ -46,6 +51,11 @@ const UsersTable = () => {
     pageCount: count,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(), // TODO: sort via database
+    state: {
+      sorting,
+    },
   });
 
   return (

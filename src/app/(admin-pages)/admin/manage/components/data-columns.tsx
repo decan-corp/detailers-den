@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
 import { users } from 'src/schema';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -19,31 +20,27 @@ export const userColumns: ColumnDef<
   Pick<typeof users.$inferSelect, 'id' | 'name' | 'email' | 'createdAt' | 'updatedAt' | 'role'>
 >[] = [
   {
-    header: 'ID',
-    accessorKey: 'id',
-  },
-  {
-    header: 'Name',
     accessorKey: 'name',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
   },
   {
-    header: 'Email',
     accessorKey: 'email',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
   },
   {
-    header: 'Role',
     accessorKey: 'role',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
   },
   {
-    header: 'Created At',
     accessorKey: 'createdAt',
     accessorFn: ({ createdAt }) => dayjs(createdAt).format('MMM DD YYYY hh:mm a'),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
   },
   {
-    header: 'Updated At',
     accessorKey: 'updatedAt',
     accessorFn: ({ updatedAt }) =>
       updatedAt ? dayjs(updatedAt).format('MMM DD YYYY hh:mm a') : '',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
   },
   {
     id: 'actions',
