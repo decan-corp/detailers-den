@@ -30,6 +30,7 @@ export const userColumns: ColumnDef<
   {
     accessorKey: 'role',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
+    filterFn: (row, id, value: string) => value.includes(row.getValue(id)),
   },
   {
     accessorKey: 'createdAt',

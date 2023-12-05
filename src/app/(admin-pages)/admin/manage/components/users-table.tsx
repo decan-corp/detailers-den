@@ -13,14 +13,18 @@ import { DataTablePagination } from 'src/components/table/data-table-pagination'
 import { Entity } from 'src/constants/entities';
 
 import { userColumns } from './data-columns';
+import { DataTableToolbar } from './data-table-toolbar';
 
 import { getUsers, getUsersCount } from '../actions';
 
 import { useQuery } from '@tanstack/react-query';
 import {
+  ColumnFiltersState,
+  PaginationState,
   SortingState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -29,6 +33,8 @@ import { useState } from 'react';
 
 const UsersTable = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
 
   const { data: users = [], isFetching } = useQuery({
     queryKey: [Entity.Users],
@@ -48,19 +54,24 @@ const UsersTable = () => {
   const table = useReactTable({
     data: users,
     columns: userColumns,
-    pageCount: count,
+    pageCount: Math.ceil(count / pagination.pageSize),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(), // TODO: sort via database
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(), // TODO: filter via database
+    onPaginationChange: setPagination,
     state: {
       sorting,
+      columnFilters,
+      pagination,
     },
   });
 
   return (
     <div className="space-y-4">
-      {/* <DataTableToolbar table={table} /> */}
+      <DataTableToolbar table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
