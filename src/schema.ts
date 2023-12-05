@@ -1,3 +1,5 @@
+import { Role } from './constants/roles';
+
 import { createId } from '@paralleldrive/cuid2';
 import { bigint, decimal, int, mysqlTable, text, timestamp, varchar } from 'drizzle-orm/mysql-core';
 
@@ -33,7 +35,6 @@ export const transactions = mysqlTable('transactions', {
     enum: ['mc', 'small', 'medium', 'large', 'x-large'],
   }).notNull(),
   discount: decimal('discount', { scale: 2, precision: 5 }),
-  // files: // TODO: array of files
   ...commonSchema,
 });
 
@@ -45,9 +46,9 @@ export const users = mysqlTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   role: varchar('role', {
     length: 64,
-    enum: ['stay-in-crew', 'crew', 'cashier', 'accounting', 'detailer', 'admin'],
+    enum: [Role.StayInCrew, Role.Crew, Role.Cashier, Role.Accounting, Role.Detailer, Role.Admin],
   }).notNull(),
-  serviceCutPercentage: int('service_cut_percentage'), // TODO:
+  serviceCutPercentage: int('service_cut_percentage'),
   image: varchar('image', { length: 255 }),
   ...commonSchema,
 });

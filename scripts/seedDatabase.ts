@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable no-console */
 
+import { Role } from 'src/constants/roles';
 import { ProviderId, auth } from 'src/utils/lucia';
 
 import cuid2 from '@paralleldrive/cuid2';
@@ -19,7 +20,7 @@ const seedDatabase = async () => {
     attributes: {
       email,
       name: 'Emman',
-      role: 'admin',
+      role: Role.Admin,
     },
     userId: cuid2.createId(),
   });
