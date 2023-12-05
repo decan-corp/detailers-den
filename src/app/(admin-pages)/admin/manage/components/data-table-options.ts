@@ -1,43 +1,38 @@
+import { Role } from 'src/constants/roles';
 import { UserSelect } from 'src/types/schema';
 
-import {
-  CheckCircledIcon,
-  CrossCircledIcon,
-  QuestionMarkCircledIcon,
-  StopwatchIcon,
-} from '@radix-ui/react-icons';
-import { CircleIcon } from 'lucide-react';
+import { BackpackIcon, MoonIcon, SunIcon } from '@radix-ui/react-icons';
+import { BrushIcon, HardHatIcon, PiggyBankIcon } from 'lucide-react';
 
-// TODO: change icons
 export const roles = [
   {
-    value: 'crew',
+    value: Role.Crew,
     label: 'Crew',
-    icon: QuestionMarkCircledIcon,
+    icon: SunIcon,
   },
   {
-    value: 'admin',
-    label: 'Admin',
-    icon: CircleIcon,
-  },
-  {
-    value: 'cashier',
-    label: 'Cashier',
-    icon: StopwatchIcon,
-  },
-  {
-    value: 'detailer',
-    label: 'Detailer',
-    icon: CheckCircledIcon,
-  },
-  {
-    value: 'accounting',
-    label: 'Accounting',
-    icon: CrossCircledIcon,
-  },
-  {
-    value: 'stay-in-crew',
+    value: Role.StayInCrew,
     label: 'Stay-in-crew',
-    icon: CrossCircledIcon,
+    icon: MoonIcon,
+  },
+  {
+    value: Role.Cashier,
+    label: 'Cashier',
+    icon: PiggyBankIcon,
+  },
+  {
+    value: Role.Detailer,
+    label: 'Detailer',
+    icon: BrushIcon,
+  },
+  {
+    value: Role.Accounting,
+    label: 'Accounting',
+    icon: BackpackIcon,
+  },
+  {
+    value: Role.Admin,
+    label: 'Admin',
+    icon: HardHatIcon,
   },
 ] satisfies { value: UserSelect['role']; label: string; icon: unknown }[];

@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/table';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
+import { Role } from 'src/constants/roles';
+import { UserSelect } from 'src/types/schema';
 
 import { userColumns } from './data-columns';
 import { DataTableToolbar } from './data-table-toolbar';
@@ -24,35 +26,46 @@ import {
   SortingState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+
+const defaultUserData: UserSelect[] = [];
 
 const UsersTable = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
 
-  const { data: users = [], isFetching } = useQuery({
-    queryKey: [Entity.Users],
+  const roleFilter = useMemo(
+    () => columnFilters.find((filter) => filter.id === 'role')?.value as Role[] | undefined,
+    [columnFilters]
+  );
+
+  const { data: users, isLoading } = useQuery({
+    queryKey: [Entity.Users, roleFilter],
     queryFn: async () => {
-      const { data = [] } = await getUsers({});
+      const { data = [] } = await getUsers({
+        ...(roleFilter && { role: roleFilter }),
+      });
       return data;
     },
   });
+
   const { data: count = 0 } = useQuery({
-    queryKey: [Entity.Users, 'count'],
+    queryKey: [Entity.Users, 'count', roleFilter],
     queryFn: async () => {
-      const { data = 0 } = await getUsersCount({});
+      const { data = 0 } = await getUsersCount({
+        ...(roleFilter && { role: roleFilter }),
+      });
       return data;
     },
   });
 
   const table = useReactTable({
-    data: users,
+    data: users || defaultUserData,
     columns: userColumns,
     pageCount: Math.ceil(count / pagination.pageSize),
     getCoreRowModel: getCoreRowModel(),
@@ -60,7 +73,7 @@ const UsersTable = () => {
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(), // TODO: sort via database
     onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(), // TODO: filter via database
+    // manualFiltering: true,
     onPaginationChange: setPagination,
     state: {
       sorting,
@@ -88,7 +101,7 @@ const UsersTable = () => {
             ))}
           </TableHeader>
           <TableBody>
-            {isFetching &&
+            {isLoading &&
               Array(table.getState().pagination.pageSize)
                 .fill(null)
                 .map((_, index) => (
@@ -104,7 +117,7 @@ const UsersTable = () => {
                     ))}
                   </TableRow>
                 ))}
-            {!isFetching &&
+            {!isLoading &&
               table.getRowModel().rows?.length > 0 &&
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
@@ -115,7 +128,7 @@ const UsersTable = () => {
                   ))}
                 </TableRow>
               ))}
-            {!isFetching && table.getRowModel().rows?.length === 0 && (
+            {!isLoading && table.getRowModel().rows?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={userColumns.length} className="h-24 text-center">
                   No results.

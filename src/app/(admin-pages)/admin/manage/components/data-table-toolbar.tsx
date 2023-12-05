@@ -28,6 +28,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
         {table.getColumn('role') && (
           <DataTableFacetedFilter column={table.getColumn('role')} title="Role" options={roles} />
         )}
+
         {isFiltered && (
           <Button
             variant="ghost"
