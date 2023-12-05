@@ -31,6 +31,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
+import { useDebounce } from 'react-use';
 
 const defaultUserData: UserSelect[] = [];
 
@@ -38,6 +39,18 @@ const UsersTable = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useDebounce(
+    () => {
+      const search = columnFilters.find((filter) => filter.id === 'email')?.value as
+        | string
+        | undefined;
+      setDebouncedSearch(search || '');
+    },
+    250,
+    [columnFilters]
+  );
 
   const roleFilter = useMemo(
     () => columnFilters.find((filter) => filter.id === 'role')?.value as Role[] | undefined,
@@ -45,20 +58,24 @@ const UsersTable = () => {
   );
 
   const { data: users, isLoading } = useQuery({
-    queryKey: [Entity.Users, roleFilter],
+    queryKey: [Entity.Users, roleFilter, debouncedSearch],
     queryFn: async () => {
       const { data = [] } = await getUsers({
         ...(roleFilter && { role: roleFilter }),
+        ...(debouncedSearch && { name: debouncedSearch }),
+        ...(debouncedSearch && { email: debouncedSearch }),
       });
       return data;
     },
   });
 
   const { data: count = 0 } = useQuery({
-    queryKey: [Entity.Users, 'count', roleFilter],
+    queryKey: [Entity.Users, 'count', roleFilter, debouncedSearch],
     queryFn: async () => {
       const { data = 0 } = await getUsersCount({
         ...(roleFilter && { role: roleFilter }),
+        ...(debouncedSearch && { name: debouncedSearch }),
+        ...(debouncedSearch && { email: debouncedSearch }),
       });
       return data;
     },

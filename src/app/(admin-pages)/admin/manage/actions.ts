@@ -5,7 +5,7 @@ import { users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 
-import { count, eq, inArray } from 'drizzle-orm';
+import { count, eq, inArray, like, or } from 'drizzle-orm';
 import { MySqlSelect } from 'drizzle-orm/mysql-core';
 import { z } from 'zod';
 
@@ -16,67 +16,87 @@ const withRoleFilter = <T extends MySqlSelect>(qb: T, role: Role | Role[]) => {
   return qb.where(eq(users.role, role));
 };
 
-export const getUsers = authAction(
-  z.object({
-    role: z
-      .nativeEnum(Role)
-      .or(z.array(z.nativeEnum(Role)))
-      .optional(),
-  }),
-  (params, { session }) => {
-    const { role } = session.user;
-
-    if (role !== Role.Admin) {
-      throw new Error('Forbidden access');
-    }
-
-    let query = db
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        role: users.role,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      })
-      .from(users)
-      .$dynamic();
-
-    if (params.role) {
-      query = withRoleFilter(query, params.role);
-    }
-
-    return query;
+const withSearchFilter = <T extends MySqlSelect>(
+  qb: T,
+  searchParams: {
+    name?: string;
+    email?: string;
   }
-);
+) =>
+  qb.where(
+    or(
+      searchParams.name ? like(users.name, `%${searchParams.name}%`) : undefined,
+      searchParams.email ? like(users.email, `%${searchParams.email}%`) : undefined
+    )
+  );
 
-export const getUsersCount = authAction(
-  z.object({
-    role: z
-      .nativeEnum(Role)
-      .or(z.array(z.nativeEnum(Role)))
-      .optional(),
-  }),
-  async (params, { session }) => {
-    const { role } = session.user;
+const searchSchema = z.object({
+  role: z
+    .nativeEnum(Role)
+    .or(z.array(z.nativeEnum(Role)))
+    .optional(),
+  name: z.string().toLowerCase().optional(),
+  email: z.string().toLowerCase().optional(),
+});
+export const getUsers = authAction(searchSchema, (params, { session }) => {
+  const { role } = session.user;
 
-    if (role !== Role.Admin) {
-      throw new Error('Forbidden access');
-    }
-
-    let query = db
-      .select({
-        value: count(),
-      })
-      .from(users)
-      .$dynamic();
-
-    if (params.role) {
-      query = withRoleFilter(query, params.role);
-    }
-
-    const [{ value }] = await query;
-
-    return value;
+  if (role !== Role.Admin) {
+    throw new Error('Forbidden access');
   }
-);
+
+  let query = db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    })
+    .from(users)
+    .$dynamic();
+
+  if (params.role) {
+    query = withRoleFilter(query, params.role);
+  }
+
+  if (params.email || params.name) {
+    query = withSearchFilter(query, {
+      name: params.name,
+      email: params.email,
+    });
+  }
+
+  return query;
+});
+
+export const getUsersCount = authAction(searchSchema, async (params, { session }) => {
+  const { role } = session.user;
+
+  if (role !== Role.Admin) {
+    throw new Error('Forbidden access');
+  }
+
+  let query = db
+    .select({
+      value: count(),
+    })
+    .from(users)
+    .$dynamic();
+
+  if (params.role) {
+    query = withRoleFilter(query, params.role);
+  }
+
+  if (params.email || params.name) {
+    query = withSearchFilter(query, {
+      name: params.name,
+      email: params.email,
+    });
+  }
+
+  const [{ value }] = await query;
+
+  return value;
+});
