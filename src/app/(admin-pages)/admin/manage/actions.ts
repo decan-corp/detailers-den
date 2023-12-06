@@ -37,6 +37,8 @@ const searchSchema = z.object({
     .optional(),
   name: z.string().toLowerCase().optional(),
   email: z.string().toLowerCase().optional(),
+  pageSize: z.number().default(10),
+  pageIndex: z.number().default(0),
 });
 export const getUsers = authAction(searchSchema, (params, { session }) => {
   const { role } = session.user;
@@ -67,6 +69,8 @@ export const getUsers = authAction(searchSchema, (params, { session }) => {
       email: params.email,
     });
   }
+
+  query = query.limit(params.pageSize).offset(params.pageIndex);
 
   return query;
 });
