@@ -4,9 +4,11 @@ import { Role } from 'src/constants/roles';
 import { users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
+import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
-import { count, eq, inArray, like, or } from 'drizzle-orm';
+import { count, eq, inArray, like, or, desc, asc } from 'drizzle-orm';
 import { MySqlSelect } from 'drizzle-orm/mysql-core';
+import { castArray } from 'lodash';
 import { z } from 'zod';
 
 const withRoleFilter = <T extends MySqlSelect>(qb: T, role: Role | Role[]) => {
@@ -37,43 +39,57 @@ const searchSchema = z.object({
     .optional(),
   name: z.string().toLowerCase().optional(),
   email: z.string().toLowerCase().optional(),
-  pageSize: z.number().default(10),
-  pageIndex: z.number().default(0),
 });
-export const getUsers = authAction(searchSchema, (params, { session }) => {
-  const { role } = session.user;
+export const getUsers = authAction(
+  searchSchema.merge(paginationSchema).merge(sortingSchema),
+  (params, { session }) => {
+    const { role } = session.user;
 
-  if (role !== Role.Admin) {
-    throw new Error('Forbidden access');
+    if (role !== Role.Admin) {
+      throw new Error('Forbidden access');
+    }
+
+    let query = db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .$dynamic();
+
+    if (params.role) {
+      query = withRoleFilter(query, params.role);
+    }
+
+    if (params.email || params.name) {
+      query = withSearchFilter(query, {
+        name: params.name,
+        email: params.email,
+      });
+    }
+
+    query = query.limit(params.pageSize).offset(params.pageIndex);
+
+    if (params.sortBy) {
+      const sortBy = castArray(params.sortBy);
+      query = query.orderBy(
+        ...sortBy.map(({ id, desc: isDesc }) => {
+          const field = id as keyof typeof users.$inferSelect;
+          if (isDesc) {
+            return desc(users[field]);
+          }
+          return asc(users[field]);
+        })
+      );
+    }
+
+    return query;
   }
-
-  let query = db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      role: users.role,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-    })
-    .from(users)
-    .$dynamic();
-
-  if (params.role) {
-    query = withRoleFilter(query, params.role);
-  }
-
-  if (params.email || params.name) {
-    query = withSearchFilter(query, {
-      name: params.name,
-      email: params.email,
-    });
-  }
-
-  query = query.limit(params.pageSize).offset(params.pageIndex);
-
-  return query;
-});
+);
 
 export const getUsersCount = authAction(searchSchema, async (params, { session }) => {
   const { role } = session.user;

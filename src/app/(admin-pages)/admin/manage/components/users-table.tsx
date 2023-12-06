@@ -26,7 +26,6 @@ import {
   SortingState,
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
@@ -63,6 +62,7 @@ const UsersTable = () => {
       debouncedSearch,
       pagination.pageIndex,
       pagination.pageSize,
+      sorting,
     ],
     queryFn: async () => {
       const { data = [] } = await getUsers({
@@ -71,6 +71,7 @@ const UsersTable = () => {
         ...(debouncedSearch && { email: debouncedSearch }),
         pageSize: pagination.pageSize,
         pageIndex: pagination.pageIndex,
+        sortBy: sorting,
       });
       return data;
     },
@@ -94,8 +95,9 @@ const UsersTable = () => {
     pageCount: Math.ceil(count / pagination.pageSize),
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(), // TODO: sort via database
+    // getSortedRowModel: getSortedRowModel(), // TODO: sort via database
     onColumnFiltersChange: setColumnFilters,
+    manualSorting: true,
     manualFiltering: true,
     manualPagination: true,
     onPaginationChange: setPagination,
