@@ -34,7 +34,7 @@ import { useDebounce } from 'react-use';
 const defaultUserData: UserSelect[] = [];
 
 const UsersTable = () => {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
   const [debouncedSearch, setDebouncedSearch] = useState('');

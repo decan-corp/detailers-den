@@ -1,7 +1,9 @@
 import './globals.css';
 
-import { ThemeProvider } from 'src/components/themes/theme-provider';
+import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from 'src/components/theme-provider';
 import { inter } from 'src/utils/fonts';
+import { JotaiProvider } from 'src/utils/jotai';
 import QueryProvider from 'src/utils/query-provider';
 
 import { twJoin } from 'tailwind-merge';
@@ -27,7 +29,10 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="en" data-theme="light" suppressHydrationWarning>
     <body className={twJoin(inter.className, 'h-screen w-full font-sans antialiased')}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <JotaiProvider>{children}</JotaiProvider>
+        </QueryProvider>
+        <Toaster />
       </ThemeProvider>
     </body>
   </html>

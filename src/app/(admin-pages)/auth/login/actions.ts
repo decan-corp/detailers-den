@@ -4,7 +4,7 @@ import { AdminRoute } from 'src/constants/routes';
 import { users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
-import { action, authAction } from 'src/utils/safe-action';
+import { SafeActionError, action, authAction } from 'src/utils/safe-action';
 
 import { and, eq, isNull } from 'drizzle-orm';
 import { LuciaError } from 'lucia';
@@ -24,7 +24,8 @@ export const login = action(
       const [user] = await db
         .select()
         .from(users)
-        .where(and(eq(users.id, key.userId), isNull(users.deletedAt)));
+        .where(and(eq(users.id, key.userId), isNull(users.deletedAt)))
+        .limit(1);
 
       if (!user) {
         throw Error("User doesn't exist");
@@ -44,7 +45,7 @@ export const login = action(
         error instanceof LuciaError &&
         (error.message === 'AUTH_INVALID_KEY_ID' || error.message === 'AUTH_INVALID_PASSWORD')
       ) {
-        throw new Error('Incorrect username or password');
+        throw new SafeActionError('Incorrect username or password');
       }
       throw error;
     }

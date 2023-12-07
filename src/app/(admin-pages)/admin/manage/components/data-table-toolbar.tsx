@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { UserFormDialog } from 'src/app/(admin-pages)/admin/manage/components/user-form-dialog';
 import { DataTableFacetedFilter } from 'src/components/table/data-table-faceted-filter';
 
 import { roles } from './data-table-options';
@@ -40,6 +41,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
           </Button>
         )}
       </div>
+      <UserFormDialog />
     </div>
   );
 };

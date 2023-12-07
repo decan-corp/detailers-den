@@ -4,10 +4,25 @@ import { auth } from './lucia';
 import * as context from 'next/headers';
 import { createSafeActionClient } from 'next-safe-action';
 
+export class SafeActionError extends Error {}
+
+const handleReturnedServerError = (e: Error) => {
+  if (e instanceof SafeActionError) {
+    return {
+      serverError: e.message,
+    };
+  }
+
+  return {
+    serverError: 'Something went wrong while executing the operation',
+  };
+};
+
 export const action = createSafeActionClient({
   handleServerErrorLog: (error) => {
     console.error('Action error', error);
   },
+  handleReturnedServerError,
 });
 
 export const authAction = createSafeActionClient({
@@ -24,4 +39,5 @@ export const authAction = createSafeActionClient({
   handleServerErrorLog: (error) => {
     console.error('Auth action error', error);
   },
+  handleReturnedServerError,
 });

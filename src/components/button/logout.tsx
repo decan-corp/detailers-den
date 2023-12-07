@@ -5,14 +5,18 @@
 import { Icons } from '@/components/ui/icons';
 import { logout } from 'src/app/(admin-pages)/auth/login/actions';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 const LogoutButton = ({ className }: { className?: string }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+
   const onClickLogout = async () => {
     setIsLoading(true);
 
+    await queryClient.resetQueries();
     const result = await logout({});
 
     if (result?.serverError) {
