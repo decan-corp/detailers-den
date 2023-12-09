@@ -12,6 +12,8 @@ import {
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
 import { users } from 'src/schema';
 
+import { useUserFormStore } from './user-form-dialog';
+
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { MoreHorizontal } from 'lucide-react';
@@ -30,7 +32,6 @@ export const userColumns: ColumnDef<
   {
     accessorKey: 'role',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
-    // filterFn: (row, id, value: string) => value.includes(row.getValue(id)),
   },
   {
     accessorKey: 'createdAt',
@@ -65,7 +66,14 @@ export const userColumns: ColumnDef<
               Copy User ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer">Edit</DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() =>
+                useUserFormStore.setState({ isDialogOpen: true, userIdToEdit: user.id })
+              }
+            >
+              Edit
+            </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer">Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

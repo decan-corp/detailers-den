@@ -4,13 +4,13 @@ import { Role } from 'src/constants/roles';
 import { userKeys, users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { ProviderId } from 'src/utils/lucia';
-import { authAction } from 'src/utils/safe-action';
+import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
 import cuid2 from '@paralleldrive/cuid2';
 import { count, eq, inArray, like, or, desc, asc } from 'drizzle-orm';
 import { MySqlSelect } from 'drizzle-orm/mysql-core';
-import { createInsertSchema } from 'drizzle-zod';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { castArray } from 'lodash';
 import { createKeyId } from 'lucia';
 import { generateLuciaPasswordHash } from 'lucia/utils';
@@ -51,7 +51,7 @@ export const getUsers = authAction(
     const { role } = session.user;
 
     if (role !== Role.Admin) {
-      throw new Error('Forbidden access');
+      throw new SafeActionError('Forbidden access');
     }
 
     let query = db
@@ -100,7 +100,7 @@ export const getUsersCount = authAction(searchSchema, async (params, { session }
   const { role } = session.user;
 
   if (role !== Role.Admin) {
-    throw new Error('Forbidden access');
+    throw new SafeActionError('Forbidden access');
   }
 
   let query = db
@@ -126,6 +126,18 @@ export const getUsersCount = authAction(searchSchema, async (params, { session }
   return value;
 });
 
+export const getUser = authAction(z.string().cuid2(), async (id, { session }) => {
+  const { role, userId } = session.user;
+
+  if (role !== Role.Admin && userId !== id) {
+    throw new SafeActionError('Forbidden access');
+  }
+
+  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+
+  return user || undefined;
+});
+
 export const addUser = authAction(
   createInsertSchema(users, {
     email: (schema) => schema.email.toLowerCase(),
@@ -147,7 +159,8 @@ export const addUser = authAction(
     })
     .merge(
       z.object({
-        password: z.string().min(6),
+        password: z.string().min(6, { message: 'Must contain at least 6 characters' }),
+        confirmPassword: z.string().min(6, { message: 'Must contain at least 6 characters' }),
       })
     )
     .refine(
@@ -162,12 +175,18 @@ export const addUser = authAction(
         message: 'Service cut percentage is required for crew, detailer, and stay-in-crew roles.',
         path: ['serviceCutPercentage'],
       }
-    ),
+    )
+    .refine((value) => value.confirmPassword === value.password, {
+      message:
+        'The passwords you entered do not match. Please ensure that both passwords are identical before proceeding.',
+      path: ['confirmPassword'],
+    }),
+
   (data, { session }) => {
     const { role, userId } = session.user;
 
     if (role !== Role.Admin) {
-      throw new Error('Forbidden access');
+      throw new SafeActionError('Forbidden access');
     }
 
     const { password, ...userData } = data;
@@ -187,5 +206,50 @@ export const addUser = authAction(
         hashedPassword,
       });
     });
+  }
+);
+
+export const updateUser = authAction(
+  createSelectSchema(users, {
+    image: (schema) => schema.image.optional(),
+    serviceCutPercentage: z.coerce
+      .number()
+      .int({ message: 'Must not contain decimal values' })
+      .min(0)
+      .max(100)
+      .nullish(),
+  })
+    .omit({
+      createdById: true,
+      updatedById: true,
+      deletedById: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
+    })
+    .refine(
+      (value) => {
+        if ([Role.StayInCrew, Role.Crew, Role.Detailer].includes(value.role)) {
+          return Boolean(value.serviceCutPercentage);
+        }
+
+        return true;
+      },
+      {
+        message: 'Service cut percentage is required for crew, detailer, and stay-in-crew roles.',
+        path: ['serviceCutPercentage'],
+      }
+    ),
+  async (params, { session }) => {
+    const { id, ...userData } = params;
+    const { role, userId } = session.user;
+    if (role !== Role.Admin && userId !== params.id) {
+      throw new SafeActionError('Forbidden access');
+    }
+
+    await db
+      .update(users)
+      .set({ ...userData, updatedById: userId })
+      .where(eq(users.id, id));
   }
 );

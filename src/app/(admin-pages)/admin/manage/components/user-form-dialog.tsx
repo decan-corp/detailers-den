@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -26,27 +27,120 @@ import { UserSelect } from 'src/types/schema';
 
 import { roles } from './data-table-options';
 
-import { addUser } from '../actions';
+import { addUser, updateUser, getUser } from '../actions';
 
-import { useQueryClient } from '@tanstack/react-query';
-import { atom, useAtom, useStore } from 'jotai';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ComponentProps, useState } from 'react';
+import { twJoin } from 'tailwind-merge';
+import { create } from 'zustand';
 
-type UserValidationError = { [Field in keyof UserSelect]?: string };
+type UserValidationError = {
+  [Field in keyof (UserSelect & { confirmPassword: string })]?: string;
+};
 
-const isUserDialogOpenAtom = atom(false);
+export const useUserFormStore = create<{
+  isDialogOpen: boolean;
+  userIdToEdit: null | string;
+}>(() => ({
+  isDialogOpen: false,
+  userIdToEdit: null,
+}));
 
-const UserForm = () => {
+const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
   const queryClient = useQueryClient();
-  const store = useStore();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+
   const [error, setError] = useState<UserValidationError>({});
 
-  const onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
-    event.preventDefault(); // always add prevent default for onSubmit action
+  const isEdit = Boolean(userIdToEdit);
 
-    setError({});
+  const { data: user, isLoading: isFetchingUserToEdit } = useQuery({
+    queryKey: [Entity.Users, userIdToEdit],
+    queryFn: async () => {
+      const { data, serverError, validationError } = await getUser(userIdToEdit as string);
+
+      if (serverError || validationError) {
+        toast({
+          title: validationError ? 'Validation error' : 'Server Error',
+          description: serverError || 'Invalid user id',
+        });
+      }
+
+      return data;
+    },
+    enabled: !!userIdToEdit,
+  });
+
+  const { mutate: mutateAddUser, isPending: isAddingUser } = useMutation({
+    mutationFn: addUser,
+    mutationKey: [Entity.Users],
+    onSuccess: async (result) => {
+      if (result.validationError) {
+        toast({
+          title: 'Invalid Input',
+          description:
+            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
+          variant: 'destructive',
+        });
+
+        setError(result.validationError as UserValidationError);
+        return;
+      }
+
+      if (result?.serverError) {
+        toast({
+          title: 'Something went wrong',
+          description: result.serverError,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      await queryClient.invalidateQueries({ queryKey: [Entity.Users] });
+      toast({
+        title: 'Success!',
+        description: 'User created successfully.',
+      });
+      useUserFormStore.setState({ isDialogOpen: false });
+    },
+  });
+
+  const { mutate: mutateEditUser, isPending: isEditingUser } = useMutation({
+    mutationFn: updateUser,
+    mutationKey: [Entity.Users, userIdToEdit],
+    onSuccess: async (result) => {
+      if (result.validationError) {
+        toast({
+          title: 'Invalid Input',
+          description:
+            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
+          variant: 'destructive',
+        });
+
+        setError(result.validationError as UserValidationError);
+        return;
+      }
+
+      if (result?.serverError) {
+        toast({
+          title: 'Something went wrong',
+          description: result.serverError,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      await queryClient.invalidateQueries({ queryKey: [Entity.Users] });
+      toast({
+        title: 'Success!',
+        description: 'User updated successfully.',
+      });
+      useUserFormStore.setState({ isDialogOpen: false, userIdToEdit: null });
+    },
+  });
+
+  const onSubmit: ComponentProps<'form'>['onSubmit'] = (event) => {
+    event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
 
@@ -56,61 +150,33 @@ const UserForm = () => {
       payload[key] = value;
     }
 
-    const { password, confirmPassword, ...userInsertData } =
-      payload as typeof users.$inferInsert & { confirmPassword: string; password: string };
-
-    if (confirmPassword !== password) {
-      toast({
-        title: 'Password Mismatch',
-        description:
-          'The passwords you entered do not match. Please ensure that both passwords are identical before proceeding.',
-        variant: 'destructive',
+    if (userIdToEdit) {
+      mutateEditUser({
+        ...(payload as typeof users.$inferSelect),
+        id: userIdToEdit,
       });
-      return;
+    } else {
+      mutateAddUser(
+        payload as typeof users.$inferInsert & { confirmPassword: string; password: string }
+      );
     }
-
-    setIsLoading(true);
-
-    const result = await addUser({
-      ...userInsertData,
-      password,
-    });
-
-    setIsLoading(false);
-
-    if (result.validationError) {
-      toast({
-        title: 'Invalid Input',
-        description:
-          'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        variant: 'destructive',
-      });
-
-      setError(result.validationError as UserValidationError);
-      return;
-    }
-    if (result?.serverError) {
-      toast({
-        title: 'Something went wrong',
-        description: result.serverError,
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    await queryClient.invalidateQueries({ queryKey: [Entity.Users] });
-    toast({
-      title: 'Success!',
-      description: 'User created successfully.',
-    });
-    store.set(isUserDialogOpenAtom, false);
   };
+
+  if (isEdit && isFetchingUserToEdit) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <DialogHeader>
-        <DialogTitle>Add User</DialogTitle>
-        <DialogDescription>Add new user here. Click save when you&apos;re done.</DialogDescription>
+        <DialogTitle>{isEdit ? 'Edit' : 'Add'} User</DialogTitle>
+        <DialogDescription>
+          {isEdit ? 'Edit' : 'Add new'} user here. Click save when you&apos;re done.
+        </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4 py-4">
         <div className="grid grid-cols-6 items-center gap-4">
@@ -118,19 +184,25 @@ const UserForm = () => {
             Name
             <RequiredIndicator />
           </Label>
-          <Input id="name" name="name" required className="col-span-4" />
+          <Input name="name" required className="col-span-4" defaultValue={user?.name || ''} />
         </div>
         <div className="grid grid-cols-6 items-center gap-4">
           <Label htmlFor="email" className="col-span-2 flex justify-end">
             Email <RequiredIndicator />
           </Label>
-          <Input id="email" type="email" name="email" required className="col-span-4" />
+          <Input
+            type="email"
+            name="email"
+            required
+            className="col-span-4"
+            defaultValue={user?.email || ''}
+          />
         </div>
         <div className="grid grid-cols-6 items-center gap-4">
           <Label htmlFor="role" className="col-span-2 flex justify-end">
             Role <RequiredIndicator />
           </Label>
-          <Select required name="role">
+          <Select required name="role" defaultValue={user?.role}>
             <SelectTrigger className="col-span-4">
               <SelectValue />
             </SelectTrigger>
@@ -149,13 +221,15 @@ const UserForm = () => {
               Service Cut %
             </Label>
             <Input
-              id="serviceCutPercentage"
               name="serviceCutPercentage"
-              defaultValue={0}
+              defaultValue={user?.serviceCutPercentage || 0}
               type="number"
               min={0}
               max={100}
-              className="col-span-4"
+              className={twJoin(
+                'col-span-4',
+                error.serviceCutPercentage && 'border-destructive-200'
+              )}
             />
           </div>
           {error.serviceCutPercentage && (
@@ -166,27 +240,55 @@ const UserForm = () => {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-6 items-center gap-4">
-          <Label htmlFor="password" className="col-span-2 flex justify-end">
-            Password <RequiredIndicator />
-          </Label>
-          <Input id="password" name="password" type="password" required className="col-span-4" />
-        </div>
-        <div className="grid grid-cols-6 items-center gap-4">
-          <Label htmlFor="confirmPassword" className="col-span-2 flex justify-end">
-            Confirm Password <RequiredIndicator />
-          </Label>
-          <Input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            required
-            className="col-span-4"
-          />
-        </div>
+        {!isEdit && (
+          <>
+            <div className="grid grid-cols-6 items-center gap-4">
+              <Label htmlFor="password" className="col-span-2 flex justify-end">
+                Password <RequiredIndicator />
+              </Label>
+              <Input
+                name="password"
+                type="password"
+                required
+                className="col-span-4"
+                minLength={6}
+              />
+            </div>
+            <div>
+              <div className="grid grid-cols-6 items-center gap-4">
+                <Label htmlFor="confirmPassword" className="col-span-2 flex justify-end">
+                  Confirm Password <RequiredIndicator />
+                </Label>
+                <Input
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  className={twJoin(
+                    'col-span-4',
+                    error.confirmPassword && 'border-destructive-200'
+                  )}
+                  minLength={6}
+                />
+              </div>
+              {error.confirmPassword && (
+                <div className="grid grid-cols-6">
+                  <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
+                    {error.confirmPassword}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
       <DialogFooter>
-        <Button type="submit" disabled={isLoading}>
+        <Button
+          type="submit"
+          disabled={isAddingUser || isEditingUser || (!!userIdToEdit && isFetchingUserToEdit)}
+        >
+          {(isAddingUser || isEditingUser) && (
+            <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
+          )}
           Save
         </Button>
       </DialogFooter>
@@ -195,15 +297,24 @@ const UserForm = () => {
 };
 
 export const UserFormDialog = () => {
-  const [isUserDialogOpen, setIsUserDialogOpen] = useAtom(isUserDialogOpenAtom);
+  const isDialogOpen = useUserFormStore((state) => state.isDialogOpen);
+  const userId = useUserFormStore((state) => state.userIdToEdit);
+
+  const onOpenChange = (dialogOpen: boolean) => {
+    useUserFormStore.setState({ isDialogOpen: dialogOpen });
+
+    if (!dialogOpen) {
+      useUserFormStore.setState({ userIdToEdit: null });
+    }
+  };
 
   return (
-    <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+    <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">Add User</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px]">
-        <UserForm />
+        <UserForm userIdToEdit={userId} />
       </DialogContent>
     </Dialog>
   );

@@ -18,7 +18,8 @@
     "lockb",
     "planetscale",
     "paralleldrive",
-    "shadcn"
+    "shadcn",
+    "zustand"
   ],
   "ignorePaths": [
     "node_modules/",

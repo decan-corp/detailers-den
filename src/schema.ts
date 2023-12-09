@@ -42,7 +42,7 @@ export const users = mysqlTable('users', {
   id: varchar('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),
-  name: varchar('name', { length: 255 }),
+  name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   role: varchar('role', {
     length: 64,

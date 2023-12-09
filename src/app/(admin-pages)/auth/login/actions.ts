@@ -28,7 +28,7 @@ export const login = action(
         .limit(1);
 
       if (!user) {
-        throw Error("User doesn't exist");
+        throw new SafeActionError("User doesn't exist");
       }
 
       const session = await auth.createSession({
