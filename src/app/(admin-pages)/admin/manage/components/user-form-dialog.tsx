@@ -105,7 +105,7 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
     },
   });
 
-  const { mutate: mutateEditUser, isPending: isEditingUser } = useMutation({
+  const { mutate: mutateUpdateUser, isPending: isUpdatingUser } = useMutation({
     mutationFn: updateUser,
     mutationKey: [Entity.Users, userIdToEdit],
     onSuccess: async (result) => {
@@ -151,7 +151,7 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
     }
 
     if (userIdToEdit) {
-      mutateEditUser({
+      mutateUpdateUser({
         ...(payload as typeof users.$inferSelect),
         id: userIdToEdit,
       });
@@ -284,9 +284,9 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
       <DialogFooter>
         <Button
           type="submit"
-          disabled={isAddingUser || isEditingUser || (!!userIdToEdit && isFetchingUserToEdit)}
+          disabled={isAddingUser || isUpdatingUser || (!!userIdToEdit && isFetchingUserToEdit)}
         >
-          {(isAddingUser || isEditingUser) && (
+          {(isAddingUser || isUpdatingUser) && (
             <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
           )}
           Save

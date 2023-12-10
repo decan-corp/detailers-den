@@ -58,7 +58,7 @@ export const services = mysqlTable('services', {
     .$defaultFn(() => createId())
     .primaryKey(),
   serviceName: varchar('service_name', { length: 255 }).notNull(),
-  price: decimal('price', { scale: 2, precision: 5 }),
+  price: decimal('price', { scale: 2, precision: 5 }).notNull(),
   description: text('description'),
   ...commonSchema,
 });

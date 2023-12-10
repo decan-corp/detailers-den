@@ -10,29 +10,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
-import { users } from 'src/schema';
+import { services } from 'src/schema';
 
-import { useUserFormStore } from './user-form-dialog';
-import { useUserAlertDialogStore } from './users-table';
+import { useServiceFormStore } from './service-form-dialog';
+import { useServiceAlertDialogStore } from './services-table';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { MoreHorizontal } from 'lucide-react';
 
-export const userColumns: ColumnDef<
-  Pick<typeof users.$inferSelect, 'id' | 'name' | 'email' | 'createdAt' | 'updatedAt' | 'role'>
+export const serviceColumns: ColumnDef<
+  Pick<
+    typeof services.$inferSelect,
+    'id' | 'serviceName' | 'description' | 'price' | 'createdAt' | 'updatedAt'
+  >
 >[] = [
   {
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+    accessorKey: 'serviceName',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Name" />,
   },
   {
-    accessorKey: 'email',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
+    accessorKey: 'price',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Price" />,
   },
   {
-    accessorKey: 'role',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
+    accessorKey: 'description',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
   },
   {
     accessorKey: 'createdAt',
@@ -48,7 +51,7 @@ export const userColumns: ColumnDef<
   {
     id: 'actions',
     cell: ({ row }) => {
-      const user = row.original;
+      const service = row.original;
 
       return (
         <DropdownMenu>
@@ -62,7 +65,7 @@ export const userColumns: ColumnDef<
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               className="cursor-pointer"
-              onClick={() => navigator.clipboard.writeText(user.id)}
+              onClick={() => navigator.clipboard.writeText(service.id)}
             >
               Copy ID
             </DropdownMenuItem>
@@ -70,7 +73,7 @@ export const userColumns: ColumnDef<
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={() =>
-                useUserFormStore.setState({ isDialogOpen: true, userIdToEdit: user.id })
+                useServiceFormStore.setState({ isDialogOpen: true, serviceIdToEdit: service.id })
               }
             >
               Edit
@@ -78,9 +81,9 @@ export const userColumns: ColumnDef<
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={() => {
-                useUserAlertDialogStore.setState({
+                useServiceAlertDialogStore.setState({
                   isDeleteDialogOpen: true,
-                  userIdToDelete: user.id,
+                  serviceIdToDelete: service.id,
                 });
               }}
             >
