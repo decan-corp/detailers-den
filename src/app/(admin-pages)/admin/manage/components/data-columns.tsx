@@ -13,6 +13,7 @@ import { DataTableColumnHeader } from 'src/components/table/data-table-column-he
 import { users } from 'src/schema';
 
 import { useUserFormStore } from './user-form-dialog';
+import { useUserAlertDialogStore } from './users-table';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
@@ -74,7 +75,17 @@ export const userColumns: ColumnDef<
             >
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">Delete</DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => {
+                useUserAlertDialogStore.setState({
+                  isDeleteDialogOpen: true,
+                  userIdToDelete: user.id,
+                });
+              }}
+            >
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

@@ -3,6 +3,7 @@
 'use client';
 
 import { Icons } from '@/components/ui/icons';
+import { toast } from '@/components/ui/use-toast';
 import { logout } from 'src/app/(admin-pages)/auth/login/actions';
 
 import { useQueryClient } from '@tanstack/react-query';
@@ -20,7 +21,10 @@ const LogoutButton = ({ className }: { className?: string }) => {
     const result = await logout({});
 
     if (result?.serverError) {
-      alert(result?.serverError); // TODO: replace with react toast
+      toast({
+        title: 'Server Error',
+        description: result.serverError,
+      });
       return;
     }
     setIsLoading(false);

@@ -8,7 +8,7 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
 import cuid2 from '@paralleldrive/cuid2';
-import { count, eq, inArray, like, or, desc, asc } from 'drizzle-orm';
+import { count, eq, inArray, like, or, desc, asc, sql, isNull } from 'drizzle-orm';
 import { MySqlSelect } from 'drizzle-orm/mysql-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { castArray } from 'lodash';
@@ -64,7 +64,8 @@ export const getUsers = authAction(
         updatedAt: users.updatedAt,
       })
       .from(users)
-      .$dynamic();
+      .$dynamic()
+      .where(isNull(users.deletedAt));
 
     if (params.role) {
       query = withRoleFilter(query, params.role);
@@ -108,7 +109,8 @@ export const getUsersCount = authAction(searchSchema, async (params, { session }
       value: count(),
     })
     .from(users)
-    .$dynamic();
+    .$dynamic()
+    .where(isNull(users.deletedAt));
 
   if (params.role) {
     query = withRoleFilter(query, params.role);
@@ -253,3 +255,35 @@ export const updateUser = authAction(
       .where(eq(users.id, id));
   }
 );
+
+export const softDeleteUser = authAction(z.string().cuid2(), async (id, { session }) => {
+  const { role, userId } = session.user;
+
+  if (role !== Role.Admin) {
+    throw new SafeActionError('Forbidden access');
+  }
+
+  await db
+    .update(users)
+    .set({
+      deletedById: userId,
+      deletedAt: sql`CURRENT_TIMESTAMP`,
+    })
+    .where(eq(users.id, id));
+});
+
+export const recoverUser = authAction(z.string().cuid2(), async (id, { session }) => {
+  const { role } = session.user;
+
+  if (role !== Role.Admin) {
+    throw new SafeActionError('Forbidden access');
+  }
+
+  await db
+    .update(users)
+    .set({
+      deletedById: null,
+      deletedAt: null,
+    })
+    .where(eq(users.id, id));
+});
