@@ -43,6 +43,13 @@
       "when": 1700558938476,
       "tag": "0005_fresh_killraven",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1702211013224,
+      "tag": "0006_freezing_fabian_cortez",
+      "breakpoints": true
     }
   ]
 }
