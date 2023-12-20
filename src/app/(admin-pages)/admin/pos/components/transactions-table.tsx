@@ -154,6 +154,7 @@ const TransactionsTable = () => {
       });
       return data;
     },
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: count = 0 } = useQuery({
@@ -175,6 +176,7 @@ const TransactionsTable = () => {
       });
       return data;
     },
+    staleTime: 1000 * 60 * 5,
   });
 
   const table = useReactTable({
