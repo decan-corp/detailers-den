@@ -6,9 +6,7 @@ import { PoolOptions, createPool } from 'mysql2/promise';
 
 let poolOptions: PoolOptions;
 
-const { NODE_ENV } = process.env;
-
-if (NODE_ENV === 'production') {
+if (serverEnv.DB_HOST !== 'localhost') {
   poolOptions = {
     host: serverEnv.DB_HOST,
     user: serverEnv.DB_USERNAME,
