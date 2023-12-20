@@ -45,7 +45,7 @@ import cuid2 from '@paralleldrive/cuid2';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PlusCircleIcon, XIcon } from 'lucide-react';
 import { notFound, useRouter } from 'next/navigation';
-import { ComponentProps, useState } from 'react';
+import { ComponentProps, useEffect, useMemo, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 
@@ -103,6 +103,12 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     notFound();
   }
 
+  useEffect(() => {
+    if (isEdit && transaction) {
+      setTransactionServicesState(transaction.transactionServices);
+    }
+  }, [isEdit, transaction, setTransactionServicesState]);
+
   const { data: serviceOptions = [], isLoading: isFetchingServices } = useQuery({
     queryKey: [Entity.Services],
     queryFn: async () => {
@@ -147,7 +153,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
       toast({
         title: 'Success!',
-        description: 'User created successfully.',
+        description: 'Transaction created successfully.',
       });
       router.push(AdminRoute.POS);
     },
@@ -181,7 +187,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
       toast({
         title: 'Success!',
-        description: 'User updated successfully.',
+        description: 'Transaction updated successfully.',
       });
       router.push(AdminRoute.POS);
     },
@@ -216,6 +222,11 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     }
   };
 
+  const savedTransactionServiceIds = useMemo(
+    () => transaction?.transactionServices.map((transactionService) => transactionService.id) || [],
+    [transaction?.transactionServices]
+  );
+
   if (isEdit && isFetchingTransactionToEdit) {
     return (
       <div className="flex h-96 items-center justify-center">
@@ -223,6 +234,8 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       </div>
     );
   }
+
+  const isSaving = isAddingTransaction || isUpdatingTransaction;
 
   return (
     <main className="flex-1 space-y-4 bg-background p-8 pt-10">
@@ -384,7 +397,11 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                       className=""
                       variant="ghost"
                       type="button"
-                      disabled={transactionServicesState.length === 1}
+                      disabled={
+                        transactionServicesState.length === 1 ||
+                        isSaving ||
+                        savedTransactionServiceIds.includes(service.id)
+                      }
                       onClick={() =>
                         setTransactionServicesState((prevState) => prevState.toSpliced(index, 1))
                       }
@@ -433,56 +450,61 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                     <Label className="col-span-2 text-right">Price</Label>
                     <Input value={service.price} type="number" disabled className="col-span-4" />
                   </div>
-                  {service.serviceBy.map((serviceById, serviceByIndex) => (
-                    <div
-                      key={serviceById || serviceByIndex}
-                      className="grid grid-cols-6 items-center gap-4"
-                    >
-                      <Label className="col-span-2 flex justify-end">
-                        Crew #{serviceByIndex + 1} <RequiredIndicator />
-                      </Label>
-                      <Select
-                        required
-                        defaultValue={serviceById || undefined}
-                        onValueChange={(id) =>
-                          setTransactionServicesState((prevState) => {
-                            prevState[index].serviceBy[serviceByIndex] = id;
-                          })
-                        }
-                        disabled={isFetchingCrews}
+                  {service.serviceBy.map((serviceById, serviceByIndex) => {
+                    const isDisabled =
+                      !!transaction?.transactionServices[index] &&
+                      transaction?.transactionServices[index].serviceBy.length > serviceByIndex;
+                    return (
+                      <div
+                        key={serviceById || serviceByIndex}
+                        className="grid grid-cols-6 items-center gap-4"
                       >
-                        <SelectTrigger className="col-span-3">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {crewOptions
-                            .filter(
-                              ({ id }) => id === serviceById || !service.serviceBy.includes(id)
-                            )
-                            .map(({ id, name, role }) => (
-                              <SelectItem key={id} value={id}>
-                                <div className="flex flex-row items-center gap-3">
-                                  {name} - {role}
-                                </div>
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        className="col-span-1 w-fit"
-                        variant="ghost"
-                        type="button"
-                        disabled={service.serviceBy.length === 1}
-                        onClick={() =>
-                          setTransactionServicesState((prevState) => {
-                            prevState[index].serviceBy.splice(serviceByIndex, 1);
-                          })
-                        }
-                      >
-                        <XIcon className="w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                        <Label className="col-span-2 flex justify-end">
+                          Crew #{serviceByIndex + 1} <RequiredIndicator />
+                        </Label>
+                        <Select
+                          required
+                          defaultValue={serviceById || undefined}
+                          onValueChange={(id) =>
+                            setTransactionServicesState((prevState) => {
+                              prevState[index].serviceBy[serviceByIndex] = id;
+                            })
+                          }
+                          disabled={isFetchingCrews || isDisabled}
+                        >
+                          <SelectTrigger className="col-span-3">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {crewOptions
+                              .filter(
+                                ({ id }) => id === serviceById || !service.serviceBy.includes(id)
+                              )
+                              .map(({ id, name, role }) => (
+                                <SelectItem key={id} value={id}>
+                                  <div className="flex flex-row items-center gap-3">
+                                    {name} - {role}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          className="col-span-1 w-fit"
+                          variant="ghost"
+                          type="button"
+                          disabled={service.serviceBy.length === 1 || isSaving || isDisabled}
+                          onClick={() =>
+                            setTransactionServicesState((prevState) => {
+                              prevState[index].serviceBy.splice(serviceByIndex, 1);
+                            })
+                          }
+                        >
+                          <XIcon className="w-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
                   <Button
                     className="gap-2 text-center"
                     variant="outline"

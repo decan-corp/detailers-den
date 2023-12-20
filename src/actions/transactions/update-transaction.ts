@@ -12,7 +12,7 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 import cuid2 from '@paralleldrive/cuid2';
 import { eq, inArray } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-zod';
-import { uniq, uniqBy } from 'lodash';
+import { omit, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
 
 const transactionServicesSchema = z.object({
@@ -103,7 +103,12 @@ export const updateTransaction = authAction(
         await tx
           .insert(transactionServices)
           .values(updateTransactionService)
-          .onDuplicateKeyUpdate({ set: updateTransactionService });
+          .onDuplicateKeyUpdate({
+            set: {
+              ...omit(updateTransactionService, ['createdById']),
+              updatedById: userId,
+            },
+          });
 
         const highestServiceCut = usersRef.reduce(
           (acc, value) => Math.max(acc, value.serviceCutPercentage || 0),
@@ -135,7 +140,12 @@ export const updateTransaction = authAction(
           await tx
             .insert(crewEarnings)
             .values(updateCrewEarning)
-            .onDuplicateKeyUpdate({ set: updateCrewEarning });
+            .onDuplicateKeyUpdate({
+              set: {
+                ...omit(updateCrewEarning, ['createdById']),
+                updatedById: userId,
+              },
+            });
         }
       }
 
@@ -145,7 +155,7 @@ export const updateTransaction = authAction(
         .update(transactions)
         .set({
           ...transactionData,
-          createdById: userId,
+          updatedById: userId,
           totalPrice: String(discountedPrice),
         })
         .where(eq(transactions.id, transactionData.id));

@@ -1,12 +1,12 @@
 'use server';
 
 import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from 'src/constants/common';
-import { transactions } from 'src/schema';
+import { transactionServices, transactions } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
-import { count, eq, inArray, like, or, desc, asc, isNull } from 'drizzle-orm';
+import { count, eq, inArray, like, or, desc, asc, isNull, and } from 'drizzle-orm';
 import { MySqlSelect } from 'drizzle-orm/mysql-core';
 import { castArray } from 'lodash';
 import { z } from 'zod';
@@ -186,8 +186,21 @@ export const getTransaction = authAction(z.string().cuid2(), async (id, { sessio
   const [transaction] = await db
     .select()
     .from(transactions)
-    .where(eq(transactions.id, id))
+    .where(and(eq(transactions.id, id), isNull(transactions.deletedAt)))
     .limit(1);
 
-  return transaction || undefined;
+  if (!transaction) {
+    return undefined;
+  }
+
+  const transactionServicesList = await db
+    .select()
+    .from(transactionServices)
+    .where(and(eq(transactionServices.transactionId, id), isNull(transactions.deletedAt)))
+    .orderBy(asc(transactionServices.createdAt));
+
+  return {
+    ...transaction,
+    transactionServices: transactionServicesList,
+  };
 });

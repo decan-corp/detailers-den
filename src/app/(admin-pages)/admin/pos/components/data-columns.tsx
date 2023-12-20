@@ -92,6 +92,7 @@ export const transactionColumns: ColumnDef<
               Copy ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            {/* TODO: add mark as paid and mark as cancelled shortcut menu */}
             <DropdownMenuItem asChild className="cursor-pointer">
               <Link href={`${AdminRoute.EditTransaction}/${transaction.id}`}>Edit</Link>
             </DropdownMenuItem>
