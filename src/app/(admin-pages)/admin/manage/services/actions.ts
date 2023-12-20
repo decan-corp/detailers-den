@@ -1,6 +1,6 @@
 'use server';
 
-import { Role } from 'src/constants/roles';
+import { Role } from 'src/constants/common';
 import { services } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -44,6 +44,7 @@ export const getServices = authAction(
         id: services.id,
         serviceName: services.serviceName,
         price: services.price,
+        serviceCutPercentage: services.serviceCutPercentage,
         description: services.description,
         createdAt: services.createdAt,
         updatedAt: services.updatedAt,

@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
+import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
 import { services } from 'src/schema';
 
 import { useServiceFormStore } from './service-form-dialog';
@@ -22,7 +23,13 @@ import { MoreHorizontal } from 'lucide-react';
 export const serviceColumns: ColumnDef<
   Pick<
     typeof services.$inferSelect,
-    'id' | 'serviceName' | 'description' | 'price' | 'createdAt' | 'updatedAt'
+    | 'id'
+    | 'serviceName'
+    | 'description'
+    | 'price'
+    | 'serviceCutPercentage'
+    | 'createdAt'
+    | 'updatedAt'
   >
 >[] = [
   {
@@ -34,18 +41,24 @@ export const serviceColumns: ColumnDef<
     header: ({ column }) => <DataTableColumnHeader column={column} title="Price" />,
   },
   {
+    accessorKey: 'serviceCutPercentage',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Service Cut Percentage" />
+    ),
+  },
+  {
     accessorKey: 'description',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
   },
   {
     accessorKey: 'createdAt',
-    accessorFn: ({ createdAt }) => dayjs(createdAt).format('MMM DD YYYY hh:mm a'),
+    accessorFn: ({ createdAt }) => dayjs(createdAt).format(DATE_TABLE_DATE_FORMAT),
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
   },
   {
     accessorKey: 'updatedAt',
     accessorFn: ({ updatedAt }) =>
-      updatedAt ? dayjs(updatedAt).format('MMM DD YYYY hh:mm a') : '',
+      updatedAt ? dayjs(updatedAt).format(DATE_TABLE_DATE_FORMAT) : '',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
   },
   {

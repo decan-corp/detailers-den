@@ -19,7 +19,9 @@
     "planetscale",
     "paralleldrive",
     "shadcn",
-    "zustand"
+    "zustand",
+    "gcash",
+    "immer"
   ],
   "ignorePaths": [
     "node_modules/",

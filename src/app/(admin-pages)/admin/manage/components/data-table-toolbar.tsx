@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { UserFormDialog } from 'src/app/(admin-pages)/admin/manage/components/user-form-dialog';
 import { DataTableFacetedFilter } from 'src/components/table/data-table-faceted-filter';
 
-import { roles } from './data-table-options';
+import { rolesOptions } from './data-table-options';
 
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
@@ -21,13 +21,17 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Search users by email or name"
+          placeholder="Search by email or name"
           value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
           onChange={(event) => table.getColumn('email')?.setFilterValue(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
         />
         {table.getColumn('role') && (
-          <DataTableFacetedFilter column={table.getColumn('role')} title="Role" options={roles} />
+          <DataTableFacetedFilter
+            column={table.getColumn('role')}
+            title="Role"
+            options={rolesOptions}
+          />
         )}
 
         {isFiltered && (

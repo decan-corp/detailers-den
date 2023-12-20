@@ -11,29 +11,53 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
-import { users } from 'src/schema';
+import { AdminRoute } from 'src/constants/routes';
+import { transactions } from 'src/schema';
 
-import { useUserFormStore } from './user-form-dialog';
-import { useUserAlertDialogStore } from './users-table';
+import { useTransactionAlertDialogStore } from './transactions-table';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
 
-export const userColumns: ColumnDef<
-  Pick<typeof users.$inferSelect, 'id' | 'name' | 'email' | 'createdAt' | 'updatedAt' | 'role'>
+export const transactionColumns: ColumnDef<
+  Pick<
+    typeof transactions.$inferSelect,
+    | 'id'
+    | 'customerName'
+    | 'plateNumber'
+    | 'status'
+    | 'totalPrice'
+    | 'vehicleSize'
+    | 'modeOfPayment'
+    | 'createdAt'
+    | 'updatedAt'
+  >
 >[] = [
   {
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+    accessorKey: 'customerName',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Customer Name" />,
   },
   {
-    accessorKey: 'email',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
+    accessorKey: 'plateNumber',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Plate Number" />,
   },
   {
-    accessorKey: 'role',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
+    accessorKey: 'totalPrice',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Total Price" />,
+  },
+  {
+    accessorKey: 'vehicleSize',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Vehicle Size" />,
+  },
+  {
+    accessorKey: 'status',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+  },
+  {
+    accessorKey: 'modeOfPayment',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="MOP" />,
   },
   {
     accessorKey: 'createdAt',
@@ -49,7 +73,7 @@ export const userColumns: ColumnDef<
   {
     id: 'actions',
     cell: ({ row }) => {
-      const user = row.original;
+      const transaction = row.original;
 
       return (
         <DropdownMenu>
@@ -63,25 +87,20 @@ export const userColumns: ColumnDef<
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               className="cursor-pointer"
-              onClick={() => navigator.clipboard.writeText(user.id)}
+              onClick={() => navigator.clipboard.writeText(transaction.id)}
             >
               Copy ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() =>
-                useUserFormStore.setState({ isDialogOpen: true, userIdToEdit: user.id })
-              }
-            >
-              Edit
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href={`${AdminRoute.EditTransaction}/${transaction.id}`}>Edit</Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={() => {
-                useUserAlertDialogStore.setState({
+                useTransactionAlertDialogStore.setState({
                   isDeleteDialogOpen: true,
-                  userIdToDelete: user.id,
+                  userIdToDelete: transaction.id,
                 });
               }}
             >

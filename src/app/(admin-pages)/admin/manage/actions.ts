@@ -1,6 +1,6 @@
 'use server';
 
-import { Role } from 'src/constants/roles';
+import { Role } from 'src/constants/common';
 import { userKeys, users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { ProviderId } from 'src/utils/lucia';

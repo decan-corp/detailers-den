@@ -16,4 +16,7 @@ export enum AdminRoute {
   ChangePassword = '/admin/settings/change-password',
   ManageUsers = '/admin/manage',
   ManageServices = '/admin/manage/services',
+  ManagePromo = '/admin/manage/Promo',
+  AddTransaction = '/admin/pos/add',
+  EditTransaction = '/admin/pos/edit',
 }

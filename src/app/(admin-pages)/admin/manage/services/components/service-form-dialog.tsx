@@ -145,11 +145,16 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
       mutateUpdateService({
         ...updateData,
         price: Number(updateData.price),
+        serviceCutPercentage: Number(updateData.serviceCutPercentage),
         id: serviceIdToEdit,
       });
     } else {
       const addData = payload as typeof services.$inferInsert;
-      mutateAddService({ ...addData, price: Number(addData.price) });
+      mutateAddService({
+        ...addData,
+        price: Number(addData.price),
+        serviceCutPercentage: Number(addData.serviceCutPercentage),
+      });
     }
   };
 
@@ -171,11 +176,12 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
       </DialogHeader>
       <div className="grid gap-4 py-4">
         <div className="grid grid-cols-6 items-center gap-4">
-          <Label htmlFor="name" className="col-span-2 flex justify-end">
+          <Label htmlFor="serviceName" className="col-span-2 flex justify-end">
             Service Name
             <RequiredIndicator />
           </Label>
           <Input
+            id="serviceName"
             name="serviceName"
             required
             className="col-span-4"
@@ -196,21 +202,34 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
             maxLength={160}
           />
         </div>
-        <div>
-          <div className="grid grid-cols-6 items-center gap-4">
-            <Label htmlFor="serviceCutPercentage" className="col-span-2 text-right">
-              Price
-            </Label>
-            <Input
-              name="price"
-              defaultValue={service?.price || 0}
-              type="number"
-              min={1}
-              max={100000}
-              className={twJoin('col-span-4', error.price && 'border-destructive-200')}
-              required
-            />
-          </div>
+        <div className="grid grid-cols-6 items-center gap-4">
+          <Label htmlFor="price" className="col-span-2 flex justify-end">
+            Price <RequiredIndicator />
+          </Label>
+          <Input
+            id="price"
+            name="price"
+            defaultValue={service?.price || 0}
+            type="number"
+            min={1}
+            max={100000}
+            className={twJoin('col-span-4', error.price && 'border-destructive-200')}
+            required
+          />
+        </div>
+        <div className="grid grid-cols-6 items-center gap-4">
+          <Label htmlFor="serviceCutPercentage" className="col-span-2 flex justify-end">
+            Service Cut %
+          </Label>
+          <Input
+            id="serviceCutPercentage"
+            name="serviceCutPercentage"
+            defaultValue={service?.serviceCutPercentage || 0}
+            type="number"
+            min={-99}
+            max={99}
+            className={twJoin('col-span-4', error.price && 'border-destructive-200')}
+          />
         </div>
       </div>
       <DialogFooter>

@@ -10,16 +10,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toast } from '@/components/ui/use-toast';
+import { softDeleteTransaction } from 'src/actions/transactions/delete-transaction';
+import { getTransactions, getTransactionsCount } from 'src/actions/transactions/get-transactions';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
-import { Role } from 'src/constants/common';
+import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
-import { UserSelect } from 'src/types/schema';
+import { transactions } from 'src/schema';
 
-import { userColumns } from './data-columns';
+import { transactionColumns } from './data-columns';
 import { DataTableToolbar } from './data-table-toolbar';
-
-import { getUsers, getUsersCount, softDeleteUser } from '../actions';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -34,7 +34,7 @@ import { useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
 import { create } from 'zustand';
 
-export const useUserAlertDialogStore = create<{
+export const useTransactionAlertDialogStore = create<{
   isDeleteDialogOpen: boolean;
   userIdToDelete: string | null;
 }>(() => ({
@@ -42,9 +42,9 @@ export const useUserAlertDialogStore = create<{
   userIdToDelete: null,
 }));
 
-const emptyArray: UserSelect[] = [];
+const emptyArray: (typeof transactions.$inferSelect)[] = [];
 
-const UsersTable = () => {
+const TransactionsTable = () => {
   const queryClient = useQueryClient();
 
   const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
@@ -52,13 +52,13 @@ const UsersTable = () => {
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const isDeleteDialogOpen = useUserAlertDialogStore((state) => state.isDeleteDialogOpen);
-  const userIdToDelete = useUserAlertDialogStore((state) => state.userIdToDelete);
+  const isDeleteDialogOpen = useTransactionAlertDialogStore((state) => state.isDeleteDialogOpen);
+  const userIdToDelete = useTransactionAlertDialogStore((state) => state.userIdToDelete);
 
   const { mutate: mutateSoftDeleteUser } = useMutation({
-    mutationFn: softDeleteUser,
+    mutationFn: softDeleteTransaction,
     onMutate: () => {
-      useUserAlertDialogStore.setState({
+      useTransactionAlertDialogStore.setState({
         isDeleteDialogOpen: false,
         userIdToDelete: null,
       });
@@ -90,14 +90,14 @@ const UsersTable = () => {
 
       toast({
         title: 'Success!',
-        description: 'Success soft deleting user',
+        description: 'Success soft deleting transaction',
       });
     },
   });
 
   useDebounce(
     () => {
-      const search = columnFilters.find((filter) => filter.id === 'email')?.value as
+      const search = columnFilters.find((filter) => filter.id === 'customerName')?.value as
         | string
         | undefined;
       setDebouncedSearch(search || '');
@@ -106,25 +106,48 @@ const UsersTable = () => {
     [columnFilters]
   );
 
-  const roleFilter = useMemo(
-    () => columnFilters.find((filter) => filter.id === 'role')?.value as Role[] | undefined,
+  const vehicleSizeFilter = useMemo(
+    () =>
+      columnFilters.find((filter) => filter.id === 'vehicleSize')?.value as
+        | VehicleSize[]
+        | undefined,
     [columnFilters]
   );
 
-  const { data: users, isLoading } = useQuery({
+  const modeOfPaymentFilter = useMemo(
+    () =>
+      columnFilters.find((filter) => filter.id === 'modeOfPayment')?.value as
+        | ModeOfPayment[]
+        | undefined,
+    [columnFilters]
+  );
+
+  const transactionStatusFilter = useMemo(
+    () =>
+      columnFilters.find((filter) => filter.id === 'status')?.value as
+        | TransactionStatus[]
+        | undefined,
+    [columnFilters]
+  );
+
+  const { data: transactionsData, isLoading } = useQuery({
     queryKey: [
-      Entity.Users,
-      roleFilter,
+      Entity.Transactions,
+      vehicleSizeFilter,
+      modeOfPaymentFilter,
+      transactionStatusFilter,
       debouncedSearch,
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
     ],
     queryFn: async () => {
-      const { data = [] } = await getUsers({
-        ...(roleFilter && { role: roleFilter }),
-        ...(debouncedSearch && { name: debouncedSearch }),
-        ...(debouncedSearch && { email: debouncedSearch }),
+      const { data = [] } = await getTransactions({
+        ...(debouncedSearch && { customerName: debouncedSearch }),
+        ...(debouncedSearch && { plateNumber: debouncedSearch }),
+        ...(vehicleSizeFilter && { vehicleSize: vehicleSizeFilter }),
+        ...(modeOfPaymentFilter && { modeOfPayment: modeOfPaymentFilter }),
+        ...(transactionStatusFilter && { status: transactionStatusFilter }),
         pageSize: pagination.pageSize,
         pageIndex: pagination.pageIndex,
         sortBy: sorting,
@@ -134,20 +157,29 @@ const UsersTable = () => {
   });
 
   const { data: count = 0 } = useQuery({
-    queryKey: [Entity.Users, 'count', roleFilter, debouncedSearch],
+    queryKey: [
+      Entity.Transactions,
+      'count',
+      vehicleSizeFilter,
+      modeOfPaymentFilter,
+      transactionStatusFilter,
+      debouncedSearch,
+    ],
     queryFn: async () => {
-      const { data = 0 } = await getUsersCount({
-        ...(roleFilter && { role: roleFilter }),
-        ...(debouncedSearch && { name: debouncedSearch }),
-        ...(debouncedSearch && { email: debouncedSearch }),
+      const { data = 0 } = await getTransactionsCount({
+        ...(debouncedSearch && { customerName: debouncedSearch }),
+        ...(debouncedSearch && { plateNumber: debouncedSearch }),
+        ...(vehicleSizeFilter && { vehicleSize: vehicleSizeFilter }),
+        ...(modeOfPaymentFilter && { modeOfPayment: modeOfPaymentFilter }),
+        ...(transactionStatusFilter && { status: transactionStatusFilter }),
       });
       return data;
     },
   });
 
   const table = useReactTable({
-    data: users || emptyArray,
-    columns: userColumns,
+    data: transactionsData || emptyArray,
+    columns: transactionColumns,
     pageCount: Math.ceil(count / pagination.pageSize),
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -164,7 +196,7 @@ const UsersTable = () => {
   });
 
   const onDeleteDialogChange = (open: boolean) => {
-    useUserAlertDialogStore.setState({ isDeleteDialogOpen: open });
+    useTransactionAlertDialogStore.setState({ isDeleteDialogOpen: open });
   };
 
   const onClickConfirmDelete = () => {
@@ -180,21 +212,14 @@ const UsersTable = () => {
     mutateSoftDeleteUser(userIdToDelete);
   };
 
-  const userToDelete = useMemo(() => {
-    if (!userIdToDelete) {
-      return undefined;
-    }
-    return users?.find((user) => user.id === userIdToDelete);
-  }, [users, userIdToDelete]);
-
   return (
     <div className="space-y-4">
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onOpenChange={onDeleteDialogChange}
         hideButtonTrigger
-        title={`Are you sure you want to delete user "${userToDelete?.name}"?`}
-        description={`This action will perform soft delete. Soft deletion will mark the user as inactive while retaining their data for potential reactivation.
+        title="Are you sure you want to delete this transaction?"
+        description={`This action will perform soft delete. Soft deletion will mark the transaction as inactive while retaining their data for potential reactivation.
 This action helps maintain historical records and allows for data recovery if needed.`}
         onClickConfirm={onClickConfirmDelete}
       />
@@ -220,7 +245,7 @@ This action helps maintain historical records and allows for data recovery if ne
                 .fill(null)
                 .map((_, index) => (
                   <TableRow key={Symbol(index).toString()}>
-                    {userColumns.map((_column, columnIndex) => (
+                    {transactionColumns.map((_column, columnIndex) => (
                       <TableCell
                         key={Symbol(columnIndex).toString()}
                         colSpan={1}
@@ -244,7 +269,7 @@ This action helps maintain historical records and allows for data recovery if ne
               ))}
             {!isLoading && table.getRowModel().rows?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={userColumns.length} className="h-24 text-center">
+                <TableCell colSpan={transactionColumns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
@@ -257,4 +282,4 @@ This action helps maintain historical records and allows for data recovery if ne
   );
 };
 
-export default UsersTable;
+export default TransactionsTable;

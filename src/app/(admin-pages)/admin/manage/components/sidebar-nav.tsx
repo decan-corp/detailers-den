@@ -20,6 +20,11 @@ const sidebarNavItems = [
     href: AdminRoute.ManageServices,
     icon: ToolboxIcon,
   },
+  {
+    title: 'Promo (WIP)',
+    href: AdminRoute.ManagePromo,
+    icon: ToolboxIcon,
+  },
 ];
 
 export const SidebarNav = ({ className }: { className?: string }) => {

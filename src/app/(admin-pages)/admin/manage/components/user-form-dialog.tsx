@@ -25,7 +25,7 @@ import { Entity } from 'src/constants/entities';
 import { users } from 'src/schema';
 import { UserSelect } from 'src/types/schema';
 
-import { roles } from './data-table-options';
+import { rolesOptions } from './data-table-options';
 
 import { addUser, updateUser, getUser } from '../actions';
 
@@ -184,13 +184,20 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
             Name
             <RequiredIndicator />
           </Label>
-          <Input name="name" required className="col-span-4" defaultValue={user?.name || ''} />
+          <Input
+            id="name"
+            name="name"
+            required
+            className="col-span-4"
+            defaultValue={user?.name || ''}
+          />
         </div>
         <div className="grid grid-cols-6 items-center gap-4">
           <Label htmlFor="email" className="col-span-2 flex justify-end">
             Email <RequiredIndicator />
           </Label>
           <Input
+            id="email"
             type="email"
             name="email"
             required
@@ -203,13 +210,15 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
             Role <RequiredIndicator />
           </Label>
           <Select required name="role" defaultValue={user?.role}>
-            <SelectTrigger className="col-span-4">
+            <SelectTrigger id="role" className="col-span-4">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {roles.map(({ value, label }) => (
+              {rolesOptions.map(({ value, label, icon: Icon }) => (
                 <SelectItem key={value} value={value}>
-                  {label}
+                  <div className="flex flex-row items-center gap-3">
+                    <Icon className="h-4 w-4 text-muted-foreground" /> {label}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -221,11 +230,12 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
               Service Cut %
             </Label>
             <Input
+              id="serviceCutPercentage"
               name="serviceCutPercentage"
               defaultValue={user?.serviceCutPercentage || 0}
               type="number"
               min={0}
-              max={100}
+              max={99}
               className={twJoin(
                 'col-span-4',
                 error.serviceCutPercentage && 'border-destructive-200'
@@ -247,6 +257,7 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
                 Password <RequiredIndicator />
               </Label>
               <Input
+                id="password"
                 name="password"
                 type="password"
                 required
@@ -260,6 +271,7 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
                   Confirm Password <RequiredIndicator />
                 </Label>
                 <Input
+                  id="confirmPassword"
                   name="confirmPassword"
                   type="password"
                   required

@@ -1,10 +1,10 @@
-import { Role } from 'src/constants/roles';
+import { Role } from 'src/constants/common';
 import { UserSelect } from 'src/types/schema';
 
 import { BackpackIcon, MoonIcon, SunIcon } from '@radix-ui/react-icons';
 import { BrushIcon, HardHatIcon, PiggyBankIcon } from 'lucide-react';
 
-export const roles = [
+export const rolesOptions = [
   {
     value: Role.Crew,
     label: 'Crew',
