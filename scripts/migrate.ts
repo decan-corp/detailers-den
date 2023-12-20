@@ -12,9 +12,7 @@ import path from 'path';
 
 let connectionOptions: ConnectionOptions;
 
-const { NODE_ENV } = process.env;
-
-if (NODE_ENV === 'production') {
+if (serverEnv.DB_HOST !== 'localhost') {
   connectionOptions = {
     host: serverEnv.DB_HOST,
     user: serverEnv.DB_USERNAME,
