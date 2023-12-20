@@ -9,11 +9,10 @@ import cuid2 from '@paralleldrive/cuid2';
 
 const seedDatabase = async () => {
   // Create default user
-  const password = 'P@ssw0rd!23'; // user change the password afterwards
   const email = 'emnnipal@gmail.com'.toLowerCase();
   await auth.createUser({
     key: {
-      password,
+      password: 'P@ssw0rd!23',
       providerId: ProviderId.email,
       providerUserId: email,
     },
