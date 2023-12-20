@@ -1,1 +1,0 @@
-ALTER TABLE `services` DROP COLUMN `service_cut_percentage`;
