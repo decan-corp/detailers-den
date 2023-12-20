@@ -1,9 +1,9 @@
 'use server';
 
-import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from 'src/constants/common';
+import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
 import { transactionServices, transactions } from 'src/schema';
 import { db } from 'src/utils/db';
-import { SafeActionError, authAction } from 'src/utils/safe-action';
+import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
 import { count, eq, inArray, like, or, desc, asc, isNull, and } from 'drizzle-orm';
@@ -11,11 +11,6 @@ import { MySqlSelect } from 'drizzle-orm/mysql-core';
 import { castArray } from 'lodash';
 import { z } from 'zod';
 
-const authorize = (role: Role) => {
-  if (![Role.Admin, Role.Cashier, Role.Accounting].includes(role)) {
-    throw new SafeActionError('Forbidden access');
-  }
-};
 const withStatusFilter = <T extends MySqlSelect>(
   qb: T,
   status: TransactionStatus | TransactionStatus[]
@@ -80,11 +75,7 @@ const searchSchema = z.object({
 
 export const getTransactions = authAction(
   searchSchema.merge(paginationSchema).merge(sortingSchema),
-  (params, { session }) => {
-    const { role } = session.user;
-
-    authorize(role);
-
+  (params) => {
     let query = db
       .select({
         id: transactions.id,
@@ -139,11 +130,7 @@ export const getTransactions = authAction(
   }
 );
 
-export const getTransactionsCount = authAction(searchSchema, async (params, { session }) => {
-  const { role } = session.user;
-
-  authorize(role);
-
+export const getTransactionsCount = authAction(searchSchema, async (params) => {
   let query = db
     .select({
       value: count(),
@@ -176,13 +163,7 @@ export const getTransactionsCount = authAction(searchSchema, async (params, { se
   return value;
 });
 
-export const getTransaction = authAction(z.string().cuid2(), async (id, { session }) => {
-  const { role } = session.user;
-
-  if (![Role.Admin, Role.Cashier, Role.Accounting].includes(role)) {
-    throw new SafeActionError('Forbidden access');
-  }
-
+export const getTransaction = authAction(z.string().cuid2(), async (id) => {
   const [transaction] = await db
     .select()
     .from(transactions)

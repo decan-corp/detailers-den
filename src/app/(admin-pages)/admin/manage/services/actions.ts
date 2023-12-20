@@ -31,13 +31,7 @@ const searchSchema = z.object({
 
 export const getServices = authAction(
   searchSchema.merge(paginationSchema).merge(sortingSchema),
-  (params, { session }) => {
-    const { role } = session.user;
-
-    if (role !== Role.Admin) {
-      throw new SafeActionError('Forbidden access');
-    }
-
+  (params) => {
     let query = db
       .select({
         id: services.id,
@@ -77,13 +71,7 @@ export const getServices = authAction(
   }
 );
 
-export const getServicesCount = authAction(searchSchema, async (params, { session }) => {
-  const { role } = session.user;
-
-  if (role !== Role.Admin) {
-    throw new SafeActionError('Forbidden access');
-  }
-
+export const getServicesCount = authAction(searchSchema, async (params) => {
   let query = db
     .select({
       value: count(),
@@ -103,13 +91,7 @@ export const getServicesCount = authAction(searchSchema, async (params, { sessio
   return value;
 });
 
-export const getService = authAction(z.string().cuid2(), async (id, { session }) => {
-  const { role } = session.user;
-
-  if (role !== Role.Admin) {
-    throw new SafeActionError('Forbidden access');
-  }
-
+export const getService = authAction(z.string().cuid2(), async (id) => {
   const [service] = await db.select().from(services).where(eq(services.id, id)).limit(1);
 
   return service || undefined;

@@ -3,7 +3,6 @@
 
 'use server';
 
-import { Role } from 'src/constants/common';
 import { crewEarnings, services, transactionServices, transactions, users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -57,11 +56,7 @@ export const addTransaction = authAction(
       })
     ),
   (data, { session }) => {
-    const { role, userId } = session.user;
-
-    if (![Role.Admin, Role.Cashier, Role.Accounting].includes(role)) {
-      throw new SafeActionError('Forbidden access');
-    }
+    const { userId } = session.user;
 
     const { transactionServices: transactionServicesList, ...transactionData } = data;
     return db.transaction(async (tx) => {

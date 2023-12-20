@@ -1,5 +1,6 @@
 'use server';
 
+import { Role } from 'src/constants/common';
 import { AdminRoute } from 'src/constants/routes';
 import { users } from 'src/schema';
 import { db } from 'src/utils/db';
@@ -38,6 +39,10 @@ export const login = action(
 
       const authRequest = auth.handleRequest('POST', context);
       authRequest.setSession(session);
+
+      if (session && [Role.Crew, Role.StayInCrew, Role.Cashier].includes(session?.user.role)) {
+        redirect(AdminRoute.POS);
+      }
 
       redirect(AdminRoute.Dashboard);
     } catch (error) {

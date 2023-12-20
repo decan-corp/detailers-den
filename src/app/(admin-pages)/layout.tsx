@@ -19,7 +19,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: {
     template: '%s | 185 Detailers Den',
-    default: 'Admin',
+    default: '185 Detailers Den',
   },
   description: 'Admin page of 185 Detailers Den',
 };

@@ -47,13 +47,7 @@ const searchSchema = z.object({
 });
 export const getUsers = authAction(
   searchSchema.merge(paginationSchema).merge(sortingSchema),
-  (params, { session }) => {
-    const { role } = session.user;
-
-    if (role !== Role.Admin) {
-      throw new SafeActionError('Forbidden access');
-    }
-
+  (params) => {
     let query = db
       .select({
         id: users.id,
@@ -98,13 +92,7 @@ export const getUsers = authAction(
   }
 );
 
-export const getUsersCount = authAction(searchSchema, async (params, { session }) => {
-  const { role } = session.user;
-
-  if (role !== Role.Admin) {
-    throw new SafeActionError('Forbidden access');
-  }
-
+export const getUsersCount = authAction(searchSchema, async (params) => {
   let query = db
     .select({
       value: count(),

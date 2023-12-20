@@ -10,6 +10,7 @@ import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import cuid2 from '@paralleldrive/cuid2';
+import dayjs from 'dayjs';
 import { eq, inArray } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-zod';
 import { omit, uniq, uniqBy } from 'lodash';
@@ -59,8 +60,20 @@ export const updateTransaction = authAction(
   async (data, { session }) => {
     const { role, userId } = session.user;
 
-    if (![Role.Admin, Role.Cashier, Role.Accounting].includes(role)) {
-      throw new SafeActionError('Forbidden access');
+    const [transaction] = await db.select().from(transactions).where(eq(transactions.id, data.id));
+
+    if (!transaction) {
+      throw new SafeActionError("Transaction doesn't exist.");
+    }
+
+    const updateThreshold = 20;
+    if (
+      role !== Role.Admin &&
+      dayjs().diff(dayjs(transaction.createdAt), 'minutes') > updateThreshold
+    ) {
+      throw new SafeActionError(
+        `You may only update a transaction within ${updateThreshold} minutes`
+      );
     }
 
     const { transactionServices: transactionServicesList, ...transactionData } = data;
