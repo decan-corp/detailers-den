@@ -104,10 +104,10 @@ export const transactionServices = mysqlTable('transaction_services', {
     .$defaultFn(() => createId())
     .primaryKey(),
   transactionId: varchar('transaction_id', { length: 255 })
-    .references(() => transactions.id)
+    // .references(() => transactions.id) // TODO: foreign key constraint is not yet supported in planetscale
     .notNull(),
   serviceId: varchar('service_id', { length: 255 })
-    .references(() => services.id)
+    // .references(() => services.id) // TODO: foreign key constraint is not yet supported in planetscale
     .notNull(),
   price: decimal('price', { scale: 2, precision: 5 }).notNull(),
   serviceBy: json('serviceBy').$type<string[]>().notNull(),
@@ -119,10 +119,10 @@ export const crewEarnings = mysqlTable('crew_earnings', {
     .$defaultFn(() => createId())
     .primaryKey(),
   transactionServiceId: varchar('transaction_service_id', { length: 255 })
-    .references(() => transactionServices.id)
+    // .references(() => transactionServices.id)
     .notNull(),
   crewId: varchar('crew_id', { length: 255 })
-    .references(() => users.id)
+    // .references(() => users.id)
     .notNull(),
   computedServiceCutPercentage: int('computed_service_cut_percentage'),
   amount: decimal('amount', { scale: 2, precision: 5 }).notNull(),
@@ -135,9 +135,8 @@ export const userKeys = mysqlTable('user_keys', {
   }).primaryKey(),
   userId: varchar('user_id', {
     length: 255,
-  })
-    .notNull()
-    .references(() => users.id),
+  }).notNull(),
+  // .references(() => users.id),
   hashedPassword: varchar('hashed_password', {
     length: 255,
   }),
@@ -150,9 +149,8 @@ export const userSessions = mysqlTable('user_sessions', {
   }).primaryKey(),
   userId: varchar('user_id', {
     length: 255,
-  })
-    .notNull()
-    .references(() => users.id),
+  }).notNull(),
+  // .references(() => users.id),
   activeExpires: bigint('active_expires', {
     mode: 'number',
   }).notNull(),
