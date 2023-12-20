@@ -1,16 +1,15 @@
 'use server';
 
-import { Role } from 'src/constants/common';
+import { Role, VehicleSize } from 'src/constants/common';
 import { services } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
-import cuid2 from '@paralleldrive/cuid2';
 import { count, eq, like, desc, asc, sql, isNull } from 'drizzle-orm';
 import { MySqlSelect } from 'drizzle-orm/mysql-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { castArray } from 'lodash';
+import { castArray, uniqBy } from 'lodash';
 import { z } from 'zod';
 
 const withSearchFilter = <T extends MySqlSelect>(
@@ -43,11 +42,11 @@ export const getServices = authAction(
       .select({
         id: services.id,
         serviceName: services.serviceName,
-        price: services.price,
         serviceCutPercentage: services.serviceCutPercentage,
         description: services.description,
         createdAt: services.createdAt,
         updatedAt: services.updatedAt,
+        priceMatrix: services.priceMatrix,
       })
       .from(services)
       .$dynamic()
@@ -116,13 +115,27 @@ export const getService = authAction(z.string().cuid2(), async (id, { session })
   return service || undefined;
 });
 
+const priceMatrixSchema = z
+  .array(
+    z.object({
+      price: z.number().int().min(1),
+      vehicleSize: z.nativeEnum(VehicleSize),
+    })
+  )
+  .refine(
+    (value) => {
+      const uniquePriceMatrix = uniqBy(value, 'vehicleSize');
+      return uniquePriceMatrix.length === value.length;
+    },
+    {
+      message: 'Vehicle Sizes must be unique',
+      path: ['priceMatrix'],
+    }
+  );
+
 export const addService = authAction(
   createInsertSchema(services, {
-    price: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .transform((value) => String(value)),
+    priceMatrix: priceMatrixSchema,
   }).omit({
     createdById: true,
     updatedById: true,
@@ -140,10 +153,8 @@ export const addService = authAction(
       throw new SafeActionError('Forbidden access');
     }
 
-    const id = cuid2.createId();
     await db.insert(services).values({
       ...data,
-      id,
       createdById: userId,
     });
   }
@@ -151,11 +162,7 @@ export const addService = authAction(
 
 export const updateService = authAction(
   createSelectSchema(services, {
-    price: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .transform((value) => String(value)),
+    priceMatrix: priceMatrixSchema,
   }).omit({
     createdById: true,
     updatedById: true,

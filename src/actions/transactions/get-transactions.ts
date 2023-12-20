@@ -196,7 +196,7 @@ export const getTransaction = authAction(z.string().cuid2(), async (id, { sessio
   const transactionServicesList = await db
     .select()
     .from(transactionServices)
-    .where(and(eq(transactionServices.transactionId, id), isNull(transactions.deletedAt)))
+    .where(eq(transactionServices.transactionId, id))
     .orderBy(asc(transactionServices.createdAt));
 
   return {

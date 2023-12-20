@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 'use client';
 
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';

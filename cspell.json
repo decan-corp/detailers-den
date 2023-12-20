@@ -21,7 +21,8 @@
     "shadcn",
     "zustand",
     "gcash",
-    "immer"
+    "immer",
+    "formkit"
   ],
   "ignorePaths": [
     "node_modules/",

@@ -21,7 +21,10 @@ import dayjs from 'dayjs';
 import { MoreHorizontal } from 'lucide-react';
 
 export const userColumns: ColumnDef<
-  Pick<typeof users.$inferSelect, 'id' | 'name' | 'email' | 'createdAt' | 'updatedAt' | 'role'>
+  Pick<
+    typeof users.$inferSelect,
+    'id' | 'name' | 'email' | 'createdAt' | 'updatedAt' | 'role' | 'serviceCutPercentage'
+  >
 >[] = [
   {
     accessorKey: 'name',
@@ -34,6 +37,10 @@ export const userColumns: ColumnDef<
   {
     accessorKey: 'role',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
+  },
+  {
+    accessorKey: 'serviceCutPercentage',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Cut %" />,
   },
   {
     accessorKey: 'createdAt',

@@ -23,22 +23,12 @@ import { MoreHorizontal } from 'lucide-react';
 export const serviceColumns: ColumnDef<
   Pick<
     typeof services.$inferSelect,
-    | 'id'
-    | 'serviceName'
-    | 'description'
-    | 'price'
-    | 'serviceCutPercentage'
-    | 'createdAt'
-    | 'updatedAt'
+    'id' | 'serviceName' | 'description' | 'serviceCutPercentage' | 'createdAt' | 'updatedAt'
   >
 >[] = [
   {
     accessorKey: 'serviceName',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Service Name" />,
-  },
-  {
-    accessorKey: 'price',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Price" />,
   },
   {
     accessorKey: 'serviceCutPercentage',

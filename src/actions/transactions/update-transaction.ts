@@ -86,6 +86,14 @@ export const updateTransaction = authAction(
 
       for (const transactionService of transactionServicesList) {
         const service = servicesRef.find(({ id }) => id === transactionService.serviceId);
+        const priceMatrix = service?.priceMatrix.find(
+          ({ vehicleSize }) => vehicleSize === transactionData.vehicleSize
+        );
+
+        if (!priceMatrix) {
+          throw new SafeActionError('Invalid price matrix');
+        }
+
         if (!service) {
           throw new SafeActionError('Invalid transaction service id');
         }
@@ -94,11 +102,11 @@ export const updateTransaction = authAction(
           ...transactionService,
           id: transactionService.id || cuid2.createId(),
           createdById: userId,
-          price: String(service.price),
+          price: String(priceMatrix.price),
           transactionId: transactionData.id,
         };
 
-        totalPrice += Number(service.price);
+        totalPrice += Number(priceMatrix.price);
 
         await tx
           .insert(transactionServices)
@@ -125,7 +133,7 @@ export const updateTransaction = authAction(
           );
 
           const amount =
-            ((computedServiceCutPercentage / 100) * Number(service.price)) /
+            ((computedServiceCutPercentage / 100) * Number(priceMatrix.price)) /
             transactionService.serviceBy.length;
 
           const updateCrewEarning = {

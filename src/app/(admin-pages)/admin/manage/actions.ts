@@ -62,6 +62,7 @@ export const getUsers = authAction(
         role: users.role,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
+        serviceCutPercentage: users.serviceCutPercentage,
       })
       .from(users)
       .$dynamic()

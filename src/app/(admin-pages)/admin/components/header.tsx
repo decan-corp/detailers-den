@@ -7,8 +7,8 @@ import Link from 'next/link';
 
 const Header = () => (
   <div className="sticky top-0 select-none border-b">
-    <div className="flex h-16 items-center gap-12 bg-background/30 px-12 backdrop-blur">
-      <div className="font-bold">
+    <div className="flex h-16 items-center gap-12 bg-background/30 px-6 backdrop-blur md:px-12">
+      <div className="text-sm font-bold md:text-base">
         <Link href={AdminRoute.Dashboard}>185 Detailers Den</Link>
       </div>
       <nav className="flex items-center space-x-4 lg:space-x-6">

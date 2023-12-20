@@ -81,6 +81,14 @@ export const addTransaction = authAction(
 
       for (const transactionService of transactionServicesList) {
         const service = servicesRef.find(({ id }) => id === transactionService.serviceId);
+        const priceMatrix = service?.priceMatrix.find(
+          ({ vehicleSize }) => vehicleSize === transactionData.vehicleSize
+        );
+
+        if (!priceMatrix) {
+          throw new SafeActionError('Invalid price matrix');
+        }
+
         if (!service) {
           throw new SafeActionError('Invalid transaction service id');
         }
@@ -90,7 +98,7 @@ export const addTransaction = authAction(
           ...transactionService,
           id: transactionServiceId,
           createdById: userId,
-          price: String(service.price),
+          price: String(priceMatrix.price),
           transactionId,
         });
 
@@ -103,7 +111,7 @@ export const addTransaction = authAction(
 
         transactionService.serviceBy.forEach((crewId) => {
           const amount =
-            ((computedServiceCutPercentage / 100) * Number(service.price)) /
+            ((computedServiceCutPercentage / 100) * Number(priceMatrix.price)) /
             transactionService.serviceBy.length;
 
           insertCrewEarnings.push({

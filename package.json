@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^0.3.6",
+    "@formkit/auto-animate": "^0.8.1",
     "@lucia-auth/adapter-mysql": "^2.1.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "@planetscale/database": "^1.11.0",

@@ -12,16 +12,29 @@ import {
 import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import RequiredIndicator from 'src/components/form/required-indicator';
+import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { services } from 'src/schema';
 
+import { vehicleSizeOptions } from '../../../pos/components/data-table-options';
 import { addService, updateService, getService } from '../actions';
 
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ComponentProps, useState } from 'react';
+import { PlusCircleIcon, XIcon } from 'lucide-react';
+import { notFound } from 'next/navigation';
+import { ComponentProps, useEffect, useState } from 'react';
 import { twJoin } from 'tailwind-merge';
+import { useImmer } from 'use-immer';
 import { create } from 'zustand';
 
 type ServiceValidationError = {
@@ -36,15 +49,28 @@ export const useServiceFormStore = create<{
   serviceIdToEdit: null,
 }));
 
+const getDefaultPriceMatrix = () => ({
+  vehicleSize: undefined,
+  price: 0,
+});
+
 const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [parent] = useAutoAnimate();
+  const [priceMatrix, setPriceMatrix] = useImmer<{ vehicleSize?: VehicleSize; price: number }[]>(
+    () => [getDefaultPriceMatrix()]
+  );
 
   const [error, setError] = useState<ServiceValidationError>({});
 
   const isEdit = Boolean(serviceIdToEdit);
 
-  const { data: service, isLoading: isFetchingServiceToEdit } = useQuery({
+  const {
+    data: service,
+    isLoading: isFetchingServiceToEdit,
+    error: serviceQueryError,
+  } = useQuery({
     queryKey: [Entity.Services, serviceIdToEdit],
     queryFn: async () => {
       const { data, serverError, validationError } = await getService(serviceIdToEdit as string);
@@ -59,7 +85,18 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
       return data;
     },
     enabled: !!serviceIdToEdit,
+    refetchOnWindowFocus: false,
   });
+
+  if ((isEdit && service === null) || serviceQueryError) {
+    notFound();
+  }
+
+  useEffect(() => {
+    if (isEdit && service?.priceMatrix) {
+      setPriceMatrix(service.priceMatrix);
+    }
+  }, [isEdit, service?.priceMatrix, setPriceMatrix]);
 
   const { mutate: mutateAddService, isPending: isAddingService } = useMutation({
     mutationFn: addService,
@@ -144,16 +181,16 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
       const updateData = payload as typeof services.$inferSelect;
       mutateUpdateService({
         ...updateData,
-        price: Number(updateData.price),
         serviceCutPercentage: Number(updateData.serviceCutPercentage),
         id: serviceIdToEdit,
+        priceMatrix: priceMatrix as typeof services.$inferInsert.priceMatrix,
       });
     } else {
       const addData = payload as typeof services.$inferInsert;
       mutateAddService({
         ...addData,
-        price: Number(addData.price),
         serviceCutPercentage: Number(addData.serviceCutPercentage),
+        priceMatrix: priceMatrix as typeof services.$inferInsert.priceMatrix,
       });
     }
   };
@@ -166,10 +203,12 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
     );
   }
 
+  const isSaving = isAddingService || isUpdatingService;
+
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <DialogHeader>
-        <DialogTitle>{isEdit ? 'Edit' : 'Add'} User</DialogTitle>
+        <DialogTitle>{isEdit ? 'Edit' : 'Add'} Service</DialogTitle>
         <DialogDescription>
           {isEdit ? 'Edit' : 'Add new'} user here. Click save when you&apos;re done.
         </DialogDescription>
@@ -184,7 +223,7 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
             id="serviceName"
             name="serviceName"
             required
-            className="col-span-4"
+            className={twJoin('col-span-4', error.serviceName && 'border-destructive-200')}
             defaultValue={service?.serviceName || ''}
           />
         </div>
@@ -197,24 +236,9 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
             type="text"
             name="description"
             required
-            className="col-span-4"
+            className={twJoin('col-span-4', error.description && 'border-destructive-200')}
             defaultValue={service?.description || ''}
             maxLength={160}
-          />
-        </div>
-        <div className="grid grid-cols-6 items-center gap-4">
-          <Label htmlFor="price" className="col-span-2 flex justify-end">
-            Price <RequiredIndicator />
-          </Label>
-          <Input
-            id="price"
-            name="price"
-            defaultValue={service?.price || 0}
-            type="number"
-            min={1}
-            max={100000}
-            className={twJoin('col-span-4', error.price && 'border-destructive-200')}
-            required
           />
         </div>
         <div className="grid grid-cols-6 items-center gap-4">
@@ -228,9 +252,98 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
             type="number"
             min={-99}
             max={99}
-            className={twJoin('col-span-4', error.price && 'border-destructive-200')}
+            className={twJoin('col-span-4', error.serviceCutPercentage && 'border-destructive-200')}
           />
         </div>
+
+        <div className="py-2 font-semibold leading-none tracking-tight">Price Matrix</div>
+
+        <div ref={parent} className="flex flex-col gap-4">
+          {priceMatrix.map((matrix, index) => (
+            <div
+              key={matrix.vehicleSize || index}
+              className="flex flex-col gap-4 rounded-lg border border-border p-4 pt-2"
+            >
+              <div className="flex flex-row place-content-between items-center">
+                <div className="font-semibold leading-none tracking-tight">Service {index + 1}</div>
+                <Button
+                  className=""
+                  variant="ghost"
+                  type="button"
+                  disabled={isSaving || priceMatrix.length === 1}
+                  onClick={() => setPriceMatrix((prevState) => prevState.toSpliced(index, 1))}
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-6 items-center gap-4">
+                <Label className="col-span-2 flex justify-end">
+                  Service <RequiredIndicator />
+                </Label>
+                <Select
+                  defaultValue={matrix.vehicleSize || undefined}
+                  onValueChange={(vehicleSize: VehicleSize) =>
+                    setPriceMatrix((prevState) => {
+                      prevState[index].vehicleSize = vehicleSize;
+                    })
+                  }
+                  disabled={isSaving}
+                  required
+                >
+                  <SelectTrigger className="col-span-4">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicleSizeOptions
+                      .filter(({ value }) => {
+                        const selectedVehicleSizes = priceMatrix.map(
+                          ({ vehicleSize }) => vehicleSize
+                        );
+                        return (
+                          value === matrix.vehicleSize || !selectedVehicleSizes.includes(value)
+                        );
+                      })
+                      .map(({ value, icon: Icon, label }) => (
+                        <SelectItem key={value} value={value}>
+                          <div className="flex flex-row items-center gap-3">
+                            <Icon className="h-4 w-4 text-muted-foreground" /> {label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-6 items-center gap-4">
+                <Label className="col-span-2 text-right">Price</Label>
+                <Input
+                  defaultValue={matrix.price || 0}
+                  type="number"
+                  className="col-span-4"
+                  required
+                  min={1}
+                  max={100000}
+                  onChange={(e) =>
+                    setPriceMatrix((prevState) => {
+                      prevState[index].price = Number(e.target.value);
+                    })
+                  }
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button
+          className="gap-2 text-center"
+          variant="outline"
+          onClick={() =>
+            setPriceMatrix((prevState) => {
+              prevState.push(getDefaultPriceMatrix());
+            })
+          }
+          type="button"
+        >
+          <PlusCircleIcon className="h-4 w-4" /> Add Price Matrix
+        </Button>
       </div>
       <DialogFooter>
         <Button
@@ -266,7 +379,12 @@ export const ServiceFormDialog = () => {
       <DialogTrigger asChild>
         <Button variant="outline">Add Service</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent
+        className="sm:max-w-[525px]"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
         <ServiceForm serviceIdToEdit={serviceId} />
       </DialogContent>
     </Dialog>

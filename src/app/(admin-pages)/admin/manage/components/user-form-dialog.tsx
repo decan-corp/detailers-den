@@ -325,7 +325,12 @@ export const UserFormDialog = () => {
       <DialogTrigger asChild>
         <Button variant="outline">Add User</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent
+        className="sm:max-w-[525px]"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
         <UserForm userIdToEdit={userId} />
       </DialogContent>
     </Dialog>
