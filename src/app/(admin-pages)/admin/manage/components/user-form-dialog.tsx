@@ -20,14 +20,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
+import { addUser } from 'src/actions/users/add-user';
+import { getUser } from 'src/actions/users/get-users';
+import { updateUser } from 'src/actions/users/update-user';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { Entity } from 'src/constants/entities';
 import { users } from 'src/schema';
 import { UserSelect } from 'src/types/schema';
 
 import { rolesOptions } from './data-table-options';
-
-import { addUser, updateUser, getUser } from '../actions';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ComponentProps, useState } from 'react';

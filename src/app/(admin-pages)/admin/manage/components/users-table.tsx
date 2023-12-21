@@ -10,6 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toast } from '@/components/ui/use-toast';
+import { softDeleteUser } from 'src/actions/users/delete-user';
+import { getUsers, getUsersCount } from 'src/actions/users/get-users';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Role } from 'src/constants/common';
@@ -18,8 +20,6 @@ import { UserSelect } from 'src/types/schema';
 
 import { userColumns } from './data-columns';
 import { DataTableToolbar } from './data-table-toolbar';
-
-import { getUsers, getUsersCount, softDeleteUser } from '../actions';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {

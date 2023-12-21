@@ -4,7 +4,7 @@
 
 import { Icons } from '@/components/ui/icons';
 import { toast } from '@/components/ui/use-toast';
-import { logout } from 'src/app/(admin-pages)/auth/login/actions';
+import { logout } from 'src/actions/auth/logout';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';

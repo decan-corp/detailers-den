@@ -10,6 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toast } from '@/components/ui/use-toast';
+import { softDeleteService } from 'src/actions/services/delete-service';
+import { getServices, getServicesCount } from 'src/actions/services/get-services';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
@@ -17,8 +19,6 @@ import { services } from 'src/schema';
 
 import { serviceColumns } from './data-columns';
 import { DataTableToolbar } from './data-table-toolbar';
-
-import { getServices, getServicesCount, softDeleteService } from '../actions';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {

@@ -4,8 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
-
-import { login } from '../actions';
+import { login } from 'src/actions/auth/login';
 
 import { ComponentProps, useState } from 'react';
 import { twMerge } from 'tailwind-merge';

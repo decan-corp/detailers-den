@@ -5,7 +5,7 @@ import { AdminRoute } from 'src/constants/routes';
 import { users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
-import { SafeActionError, action, authAction } from 'src/utils/safe-action';
+import { SafeActionError, action } from 'src/utils/safe-action';
 
 import { and, eq, isNull } from 'drizzle-orm';
 import { LuciaError } from 'lucia';
@@ -56,13 +56,3 @@ export const login = action(
     }
   }
 );
-
-export const logout = authAction(z.object({}), async (_input, ctx) => {
-  const { sessionId, user } = ctx.session;
-
-  const authRequest = auth.handleRequest('POST', context);
-  await auth.invalidateSession(sessionId);
-  await auth.deleteDeadUserSessions(user.userId);
-  authRequest.setSession(null); // delete session cookie
-  redirect(AdminRoute.Login);
-});

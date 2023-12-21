@@ -23,9 +23,11 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { getServices } from 'src/actions/services/get-services';
 import { addTransaction } from 'src/actions/transactions/add-transaction';
 import { getTransaction } from 'src/actions/transactions/get-transactions';
 import { updateTransaction } from 'src/actions/transactions/update-transaction';
+import { getUsers } from 'src/actions/users/get-users';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
@@ -37,9 +39,6 @@ import {
   transactionStatusOptions,
   vehicleSizeOptions,
 } from './data-table-options';
-
-import { getUsers } from '../../manage/actions';
-import { getServices } from '../../manage/services/actions';
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import cuid2 from '@paralleldrive/cuid2';

@@ -20,13 +20,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
+import { addService } from 'src/actions/services/add-service';
+import { getService } from 'src/actions/services/get-services';
+import { updateService } from 'src/actions/services/update-service';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { services } from 'src/schema';
 
 import { vehicleSizeOptions } from '../../../pos/components/data-table-options';
-import { addService, updateService, getService } from '../actions';
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

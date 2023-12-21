@@ -13,7 +13,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
 
-const transactionServicesSchema = z.object({
+export const transactionServicesSchema = z.object({
   serviceBy: z
     .array(z.string().cuid2())
     .min(1)
