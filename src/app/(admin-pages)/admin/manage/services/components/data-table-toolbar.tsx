@@ -16,8 +16,8 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
   const isFiltered = table.getState().columnFilters.length > 0;
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
+    <div className="flex flex-col-reverse justify-between gap-y-4 md:flex-row md:items-center">
+      <div className="flex flex-1 flex-wrap items-center gap-2">
         <Input
           placeholder="Search by name"
           value={(table.getColumn('serviceName')?.getFilterValue() as string) ?? ''}

@@ -324,7 +324,9 @@ export const UserFormDialog = () => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add User</Button>
+        <Button variant="outline" className="w-min">
+          Add User
+        </Button>
       </DialogTrigger>
       <DialogContent
         className="sm:max-w-[525px]"

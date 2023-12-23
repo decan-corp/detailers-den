@@ -379,7 +379,9 @@ export const ServiceFormDialog = () => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Service</Button>
+        <Button variant="outline" className="w-min">
+          Add Service
+        </Button>
       </DialogTrigger>
       <DialogContent
         className="max-h-full overflow-auto sm:max-w-[525px]  md:max-h-[720px]"
