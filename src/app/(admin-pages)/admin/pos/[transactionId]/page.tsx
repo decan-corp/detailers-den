@@ -116,7 +116,9 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
             <div className="space-y-2">
               <CardTitle>Updated At</CardTitle>
               <div className="mt-2 text-muted-foreground">
-                {dayjs(transaction.updatedAt).format('MMM DD, YYYY hh:mm:a') || 'n/a'}
+                {transaction.updatedAt
+                  ? dayjs(transaction.updatedAt).format('MMM DD, YYYY hh:mm:a')
+                  : ''}
               </div>
             </div>
           </div>

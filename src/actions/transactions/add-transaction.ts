@@ -85,17 +85,12 @@ export const addTransaction = authAction(
           transactionId,
         });
 
-        const highestServiceCut = usersRef.reduce(
-          (acc, value) => Math.max(acc, value.serviceCutPercentage || 0),
-          0
-        );
-        const computedServiceCutPercentage =
-          highestServiceCut + (service?.serviceCutPercentage || 0);
-
         transactionService.serviceBy.forEach((crewId) => {
-          const amount =
-            ((computedServiceCutPercentage / 100) * Number(priceMatrix.price)) /
+          const crew = usersRef.find(({ id }) => crewId === id);
+          const computedServiceCutPercentage =
+            ((crew?.serviceCutPercentage || 0) + (service?.serviceCutPercentage || 0)) /
             transactionService.serviceBy.length;
+          const amount = (computedServiceCutPercentage / 100) * Number(priceMatrix.price);
 
           insertCrewEarnings.push({
             transactionServiceId,

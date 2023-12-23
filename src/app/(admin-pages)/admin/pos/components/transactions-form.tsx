@@ -277,6 +277,11 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                   minLength={6}
                   maxLength={7}
                   defaultValue={transaction?.plateNumber || ''}
+                  onKeyDown={(e) => {
+                    if (e.code === 'Space') {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </div>
               <div className="grid grid-cols-6 items-center gap-4">
