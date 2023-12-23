@@ -5,6 +5,8 @@ import PesoSignIcon from 'public/icons/peso-sign.svg';
 import ReceiptIcon from 'public/icons/receipt.svg';
 import { getCurrentMonthRevenue } from 'src/actions/transactions/get-current-month-revenue';
 import { getCurrentMonthTransactionsCount } from 'src/actions/transactions/get-current-month-transactions-count';
+import { getYearlyRevenue } from 'src/actions/transactions/get-yearly-revenue';
+import { getYearlyTransactionsCount } from 'src/actions/transactions/get-yearly-transactions-count';
 import { Entity } from 'src/constants/entities';
 
 import CrewTransactions from './employee-transactions';
@@ -30,6 +32,22 @@ const OverviewTab = () => {
         return data;
       },
     });
+
+  const { data: yearlyRevenue, isLoading: isLoadingYearlyRevenue } = useQuery({
+    queryKey: [Entity.Transactions, 'yearly-revenue'],
+    queryFn: async () => {
+      const { data } = await getYearlyRevenue({});
+      return data;
+    },
+  });
+
+  const { data: yearlyTransactionsCount, isLoading: isLoadingYearlyTransactionsCount } = useQuery({
+    queryKey: [Entity.Transactions, 'yearly-transactions-count'],
+    queryFn: async () => {
+      const { data } = await getYearlyTransactionsCount({});
+      return data;
+    },
+  });
 
   return (
     <TabsContent value={DashboardTab.Overview} className="space-y-4">
@@ -94,7 +112,11 @@ const OverviewTab = () => {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Php 345,231.89</div>
+            {isLoadingYearlyRevenue ? (
+              <Skeleton className="h-8" />
+            ) : (
+              <div className="text-2xl font-bold">Php {yearlyRevenue}</div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -114,7 +136,11 @@ const OverviewTab = () => {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+            {isLoadingYearlyTransactionsCount ? (
+              <Skeleton className="h-8" />
+            ) : (
+              <div className="text-2xl font-bold">+{yearlyTransactionsCount}</div>
+            )}
           </CardContent>
         </Card>
       </div>
