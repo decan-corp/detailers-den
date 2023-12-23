@@ -7,25 +7,13 @@ import { crewEarnings, services, transactionServices, transactions, users } from
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
+import { transactionServicesSchema } from './zod-schema';
+
 import cuid2 from '@paralleldrive/cuid2';
 import { inArray } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
-
-export const transactionServicesSchema = z.object({
-  serviceBy: z
-    .array(z.string().cuid2())
-    .min(1)
-    .refine(
-      (value) => {
-        const uniqueUserIds = uniq(value);
-        return value.length === uniqueUserIds.length;
-      },
-      { message: 'List of crews of must be unique' }
-    ),
-  serviceId: z.string().cuid2(),
-});
 
 export const addTransaction = authAction(
   createInsertSchema(transactions)

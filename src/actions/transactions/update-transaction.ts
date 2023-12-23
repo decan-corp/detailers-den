@@ -9,7 +9,7 @@ import { crewEarnings, services, transactionServices, transactions, users } from
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { transactionServicesSchema } from './add-transaction';
+import { transactionServicesSchema } from './zod-schema';
 
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';

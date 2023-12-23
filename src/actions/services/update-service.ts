@@ -5,7 +5,7 @@ import { services } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { priceMatrixSchema } from './add-service';
+import { priceMatrixSchema } from './zod-schema';
 
 import { eq } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-zod';

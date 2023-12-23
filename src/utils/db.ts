@@ -9,8 +9,8 @@ import { PoolOptions, createPool, Pool } from 'mysql2/promise';
 let poolOptions: PoolOptions;
 
 declare global {
-  var db: undefined | MySql2Database<typeof schema>;
-  var pool: undefined | Pool;
+  var globalDb: undefined | MySql2Database<typeof schema>;
+  var globalPool: undefined | Pool;
 }
 
 if (serverEnv.DB_HOST !== 'localhost') {
@@ -31,11 +31,11 @@ if (serverEnv.DB_HOST !== 'localhost') {
   };
 }
 
-export const pool = globalThis.pool ?? createPool(poolOptions);
+export const pool = globalThis.globalPool ?? createPool(poolOptions);
 
-export const db = globalThis.db ?? drizzle(pool, { schema, mode: 'planetscale' });
+export const db = globalThis.globalDb ?? drizzle(pool, { schema, mode: 'planetscale' });
 
 if (process.env.NODE_ENV !== 'production') {
-  globalThis.db = db;
-  globalThis.pool = pool;
+  globalThis.globalDb = db;
+  globalThis.globalPool = pool;
 }

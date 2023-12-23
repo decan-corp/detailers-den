@@ -1,31 +1,13 @@
 'use server';
 
-import { Role, VehicleSize } from 'src/constants/common';
+import { Role } from 'src/constants/common';
 import { services } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { createInsertSchema } from 'drizzle-zod';
-import { uniqBy } from 'lodash';
-import { z } from 'zod';
+import { priceMatrixSchema } from './zod-schema';
 
-export const priceMatrixSchema = z
-  .array(
-    z.object({
-      price: z.number().int().min(1),
-      vehicleSize: z.nativeEnum(VehicleSize),
-    })
-  )
-  .refine(
-    (value) => {
-      const uniquePriceMatrix = uniqBy(value, 'vehicleSize');
-      return uniquePriceMatrix.length === value.length;
-    },
-    {
-      message: 'Vehicle Sizes must be unique',
-      path: ['priceMatrix'],
-    }
-  );
+import { createInsertSchema } from 'drizzle-zod';
 
 export const addService = authAction(
   createInsertSchema(services, {
