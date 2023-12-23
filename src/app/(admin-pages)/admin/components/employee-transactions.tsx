@@ -12,7 +12,7 @@ const CrewTransactions = () => (
         <p className="text-sm font-medium leading-none">Clifford Domingo</p>
         <p className="text-sm text-muted-foreground">Detailer</p>
       </div>
-      <div className="ml-auto font-medium">12</div>
+      <div className="ml-auto font-medium">Php 12.00</div>
     </div>
     <div className="flex items-center">
       <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
