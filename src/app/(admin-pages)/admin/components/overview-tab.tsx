@@ -3,10 +3,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
 import PesoSignIcon from 'public/icons/peso-sign.svg';
 import ReceiptIcon from 'public/icons/receipt.svg';
-import { getCurrentMonthRevenue } from 'src/actions/transactions/get-current-month-revenue';
-import { getCurrentMonthTransactionsCount } from 'src/actions/transactions/get-current-month-transactions-count';
-import { getYearlyRevenue } from 'src/actions/transactions/get-yearly-revenue';
-import { getYearlyTransactionsCount } from 'src/actions/transactions/get-yearly-transactions-count';
+import { getTotalRevenue } from 'src/actions/transactions/get-total-revenue';
+import { getTotalTransactionCount } from 'src/actions/transactions/get-total-transactions-count';
 import { Entity } from 'src/constants/entities';
 
 import CrewTransactions from './employee-transactions';
@@ -14,12 +12,24 @@ import OverviewChart from './overview-chart';
 import { DashboardTab } from './tabs-container';
 
 import { useQuery } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 
 const OverviewTab = () => {
   const { data: currentMonthRevenue, isLoading: isLoadingCurrentMonthRevenue } = useQuery({
     queryKey: [Entity.Transactions, 'monthly-revenue'],
     queryFn: async () => {
-      const { data } = await getCurrentMonthRevenue({});
+      const startDate = dayjs().startOf('month');
+      const endDate = dayjs().endOf('month');
+      const { data } = await getTotalRevenue({
+        current: {
+          startDate: startDate.toDate(),
+          endDate: endDate.toDate(),
+        },
+        previous: {
+          startDate: startDate.subtract(1, 'month').toDate(),
+          endDate: endDate.subtract(1, 'month').toDate(),
+        },
+      });
       return data;
     },
   });
@@ -28,7 +38,18 @@ const OverviewTab = () => {
     useQuery({
       queryKey: [Entity.Transactions, 'monthly-transactions-count'],
       queryFn: async () => {
-        const { data } = await getCurrentMonthTransactionsCount({});
+        const startDate = dayjs().startOf('month');
+        const endDate = dayjs().endOf('month');
+        const { data } = await getTotalTransactionCount({
+          current: {
+            startDate: startDate.toDate(),
+            endDate: endDate.toDate(),
+          },
+          previous: {
+            startDate: startDate.subtract(1, 'month').toDate(),
+            endDate: endDate.subtract(1, 'month').toDate(),
+          },
+        });
         return data;
       },
     });
@@ -36,7 +57,12 @@ const OverviewTab = () => {
   const { data: yearlyRevenue, isLoading: isLoadingYearlyRevenue } = useQuery({
     queryKey: [Entity.Transactions, 'yearly-revenue'],
     queryFn: async () => {
-      const { data } = await getYearlyRevenue({});
+      const { data } = await getTotalRevenue({
+        current: {
+          startDate: dayjs().startOf('year').toDate(),
+          endDate: dayjs().endOf('year').toDate(),
+        },
+      });
       return data;
     },
   });
@@ -44,7 +70,12 @@ const OverviewTab = () => {
   const { data: yearlyTransactionsCount, isLoading: isLoadingYearlyTransactionsCount } = useQuery({
     queryKey: [Entity.Transactions, 'yearly-transactions-count'],
     queryFn: async () => {
-      const { data } = await getYearlyTransactionsCount({});
+      const { data } = await getTotalTransactionCount({
+        current: {
+          startDate: dayjs().startOf('year').toDate(),
+          endDate: dayjs().endOf('year').toDate(),
+        },
+      });
       return data;
     },
   });
@@ -61,7 +92,9 @@ const OverviewTab = () => {
             {isLoadingCurrentMonthRevenue ? (
               <Skeleton className="h-8" />
             ) : (
-              <div className="text-2xl font-bold">Php {currentMonthRevenue?.currentMonth ?? 0}</div>
+              <div className="text-2xl font-bold">
+                Php {currentMonthRevenue?.currentRevenue ?? 0}
+              </div>
             )}
             {isLoadingCurrentMonthRevenue ? (
               <Skeleton className="mt-1 h-3" />
@@ -82,7 +115,7 @@ const OverviewTab = () => {
               <Skeleton className="h-8" />
             ) : (
               <div className="text-2xl font-bold">
-                +{currentMonthTransactionsCount?.currentMonth}
+                +{currentMonthTransactionsCount?.currentCount}
               </div>
             )}
             {isLoadingCurrentMonthTransactionsCount ? (
@@ -115,7 +148,7 @@ const OverviewTab = () => {
             {isLoadingYearlyRevenue ? (
               <Skeleton className="h-8" />
             ) : (
-              <div className="text-2xl font-bold">Php {yearlyRevenue || 0}</div>
+              <div className="text-2xl font-bold">Php {yearlyRevenue?.currentRevenue || 0}</div>
             )}
           </CardContent>
         </Card>
@@ -139,7 +172,7 @@ const OverviewTab = () => {
             {isLoadingYearlyTransactionsCount ? (
               <Skeleton className="h-8" />
             ) : (
-              <div className="text-2xl font-bold">+{yearlyTransactionsCount}</div>
+              <div className="text-2xl font-bold">+{yearlyTransactionsCount?.currentCount}</div>
             )}
           </CardContent>
         </Card>
