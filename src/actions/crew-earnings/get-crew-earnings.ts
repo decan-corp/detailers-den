@@ -5,7 +5,7 @@ import { crewEarnings, transactionServices, transactions, users } from 'src/sche
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { and, between, eq, isNull, sum } from 'drizzle-orm';
+import { and, between, desc, eq, isNull, sum } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getCrewEarnings = authAction(
@@ -40,7 +40,7 @@ export const getCrewEarnings = authAction(
         )
       )
       .groupBy(({ crewId }) => crewId)
-      .orderBy(({ crewId }) => crewId);
+      .orderBy(({ amount }) => desc(amount));
 
     return records;
   }
