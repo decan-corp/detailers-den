@@ -23,14 +23,6 @@ export const transactionStatusOptions = [
     label: 'Paid',
   },
   {
-    value: TransactionStatus.Refunded,
-    label: 'Refunded',
-  },
-  {
-    value: TransactionStatus.Cancelled,
-    label: 'Cancelled',
-  },
-  {
     value: TransactionStatus.Void,
     label: 'Void',
   },

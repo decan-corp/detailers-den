@@ -131,7 +131,7 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
         </div>
         <div className="space-y-10">
           {transactionServices?.map((transactionService, index) => (
-            <div className="space-y-10">
+            <div key={transactionService.id} className="space-y-10">
               <CardTitle>Service #{index + 1}</CardTitle>
               <div className="flex flex-row gap-20">
                 <div className="space-y-2">
@@ -164,7 +164,7 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
                   </TableHeader>
                   <TableBody>
                     {transactionService.crewEarnings.map((crewEarning) => (
-                      <TableRow>
+                      <TableRow key={crewEarning.id}>
                         <TableCell className="font-medium">{crewEarning.crewName}</TableCell>
                         <TableCell>{crewEarning.role}</TableCell>
                         <TableCell>{crewEarning.crewServiceCutPercentage}%</TableCell>

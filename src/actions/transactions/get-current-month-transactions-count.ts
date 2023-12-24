@@ -1,13 +1,13 @@
 'use server';
 
-import { Role } from 'src/constants/common';
+import { Role, TransactionStatus } from 'src/constants/common';
 import { transactions } from 'src/schema';
 import { db } from 'src/utils/db';
 import { getIncreaseInPercentage } from 'src/utils/formula';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import dayjs from 'dayjs';
-import { between, count } from 'drizzle-orm';
+import { and, between, count, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getCurrentMonthTransactionsCount = authAction(
@@ -26,17 +26,23 @@ export const getCurrentMonthTransactionsCount = authAction(
       .select({ currentMonth: count() })
       .from(transactions)
       .where(
-        between(transactions.createdAt, new Date(startDate.format()), new Date(endDate.format()))
+        and(
+          between(transactions.createdAt, new Date(startDate.format()), new Date(endDate.format())),
+          eq(transactions.status, TransactionStatus.Paid)
+        )
       );
 
     const [{ previousMonth }] = await db
       .select({ previousMonth: count() })
       .from(transactions)
       .where(
-        between(
-          transactions.createdAt,
-          new Date(startDate.subtract(1, 'month').format()),
-          new Date(endDate.subtract(1, 'month').format())
+        and(
+          between(
+            transactions.createdAt,
+            new Date(startDate.subtract(1, 'month').format()),
+            new Date(endDate.subtract(1, 'month').format())
+          ),
+          eq(transactions.status, TransactionStatus.Paid)
         )
       );
 

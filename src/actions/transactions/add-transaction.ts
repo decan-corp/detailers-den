@@ -3,6 +3,7 @@
 
 'use server';
 
+import { TransactionStatus } from 'src/constants/common';
 import { crewEarnings, services, transactionServices, transactions, users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -10,7 +11,7 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { transactionServicesSchema } from './zod-schema';
 
 import cuid2 from '@paralleldrive/cuid2';
-import { inArray } from 'drizzle-orm';
+import { inArray, sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
@@ -26,6 +27,7 @@ export const addTransaction = authAction(
       deletedAt: true,
       id: true,
       totalPrice: true,
+      completedAt: true,
     })
     .merge(
       z.object({
@@ -113,6 +115,9 @@ export const addTransaction = authAction(
         id: transactionId,
         createdById: userId,
         totalPrice: String(discountedPrice),
+        ...(transactionData.status === TransactionStatus.Paid && {
+          completedAt: sql`CURRENT_TIMESTAMP`,
+        }),
       });
       await tx.insert(transactionServices).values(insertTransactionServicesData);
       await tx.insert(crewEarnings).values(insertCrewEarnings);

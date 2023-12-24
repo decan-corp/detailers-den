@@ -10,8 +10,6 @@ export enum Role {
 export enum TransactionStatus {
   Pending = 'pending',
   Paid = 'paid',
-  Cancelled = 'cancelled',
-  Refunded = 'refunded',
   Void = 'void',
 }
 

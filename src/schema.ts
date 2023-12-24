@@ -32,13 +32,7 @@ export const transactions = mysqlTable('transactions', {
   customerName: varchar('customer_name', { length: 255 }),
   status: varchar('status', {
     length: 64,
-    enum: [
-      TransactionStatus.Paid,
-      TransactionStatus.Pending,
-      TransactionStatus.Cancelled,
-      TransactionStatus.Refunded,
-      TransactionStatus.Void,
-    ],
+    enum: [TransactionStatus.Paid, TransactionStatus.Pending, TransactionStatus.Void],
   })
     .notNull()
     .default(TransactionStatus.Pending),
@@ -63,6 +57,8 @@ export const transactions = mysqlTable('transactions', {
   })
     .notNull()
     .default(ModeOfPayment.Cash),
+  completedAt: timestamp('completed_at', { mode: 'date' }),
+
   ...commonSchema,
 });
 
@@ -110,7 +106,7 @@ export const transactionServices = mysqlTable('transaction_services', {
     // .references(() => services.id) // TODO: foreign key constraint is not yet supported in planetscale
     .notNull(),
   price: decimal('price', { scale: 2, precision: 5 }).notNull(),
-  serviceBy: json('serviceBy').$type<string[]>().notNull(),
+  serviceBy: json('service_by').$type<string[]>().notNull(),
   ...commonSchema,
 });
 

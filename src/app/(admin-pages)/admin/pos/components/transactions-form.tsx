@@ -292,6 +292,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                   required
                   name="status"
                   defaultValue={transaction?.status || TransactionStatus.Pending}
+                  disabled={isEdit && transaction?.completedAt !== null}
                 >
                   <SelectTrigger id="status" className="col-span-4">
                     <SelectValue />

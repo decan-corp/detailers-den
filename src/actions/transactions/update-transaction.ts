@@ -4,7 +4,7 @@
 
 'use server';
 
-import { Role } from 'src/constants/common';
+import { Role, TransactionStatus } from 'src/constants/common';
 import { crewEarnings, services, transactionServices, transactions, users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -13,7 +13,7 @@ import { transactionServicesSchema } from './zod-schema';
 
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-zod';
 import { omit, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
@@ -28,6 +28,7 @@ export const updateTransaction = authAction(
       updatedAt: true,
       deletedAt: true,
       totalPrice: true,
+      completedAt: true,
     })
     .merge(
       z.object({
@@ -166,6 +167,10 @@ export const updateTransaction = authAction(
           ...transactionData,
           updatedById: userId,
           totalPrice: String(discountedPrice),
+          ...(transactionData.status === TransactionStatus.Paid &&
+            transaction.completedAt === null && {
+              completedAt: sql`CURRENT_TIMESTAMP`,
+            }),
         })
         .where(eq(transactions.id, transactionData.id));
     });

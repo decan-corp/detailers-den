@@ -1,12 +1,12 @@
 'use server';
 
-import { Role } from 'src/constants/common';
+import { Role, TransactionStatus } from 'src/constants/common';
 import { transactions } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import dayjs from 'dayjs';
-import { between, sum } from 'drizzle-orm';
+import { and, between, eq, sum } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getYearlyRevenue = authAction(z.object({}), async (_data, { session }) => {
@@ -23,7 +23,10 @@ export const getYearlyRevenue = authAction(z.object({}), async (_data, { session
     .select({ yearlyRevenue: sum(transactions.totalPrice).mapWith(Number) })
     .from(transactions)
     .where(
-      between(transactions.createdAt, new Date(startDate.format()), new Date(endDate.format()))
+      and(
+        between(transactions.createdAt, new Date(startDate.format()), new Date(endDate.format())),
+        eq(transactions.status, TransactionStatus.Paid)
+      )
     );
 
   return yearlyRevenue;
