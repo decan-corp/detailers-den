@@ -115,7 +115,7 @@ const OverviewTab = () => {
             {isLoadingYearlyRevenue ? (
               <Skeleton className="h-8" />
             ) : (
-              <div className="text-2xl font-bold">Php {yearlyRevenue}</div>
+              <div className="text-2xl font-bold">Php {yearlyRevenue || 0}</div>
             )}
           </CardContent>
         </Card>

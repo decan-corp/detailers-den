@@ -29,5 +29,5 @@ export const getYearlyRevenue = authAction(z.object({}), async (_data, { session
       )
     );
 
-  return yearlyRevenue;
+  return yearlyRevenue || 0;
 });
