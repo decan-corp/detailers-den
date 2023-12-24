@@ -39,7 +39,7 @@ const OverviewChart = () => {
         });
       } else {
         list.push({
-          name: now.subtract(key, 'day').format(dateFormat),
+          name: day === now.format(dateFormat) ? 'Now' : day,
           total: 0,
         });
       }
