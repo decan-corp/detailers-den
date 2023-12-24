@@ -17,7 +17,12 @@ export const changePassword = authAction(
       message:
         'The passwords you entered do not match. Please ensure that both passwords are identical before proceeding.',
       path: ['confirmPassword'],
+    })
+    .refine((value) => value.currentPassword !== value.newPassword, {
+      message: 'New password must be different from the current password.',
+      path: ['newPassword'],
     }),
+
   async (data, { session }) => {
     const { email } = session.user;
 

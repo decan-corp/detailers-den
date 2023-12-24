@@ -59,7 +59,7 @@ const ChangePasswordForm = () => {
 
     toast({
       title: 'Success!',
-      description: 'Change password successfully.',
+      description: 'Password changed successfully.',
     });
   };
   return (
@@ -70,11 +70,25 @@ const ChangePasswordForm = () => {
         </Label>
         <Input type="password" id="currentPassword" name="currentPassword" required minLength={6} />
       </div>
-      <div className="space-y-4">
-        <Label htmlFor="newPassword" className="flex">
-          New Password <RequiredIndicator />
-        </Label>
-        <Input type="password" id="newPassword" name="newPassword" required minLength={6} />
+      <div>
+        <div className="space-y-4">
+          <Label htmlFor="newPassword" className="flex">
+            New Password <RequiredIndicator />
+          </Label>
+          <Input
+            className={twJoin(error.newPassword && 'border-destructive-200')}
+            type="password"
+            id="newPassword"
+            name="newPassword"
+            required
+            minLength={6}
+          />
+        </div>
+        {error.newPassword && (
+          <div className="text-sm text-destructive dark:text-destructive-200">
+            {error.newPassword}
+          </div>
+        )}
       </div>
       <div>
         <div className="space-y-4">
