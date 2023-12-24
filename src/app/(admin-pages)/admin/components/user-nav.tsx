@@ -11,7 +11,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { getPageSession } from 'src/components/auth/get-page-session';
 import LogoutButton from 'src/components/button/logout';
+import { AdminRoute } from 'src/constants/routes';
 import { getInitials } from 'src/utils/formatters';
+
+import Link from 'next/link';
 
 const UserNav = async () => {
   const session = await getPageSession();
@@ -38,7 +41,9 @@ const UserNav = async () => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer">Settings</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" asChild>
+            <Link href={AdminRoute.Settings}>Settings</Link>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer p-0">
