@@ -3,4 +3,5 @@ export enum Entity {
   Services = 'services',
   Transactions = 'transactions',
   TransactionServices = 'transactionServices',
+  CrewEarnings = 'crewEarnings',
 }

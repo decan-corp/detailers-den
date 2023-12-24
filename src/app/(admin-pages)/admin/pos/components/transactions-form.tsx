@@ -155,6 +155,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
+      await queryClient.invalidateQueries({ queryKey: [Entity.CrewEarnings] });
       toast({
         title: 'Success!',
         description: 'Transaction created successfully.',
@@ -189,6 +190,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
+      await queryClient.invalidateQueries({ queryKey: [Entity.CrewEarnings] });
       toast({
         title: 'Success!',
         description: 'Transaction updated successfully.',
