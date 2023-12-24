@@ -7,7 +7,7 @@ import { getIncreaseInPercentage } from 'src/utils/formula';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import dayjs from 'dayjs';
-import { and, between, eq, sum } from 'drizzle-orm';
+import { and, between, eq, isNull, sum } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getCurrentMonthRevenue = authAction(z.object({}), async (_data, { session }) => {
@@ -26,7 +26,8 @@ export const getCurrentMonthRevenue = authAction(z.object({}), async (_data, { s
     .where(
       and(
         between(transactions.createdAt, new Date(startDate.format()), new Date(endDate.format())),
-        eq(transactions.status, TransactionStatus.Paid)
+        eq(transactions.status, TransactionStatus.Paid),
+        isNull(transactions.deletedAt)
       )
     );
 
@@ -40,7 +41,8 @@ export const getCurrentMonthRevenue = authAction(z.object({}), async (_data, { s
           new Date(startDate.subtract(1, 'month').format()),
           new Date(endDate.subtract(1, 'month').format())
         ),
-        eq(transactions.status, TransactionStatus.Paid)
+        eq(transactions.status, TransactionStatus.Paid),
+        isNull(transactions.deletedAt)
       )
     );
 

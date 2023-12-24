@@ -6,7 +6,7 @@ import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import dayjs from 'dayjs';
-import { and, between, count, eq } from 'drizzle-orm';
+import { and, between, count, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getYearlyTransactionsCount = authAction(z.object({}), async (_data, { session }) => {
@@ -25,7 +25,8 @@ export const getYearlyTransactionsCount = authAction(z.object({}), async (_data,
     .where(
       and(
         between(transactions.createdAt, new Date(startDate.format()), new Date(endDate.format())),
-        eq(transactions.status, TransactionStatus.Paid)
+        eq(transactions.status, TransactionStatus.Paid),
+        isNull(transactions.deletedAt)
       )
     );
 

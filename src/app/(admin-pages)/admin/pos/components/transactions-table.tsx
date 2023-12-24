@@ -85,7 +85,7 @@ const TransactionsTable = () => {
       }
 
       await queryClient.invalidateQueries({
-        queryKey: [Entity.Users],
+        queryKey: [Entity.Transactions],
       });
 
       toast({

@@ -11,7 +11,7 @@ import { z } from 'zod';
 export const softDeleteTransaction = authAction(z.string().cuid2(), async (id, { session }) => {
   const { role, userId } = session.user;
 
-  if (![Role.Admin, Role.Cashier, Role.Accounting].includes(role)) {
+  if (role !== Role.Admin) {
     throw new SafeActionError('Forbidden access');
   }
 
@@ -27,7 +27,7 @@ export const softDeleteTransaction = authAction(z.string().cuid2(), async (id, {
 export const recoverTransaction = authAction(z.string().cuid2(), async (id, { session }) => {
   const { role } = session.user;
 
-  if (![Role.Admin, Role.Cashier, Role.Accounting].includes(role)) {
+  if (role !== Role.Admin) {
     throw new SafeActionError('Forbidden access');
   }
 
