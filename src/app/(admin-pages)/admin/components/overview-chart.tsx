@@ -3,10 +3,13 @@ import { Entity } from 'src/constants/entities';
 
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
+import { useMemo } from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
+const dateFormat = 'MM-DD';
+
 const OverviewChart = () => {
-  const { data } = useQuery({
+  const { data: transactionCounts = [] } = useQuery({
     queryKey: [Entity.Transactions, 'recent-transactions-count'],
     queryFn: async () => {
       const { data: records } = await getPerDayTransactionsCount({
@@ -15,11 +18,35 @@ const OverviewChart = () => {
       });
 
       return (records || []).map((record) => ({
-        name: dayjs(record.day, 'YYYY-MM-DD').format('MM-DD'),
+        name: dayjs(record.day, 'YYYY-MM-DD').format(dateFormat),
         total: record.count,
       }));
     },
   });
+
+  const data = useMemo(() => {
+    const now = dayjs();
+    const list = [];
+
+    for (let key = 13; key !== -1; key -= 1) {
+      const day = now.subtract(key, 'day').format(dateFormat);
+      const transactionCount = transactionCounts.find(({ name }) => name === day);
+
+      if (transactionCount) {
+        list.push({
+          ...transactionCount,
+          name: day === now.format(dateFormat) ? 'Now' : transactionCount.name,
+        });
+      } else {
+        list.push({
+          name: now.subtract(key, 'day').format(dateFormat),
+          total: 0,
+        });
+      }
+    }
+
+    return list;
+  }, [transactionCounts]);
 
   return (
     <ResponsiveContainer width="100%" height={350}>
