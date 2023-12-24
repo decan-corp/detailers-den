@@ -121,6 +121,14 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
                   : ''}
               </div>
             </div>
+            <div className="space-y-2">
+              <CardTitle>Completed At</CardTitle>
+              <div className="mt-2 text-muted-foreground">
+                {transaction.completedAt
+                  ? dayjs(transaction.completedAt).format('MMM DD, YYYY hh:mm:a')
+                  : ''}
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -32,7 +32,7 @@ export const transactionColumns: ColumnDef<
     | 'vehicleSize'
     | 'modeOfPayment'
     | 'createdAt'
-    | 'updatedAt'
+    | 'completedAt'
   >
 >[] = [
   {
@@ -65,10 +65,10 @@ export const transactionColumns: ColumnDef<
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
   },
   {
-    accessorKey: 'updatedAt',
-    accessorFn: ({ updatedAt }) =>
-      updatedAt ? dayjs(updatedAt).format(DATE_TABLE_DATE_FORMAT) : '',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
+    accessorKey: 'completedAt',
+    accessorFn: ({ completedAt }) =>
+      completedAt ? dayjs(completedAt).format(DATE_TABLE_DATE_FORMAT) : '',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Completed At" />,
   },
   {
     id: 'actions',
