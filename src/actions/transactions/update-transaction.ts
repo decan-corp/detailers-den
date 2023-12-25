@@ -29,6 +29,7 @@ export const updateTransaction = authAction(
       deletedAt: true,
       totalPrice: true,
       completedAt: true,
+      completedBy: true,
     })
     .merge(
       z.object({
@@ -170,6 +171,7 @@ export const updateTransaction = authAction(
           ...(transactionData.status === TransactionStatus.Paid &&
             transaction.completedAt === null && {
               completedAt: sql`CURRENT_TIMESTAMP`,
+              completedBy: userId,
             }),
         })
         .where(eq(transactions.id, transactionData.id));

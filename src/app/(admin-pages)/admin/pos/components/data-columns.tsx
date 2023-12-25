@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
+import { TransactionStatus } from 'src/constants/common';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
 import { AdminRoute } from 'src/constants/routes';
 import { transactions } from 'src/schema';
@@ -90,6 +91,18 @@ export const transactionColumns: ColumnDef<
               onClick={() => navigator.clipboard.writeText(transaction.id)}
             >
               Copy ID
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              disabled={transaction.status === TransactionStatus.Paid}
+              onClick={() => {
+                useTransactionAlertDialogStore.setState({
+                  isMarkAsPaidDialogOpen: true,
+                  userIdToMarkAsPaid: transaction.id,
+                });
+              }}
+            >
+              Mark as paid
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             {/* TODO: add mark as paid and mark as cancelled shortcut menu */}

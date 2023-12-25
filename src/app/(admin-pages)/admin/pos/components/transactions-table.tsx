@@ -12,6 +12,7 @@ import {
 import { toast } from '@/components/ui/use-toast';
 import { softDeleteTransaction } from 'src/actions/transactions/delete-transaction';
 import { getTransactions, getTransactionsCount } from 'src/actions/transactions/get-transactions';
+import { markAsPaidTransaction } from 'src/actions/transactions/mark-as-paid';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
@@ -37,9 +38,13 @@ import { create } from 'zustand';
 export const useTransactionAlertDialogStore = create<{
   isDeleteDialogOpen: boolean;
   userIdToDelete: string | null;
+  isMarkAsPaidDialogOpen: boolean;
+  userIdToMarkAsPaid: string | null;
 }>(() => ({
   isDeleteDialogOpen: false,
   userIdToDelete: null,
+  isMarkAsPaidDialogOpen: false,
+  userIdToMarkAsPaid: null,
 }));
 
 const emptyArray: (typeof transactions.$inferSelect)[] = [];
@@ -52,10 +57,10 @@ const TransactionsTable = () => {
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const isDeleteDialogOpen = useTransactionAlertDialogStore((state) => state.isDeleteDialogOpen);
-  const userIdToDelete = useTransactionAlertDialogStore((state) => state.userIdToDelete);
+  const { isDeleteDialogOpen, userIdToDelete, isMarkAsPaidDialogOpen, userIdToMarkAsPaid } =
+    useTransactionAlertDialogStore((state) => state);
 
-  const { mutate: mutateSoftDeleteUser } = useMutation({
+  const { mutate: mutateSoftDeleteUser, isPending: isSoftDeletingUser } = useMutation({
     mutationFn: softDeleteTransaction,
     onMutate: () => {
       useTransactionAlertDialogStore.setState({
@@ -87,10 +92,55 @@ const TransactionsTable = () => {
       await queryClient.invalidateQueries({
         queryKey: [Entity.Transactions],
       });
+      await queryClient.invalidateQueries({
+        queryKey: [Entity.CrewEarnings],
+      });
 
       toast({
         title: 'Success!',
-        description: 'Success soft deleting transaction',
+        description: 'Success soft deleting transaction.',
+      });
+    },
+  });
+
+  const { mutate: mutateMarkAsPaid, isPending: isMarkingAsPaid } = useMutation({
+    mutationFn: markAsPaidTransaction,
+    onMutate: () => {
+      useTransactionAlertDialogStore.setState({
+        isMarkAsPaidDialogOpen: false,
+        userIdToMarkAsPaid: null,
+      });
+    },
+    onSuccess: async (result) => {
+      if (result.validationError) {
+        toast({
+          title: 'Invalid Input',
+          description:
+            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (result?.serverError) {
+        toast({
+          title: 'Something went wrong',
+          description: result.serverError,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: [Entity.Transactions],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: [Entity.CrewEarnings],
+      });
+
+      toast({
+        title: 'Success!',
+        description: 'Success marking transaction as paid.',
       });
     },
   });
@@ -197,34 +247,34 @@ const TransactionsTable = () => {
     },
   });
 
-  const onDeleteDialogChange = (open: boolean) => {
-    useTransactionAlertDialogStore.setState({ isDeleteDialogOpen: open });
-  };
-
-  const onClickConfirmDelete = () => {
-    if (!userIdToDelete) {
-      toast({
-        title: 'Missing user id',
-        description: 'User id is required to delete a user.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    mutateSoftDeleteUser(userIdToDelete);
-  };
-
   return (
     <div className="space-y-4">
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
-        onOpenChange={onDeleteDialogChange}
+        onOpenChange={(open: boolean) =>
+          useTransactionAlertDialogStore.setState({ isDeleteDialogOpen: open })
+        }
         hideButtonTrigger
         title="Are you sure you want to delete this transaction?"
         description={`This action will perform soft delete. Soft deletion will mark the transaction as inactive while retaining their data for potential reactivation.
 This action helps maintain historical records and allows for data recovery if needed.`}
-        onClickConfirm={onClickConfirmDelete}
+        onClickConfirm={() => mutateSoftDeleteUser(userIdToDelete || '')}
+        disableConfirm={isSoftDeletingUser}
+        disableCancel={isSoftDeletingUser}
       />
+      <ConfirmDialog
+        isOpen={isMarkAsPaidDialogOpen}
+        onOpenChange={(open) =>
+          useTransactionAlertDialogStore.setState({ isMarkAsPaidDialogOpen: open })
+        }
+        hideButtonTrigger
+        title="Are you sure you want to mark this transaction as paid? "
+        description="This action signifies the completion of the service, so please ensure the payment has been made."
+        onClickConfirm={() => mutateMarkAsPaid(userIdToMarkAsPaid || '')}
+        disableConfirm={isMarkingAsPaid}
+        disableCancel={isMarkingAsPaid}
+      />
+
       <DataTableToolbar table={table} />
       <div className="rounded-md border">
         <Table>

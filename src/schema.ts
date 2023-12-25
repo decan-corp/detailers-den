@@ -59,7 +59,7 @@ export const transactions = mysqlTable('transactions', {
     .notNull()
     .default(ModeOfPayment.Cash),
   completedAt: timestamp('completed_at', { mode: 'date' }),
-
+  completedBy: varchar('completed_by', { length: 255 }),
   ...commonSchema,
 });
 

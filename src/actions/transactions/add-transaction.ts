@@ -28,6 +28,7 @@ export const addTransaction = authAction(
       id: true,
       totalPrice: true,
       completedAt: true,
+      completedBy: true,
     })
     .merge(
       z.object({
@@ -117,6 +118,7 @@ export const addTransaction = authAction(
         totalPrice: String(discountedPrice),
         ...(transactionData.status === TransactionStatus.Paid && {
           completedAt: sql`CURRENT_TIMESTAMP`,
+          completedBy: userId,
         }),
       });
       await tx.insert(transactionServices).values(insertTransactionServicesData);
