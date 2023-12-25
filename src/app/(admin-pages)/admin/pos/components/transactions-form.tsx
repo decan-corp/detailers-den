@@ -284,6 +284,9 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                       e.preventDefault();
                     }
                   }}
+                  onChange={(e) => {
+                    e.currentTarget.value = e.currentTarget.value.toUpperCase();
+                  }}
                 />
               </div>
               <div className="grid grid-cols-6 items-center gap-4">
@@ -294,7 +297,6 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                   required
                   name="status"
                   defaultValue={transaction?.status || TransactionStatus.Pending}
-                  disabled={isEdit && transaction?.completedAt !== null}
                 >
                   <SelectTrigger id="status" className="col-span-4">
                     <SelectValue />
