@@ -73,7 +73,7 @@ export const users = mysqlTable('users', {
     length: 64,
     enum: [Role.StayInCrew, Role.Crew, Role.Cashier, Role.Accounting, Role.Detailer, Role.Admin],
   }).notNull(),
-  serviceCutPercentage: int('service_cut_percentage'),
+  serviceCutPercentage: int('service_cut_percentage').default(0),
   image: varchar('image', { length: 255 }),
   isFirstTimeLogin: boolean('is_first_time_login').default(true),
   ...commonSchema,
