@@ -3,6 +3,7 @@ import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from './constants
 import { createId } from '@paralleldrive/cuid2';
 import {
   bigint,
+  boolean,
   decimal,
   int,
   json,
@@ -74,6 +75,7 @@ export const users = mysqlTable('users', {
   }).notNull(),
   serviceCutPercentage: int('service_cut_percentage'),
   image: varchar('image', { length: 255 }),
+  isFirstTimeLogin: boolean('is_first_time_login').default(true),
   ...commonSchema,
 });
 

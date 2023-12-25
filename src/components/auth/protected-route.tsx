@@ -14,8 +14,12 @@ const ProtectedRoute = async ({
 }) => {
   const session = await getPageSession();
 
+  if (session?.user.isFirstTimeLogin) {
+    redirect(AdminRoute.AccountSetup);
+  }
+
   if (!session) {
-    return redirect(redirectTo || AdminRoute.Login);
+    redirect(redirectTo || AdminRoute.Login);
   }
 
   return <>{children}</>;

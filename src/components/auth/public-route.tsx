@@ -10,11 +10,11 @@ const PublicRoute = async ({ children }: { children: React.ReactNode }) => {
   const session = await getPageSession();
 
   if (session && [Role.Crew, Role.StayInCrew, Role.Cashier].includes(session?.user.role)) {
-    return redirect(AdminRoute.POS);
+    redirect(AdminRoute.POS);
   }
 
   if (session) {
-    return redirect(AdminRoute.Dashboard);
+    redirect(AdminRoute.Dashboard);
   }
 
   return <>{children}</>;

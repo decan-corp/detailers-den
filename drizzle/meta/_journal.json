@@ -15,6 +15,13 @@
       "when": 1703391975723,
       "tag": "0001_conscious_black_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1703436313362,
+      "tag": "0002_brief_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

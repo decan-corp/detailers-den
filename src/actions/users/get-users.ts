@@ -43,7 +43,7 @@ const searchSchema = z.object({
 
 export const getUsers = authAction(
   searchSchema.merge(paginationSchema).merge(sortingSchema),
-  (params) => {
+  async (params) => {
     let query = db
       .select({
         id: users.id,
@@ -53,6 +53,7 @@ export const getUsers = authAction(
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
         serviceCutPercentage: users.serviceCutPercentage,
+        isFirstTimeLogin: users.isFirstTimeLogin,
       })
       .from(users)
       .$dynamic()
@@ -84,7 +85,8 @@ export const getUsers = authAction(
       );
     }
 
-    return query;
+    const records = await query;
+    return records;
   }
 );
 

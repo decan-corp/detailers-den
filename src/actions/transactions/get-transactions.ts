@@ -75,7 +75,7 @@ const searchSchema = z.object({
 
 export const getTransactions = authAction(
   searchSchema.merge(paginationSchema).merge(sortingSchema),
-  (params) => {
+  async (params) => {
     let query = db
       .select({
         id: transactions.id,
@@ -127,7 +127,8 @@ export const getTransactions = authAction(
       );
     }
 
-    return query;
+    const records = await query;
+    return records;
   }
 );
 
