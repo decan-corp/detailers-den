@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const Management = () => (
-  <div className="space-y-6 bg-background p-10  pb-16">
+  <div className="space-y-6 bg-background p-4 pb-16 sm:p-10">
     <main className="space-y-6 bg-background">
       <div>
         <h3 className="text-2xl font-bold tracking-tight">Transactions</h3>

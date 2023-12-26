@@ -19,7 +19,7 @@ const Dashboard = async () => {
   }
 
   return (
-    <main className="flex-1 space-y-4 bg-background p-8 pt-6">
+    <main className="flex-1 space-y-4 bg-background p-4 pt-6 sm:p-8">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
       </div>

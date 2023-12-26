@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const Management = ({ children }: { children: ReactNode }) => (
-  <div className="space-y-6 bg-background p-10 pb-16">
+  <div className="space-y-6 bg-background p-4 pb-16 sm:p-10">
     <div className="space-y-0.5">
       <h2 className="text-2xl font-bold tracking-tight">Management</h2>
       <p className="text-muted-foreground">Manage your business here.</p>

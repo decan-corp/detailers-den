@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getTransactionServicesCrewAndEarnings } from 'src/actions/transaction-services/get-transaction-services';
+import { getEarningsPerService } from 'src/actions/crew-earnings/get-earnings-per-service';
 import { getTransaction } from 'src/actions/transactions/get-transactions';
 import { Entity } from 'src/constants/entities';
 
@@ -31,9 +31,9 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
   });
 
   const { data: transactionServices, isLoading: isTransactionServicesLoading } = useQuery({
-    queryKey: [Entity.TransactionServices, params.transactionId],
+    queryKey: [Entity.CrewEarnings, params.transactionId],
     queryFn: async () => {
-      const { data } = await getTransactionServicesCrewAndEarnings(params.transactionId);
+      const { data } = await getEarningsPerService(params.transactionId);
 
       return data || [];
     },
@@ -55,14 +55,14 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
   }
 
   return (
-    <div className="space-y-32 bg-background p-10 px-12">
+    <div className="space-y-32 bg-background p-4 sm:p-10 sm:px-12">
       <div className="">
         <div className="space-y-0.5">
           <h2 className="text-2xl font-bold tracking-tight">Transaction Details</h2>
           <p className="text-muted-foreground">{transaction.plateNumber}</p>
         </div>
         <Separator className="my-6" />
-        <div className="grid grid-cols-6 gap-20 space-y-6">
+        <div className="grid grid-cols-4 gap-20 space-y-6 sm:grid-cols-6">
           <div className="col-span-2 flex flex-col gap-7">
             <div className="space-y-2">
               <CardTitle>Customer Name</CardTitle>
