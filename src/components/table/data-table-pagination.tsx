@@ -21,7 +21,7 @@ interface DataTablePaginationProps<TData> {
 }
 
 export const DataTablePagination = <TData,>({ table }: DataTablePaginationProps<TData>) => (
-  <div className="flex items-center justify-between px-2">
+  <div className="flex flex-col items-center justify-between sm:flex-row md:px-2">
     <div
       className={twJoin(
         'flex-1 text-sm text-muted-foreground',
@@ -31,7 +31,7 @@ export const DataTablePagination = <TData,>({ table }: DataTablePaginationProps<
       {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length}{' '}
       row(s) selected.
     </div>
-    <div className="flex items-center space-x-6 lg:space-x-8">
+    <div className="flex flex-col items-center justify-center gap-x-6 gap-y-4 sm:flex-row sm:justify-normal">
       <div className="flex items-center space-x-2">
         <p className="text-sm font-medium">Rows per page</p>
         <Select
