@@ -8,7 +8,7 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-export const getTransactionServicesCrewAndEarnings = authAction(
+export const getEarningsPerService = authAction(
   z.string().cuid2(),
   async (transactionId, { session }) => {
     const { role } = session.user;

@@ -56,13 +56,23 @@ export const updateTransaction = authAction(
       throw new SafeActionError("Transaction doesn't exist.");
     }
 
-    const updateThreshold = 20;
+    const crewUpdateThreshold = 20;
     if (
-      role !== Role.Admin &&
-      dayjs().diff(dayjs(transaction.createdAt), 'minutes') > updateThreshold
+      ![Role.Admin, Role.Cashier].includes(role) &&
+      dayjs().diff(dayjs(transaction.createdAt), 'minutes') > crewUpdateThreshold
     ) {
       throw new SafeActionError(
-        `You may only update a transaction within ${updateThreshold} minutes`
+        `You may only update a transaction within ${crewUpdateThreshold} minutes`
+      );
+    }
+
+    const cashierUpdateThreshold = 120;
+    if (
+      role === Role.Cashier &&
+      dayjs().diff(dayjs(transaction.createdAt), 'minutes') > cashierUpdateThreshold
+    ) {
+      throw new SafeActionError(
+        `You may only update a transaction within ${cashierUpdateThreshold / 60} hours`
       );
     }
 
