@@ -1,12 +1,14 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { users } from 'src/schema';
+import { userKeys, users } from 'src/schema';
 import { db } from 'src/utils/db';
+import { ProviderId } from 'src/utils/lucia';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-zod';
+import { createKeyId } from 'lucia';
 import { z } from 'zod';
 
 export const updateUser = authAction(
@@ -26,6 +28,7 @@ export const updateUser = authAction(
       createdAt: true,
       updatedAt: true,
       deletedAt: true,
+      isFirstTimeLogin: true,
     })
     .refine(
       (value) => {
@@ -40,16 +43,29 @@ export const updateUser = authAction(
         path: ['serviceCutPercentage'],
       }
     ),
-  async (params, { session }) => {
+  (params, { session }) => {
     const { id, ...userData } = params;
-    const { role, userId } = session.user;
+    const { role, userId, email } = session.user;
     if (role !== Role.Admin && userId !== params.id) {
       throw new SafeActionError('Forbidden access');
     }
 
-    await db
-      .update(users)
-      .set({ ...userData, updatedById: userId })
-      .where(eq(users.id, id));
+    return db.transaction(async (tx) => {
+      await tx
+        .update(users)
+        .set({ ...userData, updatedById: userId })
+        .where(eq(users.id, id));
+
+      if (userData.email) {
+        await tx
+          .update(userKeys)
+          .set({
+            id: createKeyId(ProviderId.email, userData.email),
+          })
+          .where(
+            and(eq(userKeys.id, createKeyId(ProviderId.email, email)), eq(userKeys.userId, userId))
+          );
+      }
+    });
   }
 );

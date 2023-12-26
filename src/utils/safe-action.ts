@@ -7,6 +7,7 @@ import { createSafeActionClient } from 'next-safe-action';
 export class SafeActionError extends Error {}
 
 const handleReturnedServerError = (e: Error) => {
+  console.log('API Error', e);
   if (e instanceof SafeActionError) {
     return {
       serverError: e.message,
