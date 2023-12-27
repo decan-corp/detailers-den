@@ -11,9 +11,10 @@ import {
 import { MoonIcon, SunIcon } from '@radix-ui/react-icons';
 import { useTheme } from 'next-themes';
 import * as React from 'react';
+import { twJoin } from 'tailwind-merge';
 
 const ThemeModeToggle = () => {
-  const { setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -25,9 +26,24 @@ const ThemeModeToggle = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+        <DropdownMenuItem
+          className={twJoin(theme === 'light' && 'font-semibold')}
+          onClick={() => setTheme('light')}
+        >
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className={twJoin(theme === 'dark' && 'font-semibold')}
+          onClick={() => setTheme('dark')}
+        >
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className={twJoin(theme === 'system' && 'font-semibold')}
+          onClick={() => setTheme('system')}
+        >
+          System
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
