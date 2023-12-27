@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { getPageSession } from 'src/components/auth/get-page-session';
 import LogoutButton from 'src/components/button/logout';
+import ThemeModeToggle from 'src/components/toggle/theme-mode-toggle';
 import { AdminRoute } from 'src/constants/routes';
 import { getInitials } from 'src/utils/formatters';
 
@@ -45,6 +46,15 @@ const UserNav = async () => {
             <Link href={AdminRoute.Settings}>Settings</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <div className="flex place-content-between items-center p-2">
+            <span className="text-sm">Theme</span>
+            <ThemeModeToggle />
+          </div>
+        </DropdownMenuGroup>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer p-0">
           <LogoutButton className="px-2 py-1.5" />
