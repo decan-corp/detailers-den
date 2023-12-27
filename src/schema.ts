@@ -159,4 +159,3 @@ export const userSessions = mysqlTable('user_sessions', {
 });
 
 // TODO: profile
-// TODO: self registration with approval

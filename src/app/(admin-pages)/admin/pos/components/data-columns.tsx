@@ -105,7 +105,6 @@ export const transactionColumns: ColumnDef<
               Mark as paid
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            {/* TODO: add mark as paid and mark as cancelled shortcut menu */}
             <DropdownMenuItem asChild className="cursor-pointer">
               <Link href={`${AdminRoute.POS}/${transaction.id}`}>View</Link>
             </DropdownMenuItem>

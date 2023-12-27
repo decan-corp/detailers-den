@@ -14,7 +14,7 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
-    event.preventDefault(); // always add prevent default for onSubmit action
+    event.preventDefault();
 
     setIsLoading(true);
     const formData = new FormData(event.currentTarget);
