@@ -6,10 +6,8 @@ import { DashboardTab } from '../tabs-container';
 
 import dayjs from 'dayjs';
 
-// TODO: change list to charts
-// TODO: add select filter for calendar and select crew
-// TODO: weekly and monthly list of crew most likely be replaced with charts instead
-// TODO: display all crew in charts if no crew filter selected
+// TODO: add filters for crew, date range and frequency (daily, weekly monthly)
+// TODO: replace list type of card content with charts
 
 const CrewEarningsTab = () => (
   <TabsContent value={DashboardTab.CrewEarnings} className="space-y-4">

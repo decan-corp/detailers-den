@@ -23,7 +23,7 @@ const Header = async () => {
           <DrawerTrigger asChild className="block sm:hidden">
             <AlignJustifyIcon />
           </DrawerTrigger>
-          <DrawerContent className="space-y-2 pb-6 text-center">
+          <DrawerContent className="space-y-6 pb-6 text-center">
             {[Role.Admin].includes(session?.user.role) && (
               <HeaderLink className="text-2xl" route={AdminRoute.Dashboard}>
                 <DrawerClose>Dashboard</DrawerClose>
