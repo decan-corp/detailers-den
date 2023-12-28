@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 
-import { DashboardTab } from './tabs-container';
+import { DashboardTab } from '../tabs-container';
 
-const AnalyticsTabContent = () => (
+const AnalyticsTab = () => (
   <TabsContent value={DashboardTab.Analytics} className="space-y-4">
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
       <Card className="col-span-4">
@@ -24,4 +24,4 @@ const AnalyticsTabContent = () => (
   </TabsContent>
 );
 
-export default AnalyticsTabContent;
+export default AnalyticsTab;

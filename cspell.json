@@ -22,7 +22,8 @@
     "zustand",
     "gcash",
     "immer",
-    "formkit"
+    "formkit",
+    "availment"
   ],
   "ignorePaths": [
     "node_modules/",

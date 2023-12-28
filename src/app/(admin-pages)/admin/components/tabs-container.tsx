@@ -3,7 +3,8 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useSetParams from 'src/hooks/use-set-params';
 
-import AnalyticsTabContent from './analytics-tab-content';
+import AnalyticsTab from './analytics-tab';
+import CrewEarningsTab from './crew-earnings-tab';
 import OverviewTab from './overview-tab';
 
 import { useSearchParams } from 'next/navigation';
@@ -11,7 +12,7 @@ import { useSearchParams } from 'next/navigation';
 export enum DashboardTab {
   Overview = 'overview',
   Analytics = 'analytics',
-  Reports = 'reports',
+  CrewEarnings = 'crew-earnings',
 }
 export enum DashboardParam {
   Tab = 'tab',
@@ -27,23 +28,29 @@ const TabsContainer = () => {
     <Tabs value={tab || DashboardTab.Overview} className="space-y-4">
       <TabsList>
         <TabsTrigger
-          onClick={() => setParams(DashboardParam.Tab, DashboardTab.Overview)}
           value={DashboardTab.Overview}
+          onClick={() => setParams(DashboardParam.Tab, DashboardTab.Overview)}
         >
           Overview
         </TabsTrigger>
         <TabsTrigger
-          onClick={() => setParams(DashboardParam.Tab, DashboardTab.Analytics)}
+          value={DashboardTab.CrewEarnings}
+          onClick={() => setParams(DashboardParam.Tab, DashboardTab.CrewEarnings)}
+          disabled
+        >
+          Crew Earnings (WIP)
+        </TabsTrigger>
+        <TabsTrigger
           value={DashboardTab.Analytics}
+          onClick={() => setParams(DashboardParam.Tab, DashboardTab.Analytics)}
+          disabled
         >
           Analytics (WIP)
         </TabsTrigger>
-        <TabsTrigger value={DashboardTab.Reports} disabled>
-          Reports (WIP)
-        </TabsTrigger>
       </TabsList>
       <OverviewTab />
-      <AnalyticsTabContent />
+      <CrewEarningsTab />
+      <AnalyticsTab />
     </Tabs>
   );
 };

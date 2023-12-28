@@ -7,12 +7,15 @@ import { getTotalRevenue } from 'src/actions/transactions/get-total-revenue';
 import { getTotalTransactionCount } from 'src/actions/transactions/get-total-transactions-count';
 import { Entity } from 'src/constants/entities';
 
-import CrewTransactions from './employee-transactions';
 import OverviewChart from './overview-chart';
-import { DashboardTab } from './tabs-container';
+
+import AvailedServiceCount from '../common/availed-service-count';
+import CrewTransactions from '../common/crew-transactions';
+import { DashboardTab } from '../tabs-container';
 
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
+import { useMemo } from 'react';
 
 const OverviewTab = () => {
   const { data: currentMonthRevenue, isLoading: isLoadingCurrentMonthRevenue } = useQuery({
@@ -79,6 +82,14 @@ const OverviewTab = () => {
       return data;
     },
   });
+
+  const currentWeekDateRange = useMemo(
+    () => ({
+      startDate: dayjs().day(-2).startOf('day'),
+      endDate: dayjs().day(4).endOf('day'),
+    }),
+    []
+  );
 
   return (
     <TabsContent value={DashboardTab.Overview} className="space-y-4">
@@ -195,7 +206,43 @@ const OverviewTab = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <CrewTransactions />
+            <CrewTransactions
+              startDate={dayjs().startOf('month').toDate()}
+              endDate={dayjs().endOf('month').toDate()}
+            />
+          </CardContent>
+        </Card>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+        <Card className="col-span-4 lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Current Month Availed Services</CardTitle>
+            <CardDescription>
+              Count for each availed services for the current month.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AvailedServiceCount
+              startDate={dayjs().startOf('month').toDate()}
+              endDate={dayjs().endOf('month').toDate()}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-4 lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Current Week Employee Earnings</CardTitle>
+            <CardDescription>
+              Total earnings of each employee for the current week (
+              {currentWeekDateRange.startDate.format('MMM DD')} -{' '}
+              {currentWeekDateRange.endDate.format('MMM DD')}).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CrewTransactions
+              startDate={currentWeekDateRange.startDate.toDate()}
+              endDate={currentWeekDateRange.endDate.toDate()}
+            />
           </CardContent>
         </Card>
       </div>

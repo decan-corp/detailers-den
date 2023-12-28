@@ -5,15 +5,14 @@ import { Entity } from 'src/constants/entities';
 import { getInitials } from 'src/utils/formatters';
 
 import { useQuery } from '@tanstack/react-query';
-import dayjs from 'dayjs';
 
-const CrewTransactions = () => {
+const CrewTransactions = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
   const { data: crewEarnings = [], isLoading } = useQuery({
-    queryKey: [Entity.CrewEarnings],
+    queryKey: [Entity.CrewEarnings, startDate, endDate],
     queryFn: async () => {
       const { data } = await getCrewEarnings({
-        startDate: dayjs().startOf('month').toDate(),
-        endDate: dayjs().endOf('month').toDate(),
+        startDate,
+        endDate,
       });
       return data;
     },
