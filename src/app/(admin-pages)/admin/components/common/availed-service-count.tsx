@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 
 const AvailedServiceCount = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
   const { data: records = [], isLoading } = useQuery({
-    queryKey: [Entity.TransactionServices, 'availment-count', startDate, endDate],
+    queryKey: [Entity.Metrics, Entity.TransactionServices, 'availment-count', startDate, endDate],
     queryFn: async () => {
       const { data } = await getAvailedServiceCount({
         startDate,

@@ -92,9 +92,7 @@ const TransactionsTable = () => {
       await queryClient.invalidateQueries({
         queryKey: [Entity.Transactions],
       });
-      await queryClient.invalidateQueries({
-        queryKey: [Entity.CrewEarnings],
-      });
+      await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
 
       toast({
         title: 'Success!',
@@ -134,9 +132,7 @@ const TransactionsTable = () => {
       await queryClient.invalidateQueries({
         queryKey: [Entity.Transactions],
       });
-      await queryClient.invalidateQueries({
-        queryKey: [Entity.CrewEarnings],
-      });
+      await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
 
       toast({
         title: 'Success!',

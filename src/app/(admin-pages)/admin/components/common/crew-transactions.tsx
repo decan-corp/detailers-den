@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 
 const CrewTransactions = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
   const { data: crewEarnings = [], isLoading } = useQuery({
-    queryKey: [Entity.CrewEarnings, startDate, endDate],
+    queryKey: [Entity.Metrics, Entity.CrewEarnings, startDate, endDate],
     queryFn: async () => {
       const { data } = await getCrewEarnings({
         startDate,

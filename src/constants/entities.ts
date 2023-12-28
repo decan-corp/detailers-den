@@ -4,4 +4,5 @@ export enum Entity {
   Transactions = 'transactions',
   TransactionServices = 'transactionServices',
   CrewEarnings = 'crewEarnings',
+  Metrics = 'metrics',
 }

@@ -10,7 +10,7 @@ const dateFormat = 'MM-DD';
 
 const OverviewChart = () => {
   const { data: transactionCounts = [] } = useQuery({
-    queryKey: [Entity.Transactions, 'recent-transactions-count'],
+    queryKey: [Entity.Metrics, Entity.Transactions, 'recent-transactions-count'],
     queryFn: async () => {
       const { data: records } = await getPerDayTransactionsCount({
         startDate: dayjs().subtract(13, 'days').startOf('day').toDate(),

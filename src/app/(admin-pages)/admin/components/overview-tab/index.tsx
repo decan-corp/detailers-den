@@ -19,7 +19,7 @@ import { useMemo } from 'react';
 
 const OverviewTab = () => {
   const { data: currentMonthRevenue, isLoading: isLoadingCurrentMonthRevenue } = useQuery({
-    queryKey: [Entity.Transactions, 'monthly-revenue'],
+    queryKey: [Entity.Metrics, Entity.Transactions, 'monthly-revenue'],
     queryFn: async () => {
       const startDate = dayjs().startOf('month');
       const endDate = dayjs().endOf('month');
@@ -39,7 +39,7 @@ const OverviewTab = () => {
 
   const { data: currentMonthTransactionsCount, isLoading: isLoadingCurrentMonthTransactionsCount } =
     useQuery({
-      queryKey: [Entity.Transactions, 'monthly-transactions-count'],
+      queryKey: [Entity.Metrics, Entity.Transactions, 'monthly-transactions-count'],
       queryFn: async () => {
         const startDate = dayjs().startOf('month');
         const endDate = dayjs().endOf('month');
@@ -58,7 +58,7 @@ const OverviewTab = () => {
     });
 
   const { data: yearlyRevenue, isLoading: isLoadingYearlyRevenue } = useQuery({
-    queryKey: [Entity.Transactions, 'yearly-revenue'],
+    queryKey: [Entity.Metrics, Entity.Transactions, 'yearly-revenue'],
     queryFn: async () => {
       const { data } = await getTotalRevenue({
         current: {
@@ -71,7 +71,7 @@ const OverviewTab = () => {
   });
 
   const { data: yearlyTransactionsCount, isLoading: isLoadingYearlyTransactionsCount } = useQuery({
-    queryKey: [Entity.Transactions, 'yearly-transactions-count'],
+    queryKey: [Entity.Metrics, Entity.Transactions, 'yearly-transactions-count'],
     queryFn: async () => {
       const { data } = await getTotalTransactionCount({
         current: {
