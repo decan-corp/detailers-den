@@ -68,9 +68,9 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
           </Button>
         )}
       </div>
-      <Link href={AdminRoute.AddTransaction}>
-        <Button variant="outline">Add Transaction</Button>
-      </Link>
+      <Button className="w-max" variant="outline">
+        <Link href={AdminRoute.AddTransaction}>Add Transaction</Link>
+      </Button>
     </div>
   );
 };
