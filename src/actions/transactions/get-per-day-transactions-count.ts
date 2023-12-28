@@ -21,7 +21,10 @@ export const getPerDayTransactionsCount = authAction(
     }
 
     const records = await db
-      .select({ day: sql`DATE(${transactions.createdAt})`.mapWith(String), count: count() })
+      .select({
+        day: sql`DATE(CONVERT_TZ(${transactions.createdAt}, 'UTC', 'Asia/Manila'))`.mapWith(String),
+        count: count(),
+      })
       .from(transactions)
       .where(
         and(
