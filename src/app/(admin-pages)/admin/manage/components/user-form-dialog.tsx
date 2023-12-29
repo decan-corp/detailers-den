@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
 import { addUser } from 'src/actions/users/add-user';
 import { getUser } from 'src/actions/users/get-users';
 import { updateUser } from 'src/actions/users/update-user';
@@ -32,6 +31,7 @@ import { rolesOptions } from './data-table-options';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ComponentProps, useState } from 'react';
+import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 import { create } from 'zustand';
 
@@ -49,7 +49,6 @@ export const useUserFormStore = create<{
 
 const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const [error, setError] = useState<UserValidationError>({});
 
@@ -61,8 +60,7 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
       const { data, serverError, validationError } = await getUser(userIdToEdit as string);
 
       if (serverError || validationError) {
-        toast({
-          title: validationError ? 'Validation error' : 'Server Error',
+        toast.error(validationError ? 'Validation error' : 'Server Error', {
           description: serverError || 'Invalid user id',
         });
       }
@@ -77,11 +75,9 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
     mutationKey: [Entity.Users],
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         setError(result.validationError as UserValidationError);
@@ -89,19 +85,14 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Users] });
-      toast({
-        title: 'Success!',
-        description: 'User created successfully.',
-      });
+      toast.success('User created successfully.');
       useUserFormStore.setState({ isDialogOpen: false });
     },
   });
@@ -111,11 +102,9 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
     mutationKey: [Entity.Users, userIdToEdit],
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         setError(result.validationError as UserValidationError);
@@ -123,19 +112,14 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Users] });
-      toast({
-        title: 'Success!',
-        description: 'User updated successfully.',
-      });
+      toast.success('User updated successfully.');
       useUserFormStore.setState({ isDialogOpen: false, userIdToEdit: null });
     },
   });

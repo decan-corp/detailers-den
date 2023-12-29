@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { toast } from '@/components/ui/use-toast';
 import { softDeleteTransaction } from 'src/actions/transactions/delete-transaction';
 import { getTransactions, getTransactionsCount } from 'src/actions/transactions/get-transactions';
 import { markAsPaidTransaction } from 'src/actions/transactions/mark-as-paid';
@@ -33,6 +32,7 @@ import {
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
+import { toast } from 'sonner';
 import { create } from 'zustand';
 
 export const useTransactionAlertDialogStore = create<{
@@ -70,21 +70,17 @@ const TransactionsTable = () => {
     },
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         return;
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
@@ -94,10 +90,7 @@ const TransactionsTable = () => {
       });
       await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
 
-      toast({
-        title: 'Success!',
-        description: 'Success soft deleting transaction.',
-      });
+      toast.success('Success soft deleting transaction.');
     },
   });
 
@@ -111,20 +104,16 @@ const TransactionsTable = () => {
     },
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
         return;
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
@@ -134,10 +123,7 @@ const TransactionsTable = () => {
       });
       await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
 
-      toast({
-        title: 'Success!',
-        description: 'Success marking transaction as paid.',
-      });
+      toast.success('Success marking transaction as paid.');
     },
   });
 
@@ -254,7 +240,7 @@ const TransactionsTable = () => {
         title="Are you sure you want to delete this transaction?"
         description={`This action will perform soft delete. Soft deletion will mark the transaction as inactive while retaining their data for potential reactivation.
 This action helps maintain historical records and allows for data recovery if needed.`}
-        onClickConfirm={() => mutateSoftDeleteUser(userIdToDelete || '')}
+        onClickConfirm={() => mutateSoftDeleteUser(userIdToDelete as string)}
         disableConfirm={isSoftDeletingUser}
         disableCancel={isSoftDeletingUser}
       />
@@ -266,7 +252,7 @@ This action helps maintain historical records and allows for data recovery if ne
         hideButtonTrigger
         title="Are you sure you want to mark this transaction as paid? "
         description="This action signifies the completion of the service, so please ensure the payment has been made."
-        onClickConfirm={() => mutateMarkAsPaid(userIdToMarkAsPaid || '')}
+        onClickConfirm={() => mutateMarkAsPaid(userIdToMarkAsPaid as string)}
         disableConfirm={isMarkingAsPaid}
         disableCancel={isMarkingAsPaid}
       />

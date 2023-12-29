@@ -5,7 +5,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/use-toast';
 import { changePassword } from 'src/actions/auth/change-password';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { AdminRoute } from 'src/constants/routes';
@@ -13,6 +12,7 @@ import { AdminRoute } from 'src/constants/routes';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { ComponentProps, useState } from 'react';
+import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 
 type ValidationError = Partial<Parameters<typeof changePassword>[number]>;
@@ -25,11 +25,9 @@ const ChangePasswordForm = () => {
     mutationFn: changePassword,
     onSuccess: (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         setError(result.validationError as ValidationError);
@@ -37,10 +35,8 @@ const ChangePasswordForm = () => {
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
@@ -48,10 +44,7 @@ const ChangePasswordForm = () => {
       const element = document.getElementById('change-password-form') as HTMLFormElement;
       element.reset();
 
-      toast({
-        title: 'Success!',
-        description: 'Password changed successfully.',
-      });
+      toast.success('Password changed successfully.');
 
       setTimeout(() => {
         router.replace(AdminRoute.Login);

@@ -3,11 +3,11 @@
 'use client';
 
 import { Icons } from '@/components/ui/icons';
-import { toast } from '@/components/ui/use-toast';
 import { logout } from 'src/actions/auth/logout';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { twMerge } from 'tailwind-merge';
 
 const LogoutButton = ({ className }: { className?: string }) => {
@@ -21,8 +21,7 @@ const LogoutButton = ({ className }: { className?: string }) => {
     const result = await logout({});
 
     if (result?.serverError) {
-      toast({
-        title: 'Server Error',
+      toast.error('Server Error', {
         description: result.serverError,
       });
       return;

@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { toast } from '@/components/ui/use-toast';
 import { softDeleteService } from 'src/actions/services/delete-service';
 import { getServices, getServicesCount } from 'src/actions/services/get-services';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
@@ -31,6 +30,7 @@ import {
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
+import { toast } from 'sonner';
 import { create } from 'zustand';
 
 export const useServiceAlertDialogStore = create<{
@@ -64,21 +64,17 @@ const ServicesTable = () => {
     },
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         return;
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
@@ -87,10 +83,7 @@ const ServicesTable = () => {
         queryKey: [Entity.Services],
       });
 
-      toast({
-        title: 'Success!',
-        description: 'Success soft deleting service',
-      });
+      toast.success('Success soft deleting service');
     },
   });
 
@@ -156,19 +149,6 @@ const ServicesTable = () => {
     useServiceAlertDialogStore.setState({ isDeleteDialogOpen: open });
   };
 
-  const onClickConfirmDelete = () => {
-    if (!serviceIdToDelete) {
-      toast({
-        title: 'Missing service id',
-        description: 'Service id is required to delete a service.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    mutateSoftDeleteService(serviceIdToDelete);
-  };
-
   const serviceToDelete = useMemo(() => {
     if (!serviceIdToDelete) {
       return undefined;
@@ -185,7 +165,7 @@ const ServicesTable = () => {
         title={`Are you sure you want to delete service "${serviceToDelete?.serviceName}"?`}
         description={`This action will perform soft delete. Soft deletion will mark the service as inactive while retaining their data for potential reactivation.
 This action helps maintain historical records and allows for data recovery if needed.`}
-        onClickConfirm={onClickConfirmDelete}
+        onClickConfirm={() => mutateSoftDeleteService(serviceIdToDelete as string)}
       />
       <DataTableToolbar table={table} />
       <div className="rounded-md border">

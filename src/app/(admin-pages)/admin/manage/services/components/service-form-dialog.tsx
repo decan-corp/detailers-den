@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
 import { addService } from 'src/actions/services/add-service';
 import { getService } from 'src/actions/services/get-services';
 import { updateService } from 'src/actions/services/update-service';
@@ -35,6 +34,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PlusCircleIcon, XIcon } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { ComponentProps, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 import { create } from 'zustand';
@@ -58,7 +58,6 @@ const getDefaultPriceMatrix = () => ({
 
 const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
   const [parent] = useAutoAnimate();
   const [priceMatrix, setPriceMatrix] = useImmer<{ vehicleSize?: VehicleSize; price: number }[]>(
     () => [getDefaultPriceMatrix()]
@@ -78,8 +77,7 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
       const { data, serverError, validationError } = await getService(serviceIdToEdit as string);
 
       if (serverError || validationError) {
-        toast({
-          title: validationError ? 'Validation error' : 'Server Error',
+        toast.error(validationError ? 'Validation error' : 'Server Error', {
           description: serverError || 'Invalid service id',
         });
       }
@@ -105,11 +103,9 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
     mutationKey: [Entity.Services],
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         setError(result.validationError as ServiceValidationError);
@@ -117,19 +113,14 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Services] });
-      toast({
-        title: 'Success!',
-        description: 'Service created successfully.',
-      });
+      toast.success('Service created successfully.');
       useServiceFormStore.setState({ isDialogOpen: false });
     },
   });
@@ -139,31 +130,23 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
     mutationKey: [Entity.Services, serviceIdToEdit],
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
-
         setError(result.validationError as ServiceValidationError);
         return;
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Services] });
-      toast({
-        title: 'Success!',
-        description: 'Service updated successfully.',
-      });
+      toast.success('Service updated successfully.');
       useServiceFormStore.setState({ isDialogOpen: false, serviceIdToEdit: null });
     },
   });

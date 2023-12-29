@@ -1,6 +1,6 @@
 import './globals.css';
 
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'src/components/theme-provider';
 import { inter } from 'src/utils/fonts';
 import QueryProvider from 'src/utils/query-provider';

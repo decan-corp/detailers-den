@@ -23,7 +23,8 @@
     "gcash",
     "immer",
     "formkit",
-    "availment"
+    "availment",
+    "sonner"
   ],
   "ignorePaths": [
     "node_modules/",

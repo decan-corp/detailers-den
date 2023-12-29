@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { toast } from '@/components/ui/use-toast';
 import { softDeleteUser } from 'src/actions/users/delete-user';
 import { getUsers, getUsersCount } from 'src/actions/users/get-users';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
@@ -32,6 +31,7 @@ import {
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
+import { toast } from 'sonner';
 import { create } from 'zustand';
 
 export const useUserAlertDialogStore = create<{
@@ -65,21 +65,17 @@ const UsersTable = () => {
     },
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.error('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         return;
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
@@ -88,10 +84,7 @@ const UsersTable = () => {
         queryKey: [Entity.Users],
       });
 
-      toast({
-        title: 'Success!',
-        description: 'Success soft deleting user',
-      });
+      toast.success('Success soft deleting user');
     },
   });
 
@@ -167,19 +160,6 @@ const UsersTable = () => {
     useUserAlertDialogStore.setState({ isDeleteDialogOpen: open });
   };
 
-  const onClickConfirmDelete = () => {
-    if (!userIdToDelete) {
-      toast({
-        title: 'Missing user id',
-        description: 'User id is required to delete a user.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    mutateSoftDeleteUser(userIdToDelete);
-  };
-
   const userToDelete = useMemo(() => {
     if (!userIdToDelete) {
       return undefined;
@@ -196,7 +176,7 @@ const UsersTable = () => {
         title={`Are you sure you want to delete user "${userToDelete?.name}"?`}
         description={`This action will perform soft delete. Soft deletion will mark the user as inactive while retaining their data for potential reactivation.
 This action helps maintain historical records and allows for data recovery if needed.`}
-        onClickConfirm={onClickConfirmDelete}
+        onClickConfirm={() => mutateSoftDeleteUser(userIdToDelete as string)}
       />
       <DataTableToolbar table={table} />
       <div className="rounded-md border">

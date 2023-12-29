@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
 import { getServices } from 'src/actions/services/get-services';
 import { addTransaction } from 'src/actions/transactions/add-transaction';
 import { getTransaction } from 'src/actions/transactions/get-transactions';
@@ -46,6 +45,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PlusCircleIcon, XIcon } from 'lucide-react';
 import { notFound, useRouter } from 'next/navigation';
 import { ComponentProps, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 
@@ -68,7 +68,6 @@ const getDefaultServiceValue = () => ({
 const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { toast } = useToast();
   const [parent] = useAutoAnimate();
   const [transactionServicesState, setTransactionServicesState] = useImmer<Service[]>(() => [
     getDefaultServiceValue(),
@@ -91,10 +90,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       const { data, serverError, validationError } = await getTransaction(transactionId as string);
 
       if (serverError || validationError) {
-        toast({
-          title: validationError ? 'Validation error' : 'Server Error',
-          description: serverError || 'Invalid user id',
-        });
+        toast.error(validationError ? 'Validation error' : 'Server Error');
       }
 
       return data;
@@ -134,11 +130,9 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     mutationKey: [Entity.Transactions],
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         setError(result.validationError as UserValidationError);
@@ -146,20 +140,15 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
       await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
-      toast({
-        title: 'Success!',
-        description: 'Transaction created successfully.',
-      });
+      toast.success('Transaction created successfully.');
       router.push(AdminRoute.POS);
     },
   });
@@ -169,11 +158,9 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     mutationKey: [Entity.Transactions, transactionId],
     onSuccess: async (result) => {
       if (result.validationError) {
-        toast({
-          title: 'Invalid Input',
+        toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-          variant: 'destructive',
         });
 
         setError(result.validationError as UserValidationError);
@@ -181,20 +168,15 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       }
 
       if (result?.serverError) {
-        toast({
-          title: 'Something went wrong',
+        toast.error('Something went wrong', {
           description: result.serverError,
-          variant: 'destructive',
         });
         return;
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
       await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
-      toast({
-        title: 'Success!',
-        description: 'Transaction updated successfully.',
-      });
+      toast.success('Transaction updated successfully.');
       router.push(AdminRoute.POS);
     },
   });
