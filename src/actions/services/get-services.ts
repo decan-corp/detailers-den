@@ -50,7 +50,7 @@ export const getServices = authAction(
       });
     }
 
-    query = query.limit(params.pageSize).offset(params.pageIndex);
+    query = query.limit(params.pageSize).offset(params.pageIndex * params.pageSize);
 
     if (params.sortBy) {
       const sortBy = castArray(params.sortBy);
