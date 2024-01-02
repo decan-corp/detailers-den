@@ -11,7 +11,7 @@ import { twJoin } from 'tailwind-merge';
 
 const HeroSection = () => (
   <div>
-    <div className="relative flex h-[1120px] flex-col items-center justify-between md:h-[1200px] lg:h-[950px]">
+    <div className="relative flex flex-col items-center justify-between pb-10 md:h-[1200px] md:pb-0 lg:h-[950px]">
       <Image
         alt="background"
         src={heroBackgroundImage}
@@ -30,7 +30,7 @@ const HeroSection = () => (
         className={twJoin(
           bebasNeue.className,
           'z-10 mx-6 mt-[100px] md:mx-16 md:mt-[150px] lg:mx-32 lg:mt-[210px] ',
-          'grid max-w-[1240px] grid-cols-1 justify-center gap-x-16 gap-y-12 lg:grid-cols-5'
+          'grid max-w-[1240px] grid-cols-1 justify-center gap-x-16 gap-y-10 lg:grid-cols-5'
         )}
       >
         <div className="w-full space-y-8 bg-[#bcbcbc] p-6 px-8 lg:col-span-2">
@@ -56,7 +56,7 @@ const HeroSection = () => (
             </div>
           </div>
         </div>
-        <div className="h-[480px] lg:col-span-3 lg:h-[520px]">
+        <div className="h-[460px] md:h-[480px] lg:col-span-3 lg:h-[520px]">
           <iframe
             className="h-full w-full border-none"
             title="google-maps"
