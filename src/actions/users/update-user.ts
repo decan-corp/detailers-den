@@ -6,7 +6,7 @@ import { db } from 'src/utils/db';
 import { ProviderId } from 'src/utils/lucia';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, like } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-zod';
 import { createKeyId } from 'lucia';
 import { z } from 'zod';
@@ -45,7 +45,7 @@ export const updateUser = authAction(
     ),
   (params, { session }) => {
     const { id, ...userData } = params;
-    const { role, userId, email } = session.user;
+    const { role, userId } = session.user;
     if (role !== Role.Admin && userId !== params.id) {
       throw new SafeActionError('Forbidden access');
     }
@@ -62,9 +62,7 @@ export const updateUser = authAction(
           .set({
             id: createKeyId(ProviderId.email, userData.email),
           })
-          .where(
-            and(eq(userKeys.id, createKeyId(ProviderId.email, email)), eq(userKeys.userId, userId))
-          );
+          .where(and(like(userKeys.id, `${ProviderId.email}%`), eq(userKeys.userId, id)));
       }
     });
   }
