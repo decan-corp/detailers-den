@@ -9,6 +9,15 @@
     "project": ["./tsconfig.eslint.json"]
   },
   "plugins": ["@typescript-eslint"],
+  "overrides": [
+    {
+      "files": ["@/**/*.ts", "@/**/*.tsx"],
+      "rules": {
+        "react/jsx-props-no-spreading": "off",
+        "react/prop-types": "off"
+      }
+    }
+  ],
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "next/core-web-vitals",
@@ -99,6 +108,7 @@
       {
         "checksVoidReturn": false
       }
-    ]
+    ],
+    "jsx-a11y/label-has-associated-control": "off"
   }
 }

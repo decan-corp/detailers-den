@@ -24,7 +24,8 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
+      "@/*": ["./@/*"]
     }
   },
   "include": [
@@ -33,7 +34,10 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts",
     "public",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "types/**/*.ts",
+    "@/**/*.ts",
+    "@/**/*.tsx"
   ],
   "files": ["global.d.ts"],
   "exclude": ["node_modules"]

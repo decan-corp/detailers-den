@@ -17,7 +17,14 @@
     "noto",
     "lockb",
     "planetscale",
-    "paralleldrive"
+    "paralleldrive",
+    "shadcn",
+    "zustand",
+    "gcash",
+    "immer",
+    "formkit",
+    "availment",
+    "sonner"
   ],
   "ignorePaths": [
     "node_modules/",
@@ -32,6 +39,7 @@
     "package.json",
     "eslint-config-base/",
     "*.tsbuildinfo",
-    "drizzle/**"
+    "drizzle/**",
+    "@/components/**"
   ]
 }

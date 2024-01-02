@@ -6,3 +6,18 @@ export enum Route {
   Faq = '/faq',
   AboutUs = '/about-us',
 }
+
+export enum AdminRoute {
+  Login = '/auth/login',
+  Logout = '/logout',
+  Dashboard = '/admin',
+  POS = '/admin/pos',
+  Settings = '/admin/settings',
+  ChangePassword = '/admin/settings/change-password',
+  ManageUsers = '/admin/manage',
+  ManageServices = '/admin/manage/services',
+  ManagePromo = '/admin/manage/Promo',
+  AddTransaction = '/admin/pos/add',
+  EditTransaction = '/admin/pos/edit',
+  AccountSetup = '/account-setup',
+}
