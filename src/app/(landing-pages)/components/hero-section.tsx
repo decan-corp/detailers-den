@@ -1,16 +1,17 @@
+// spell-checker:disable
 import FacebookLogo from 'public/icons/fb-logo.svg';
 import InstagramLogo from 'public/icons/ig-logo.svg';
 import heroBackgroundImageMobile1 from 'public/images/hero-bg-mobile-1.png';
 import heroBackgroundImageMobile2 from 'public/images/hero-bg-mobile-2.png';
 import heroBackgroundImage from 'public/images/hero-bg.png';
-import { bebasNeue, cabin } from 'src/utils/fonts';
+import { bebasNeue, cabin, inter } from 'src/utils/fonts';
 
 import Image from 'next/image';
 import { twJoin } from 'tailwind-merge';
 
 const HeroSection = () => (
   <div>
-    <div className="relative flex h-[540px] flex-col items-center justify-between md:h-[850px]">
+    <div className="relative flex h-[1120px] flex-col items-center justify-between md:h-[1200px] lg:h-[950px]">
       <Image
         alt="background"
         src={heroBackgroundImage}
@@ -28,11 +29,44 @@ const HeroSection = () => (
       <div
         className={twJoin(
           bebasNeue.className,
-          'w-[293px] text-[90px] leading-[115px] tracking-[1.8px] text-white [text-shadow:_0px_4px_4px_rgba(0,0,0,0.25)] sm:w-full md:text-9xl md:leading-[180px] lg:text-[200px] lg:leading-[260px] lg:tracking-[4px]',
-          'z-10 mt-[150px] text-center sm:max-w-[600px]  sm:px-16 md:mt-[210px] md:max-w-[900px] lg:max-w-[1120px]'
+          'z-10 mx-6 mt-[100px] md:mx-16 md:mt-[150px] lg:mx-32 lg:mt-[210px] ',
+          'grid max-w-[1240px] grid-cols-1 justify-center gap-x-16 gap-y-12 lg:grid-cols-5'
         )}
       >
-        SERVING YOU SOON
+        <div className="w-full space-y-8 bg-[#bcbcbc] p-6 px-8 lg:col-span-2">
+          <div className="space-y-5">
+            <div className={twJoin(inter.className, 'text-2xl font-semibold')}>
+              Location:
+              <div className="w-40 border-2 border-b border-yellow-400" />
+            </div>
+            <div className={twJoin('font-sans text-base font-medium leading-tight')}>
+              L1 B4 Malanting, Amparo Subd., Brgy. 179 Tala, North Caloocan City, Metro Manila, 1425
+            </div>
+          </div>
+          <div className="space-y-5">
+            <div className={twJoin(inter.className, 'text-2xl font-semibold')}>
+              About Us: <div className="w-40 border-2 border-b border-yellow-400" />
+            </div>
+            <div className={twJoin('font-sans text-base font-medium leading-tight')}>
+              Welcome to 185 Detailers Den, your destination for excellence in car care, right here
+              in Caloocan. Our passionate team is dedicated to delivering top-notch car detailing
+              and washing services. With advanced techniques and an eco-friendly approach, we bring
+              out the best in your vehicle, ensuring a spotless shine and a lasting impact. Trust
+              185 Detailers Den for a superior automotive experience that goes beyond the ordinary.
+            </div>
+          </div>
+        </div>
+        <div className="h-[480px] lg:col-span-3 lg:h-[520px]">
+          <iframe
+            className="h-full w-full border-none"
+            title="google-maps"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1226.5106029097797!2d121.08103604546301!3d14.750045746081373!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397bb32b9d85051%3A0xe18afe86561c85cf!2s185%20Detailers%20Den!5e0!3m2!1sen!2sph!4v1704187543063!5m2!1sen!2sph"
+            width="600"
+            height="450"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
       </div>
 
       {/* Desktop View for Social Links */}
