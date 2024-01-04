@@ -77,7 +77,7 @@ export const DateRangePickerWithPresets = ({
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent position="popper">
-            {Object.entries(options).map(([label]) => (
+            {Object.keys(options).map((label) => (
               <SelectItem key={label} value={label}>
                 {label}
               </SelectItem>
