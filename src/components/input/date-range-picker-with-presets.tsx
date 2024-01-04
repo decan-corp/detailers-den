@@ -89,7 +89,16 @@ export const DateRangePickerWithPresets = ({
             mode="range"
             selected={date}
             defaultMonth={date?.from}
-            onSelect={handleOnSelect}
+            onSelect={(value) =>
+              handleOnSelect(
+                value
+                  ? {
+                      from: dayjs(value.from).startOf('day').toDate(),
+                      to: value.to ? dayjs(value.to).endOf('day').toDate() : undefined,
+                    }
+                  : value
+              )
+            }
             numberOfMonths={2}
           />
         </div>

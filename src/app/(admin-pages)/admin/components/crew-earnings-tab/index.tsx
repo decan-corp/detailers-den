@@ -37,7 +37,7 @@ const CrewEarningsTab = () => {
             {date?.from && date?.to ? (
               <CrewTransactions startDate={date.from} endDate={date.to} />
             ) : (
-              <div className="text-center text-muted-foreground">Select date range first </div>
+              <div className="text-center text-muted-foreground">Select date range first</div>
             )}
           </CardContent>
         </Card>
