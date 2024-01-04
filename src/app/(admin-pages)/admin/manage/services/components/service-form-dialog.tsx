@@ -195,7 +195,7 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
       <DialogHeader>
         <DialogTitle>{isEdit ? 'Edit' : 'Add'} Service</DialogTitle>
         <DialogDescription>
-          {isEdit ? 'Edit' : 'Add new'} user here. Click save when you&apos;re done.
+          {isEdit ? 'Edit' : 'Add new'} service here. Click save when you&apos;re done.
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4 py-4">
