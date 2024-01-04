@@ -82,19 +82,19 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
                   {transaction.modeOfPayment}
                 </div>
               </div>
-            </div>
-            <div className="col-span-2 flex flex-col gap-6">
               <div className="space-y-1">
                 <Label>Note</Label>
                 <div className="mt-2 text-sm text-muted-foreground">{transaction.note}</div>
               </div>
+            </div>
+            <div className="col-span-2 flex flex-col gap-6">
               <div className="space-y-1">
                 <Label>Discount</Label>
                 <div className="mt-2 text-sm text-muted-foreground">{transaction.discount}</div>
               </div>
               <div className="space-y-1">
-                <Label>Customer Name</Label>
-                <div className="mt-2 text-sm text-muted-foreground">{transaction.customerName}</div>
+                <Label>Tip</Label>
+                <div className="mt-2 text-sm text-muted-foreground">{transaction.tip}</div>
               </div>
               <div className="space-y-1">
                 <Label>Total Price</Label>
