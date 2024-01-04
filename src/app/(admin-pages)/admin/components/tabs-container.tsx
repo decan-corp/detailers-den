@@ -36,9 +36,8 @@ const TabsContainer = () => {
         <TabsTrigger
           value={DashboardTab.CrewEarnings}
           onClick={() => setParams(DashboardParam.Tab, DashboardTab.CrewEarnings)}
-          disabled
         >
-          Crew Earnings (WIP)
+          Crew Earnings
         </TabsTrigger>
         <TabsTrigger
           value={DashboardTab.Analytics}

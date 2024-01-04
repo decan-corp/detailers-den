@@ -49,6 +49,9 @@ const CrewTransactions = ({ startDate, endDate }: { startDate: Date; endDate: Da
             <div className="ml-auto font-medium">Php {crewEarning.amount}</div>
           </div>
         ))}
+      {!isLoading && crewEarnings.length === 0 && (
+        <div className="py-12 text-center text-muted-foreground">No results found</div>
+      )}
     </div>
   );
 };
