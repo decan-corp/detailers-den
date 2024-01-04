@@ -23,7 +23,13 @@ import { MoreHorizontal } from 'lucide-react';
 export const serviceColumns: ColumnDef<
   Pick<
     typeof services.$inferSelect,
-    'id' | 'serviceName' | 'description' | 'serviceCutPercentage' | 'createdAt' | 'updatedAt'
+    | 'id'
+    | 'serviceName'
+    | 'description'
+    | 'serviceCutPercentage'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'priceMatrix'
   >
 >[] = [
   {
@@ -39,6 +45,20 @@ export const serviceColumns: ColumnDef<
   {
     accessorKey: 'description',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+  },
+  {
+    accessorKey: 'priceMatrix',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const { priceMatrix } = row.original;
+      return priceMatrix.map((matrix) => (
+        <div className="flex place-content-between">
+          <div>{matrix.vehicleSize}</div>
+          <div>{matrix.price}</div>
+        </div>
+      ));
+    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Price Matrix" />,
   },
   {
     accessorKey: 'createdAt',

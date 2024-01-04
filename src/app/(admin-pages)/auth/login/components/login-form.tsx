@@ -17,6 +17,7 @@ const LoginForm = () => {
     event.preventDefault();
 
     setIsLoading(true);
+    setError('');
     const formData = new FormData(event.currentTarget);
 
     const email = formData.get('email') as string;
