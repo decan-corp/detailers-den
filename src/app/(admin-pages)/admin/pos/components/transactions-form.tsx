@@ -233,7 +233,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
             <CardHeader>
               <CardTitle>{isEdit ? 'Edit' : 'Add'} Transaction</CardTitle>
               <CardDescription>
-                {isEdit ? 'Edit' : 'Add new'} user here. Click save when you&apos;re done.
+                {isEdit ? 'Edit' : 'Add new'} transaction here. Click save when you&apos;re done.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 py-4">
