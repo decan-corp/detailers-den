@@ -259,7 +259,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                   required
                   className="col-span-4"
                   minLength={6}
-                  maxLength={7}
+                  maxLength={12}
                   defaultValue={transaction?.plateNumber || ''}
                   onKeyDown={(e) => {
                     if (e.code === 'Space') {

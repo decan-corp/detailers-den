@@ -36,6 +36,13 @@
       "when": 1703515672804,
       "tag": "0004_fresh_klaw",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1704353392609,
+      "tag": "0005_jittery_chat",
+      "breakpoints": true
     }
   ]
 }

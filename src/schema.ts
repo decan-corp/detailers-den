@@ -39,7 +39,7 @@ export const transactions = mysqlTable('transactions', {
     .default(TransactionStatus.Pending),
   totalPrice: decimal('total_price', { scale: 2, precision: 5 }).notNull(),
   note: text('note'),
-  plateNumber: varchar('plate_number', { length: 7 }).notNull(),
+  plateNumber: varchar('plate_number', { length: 12 }).notNull(),
   vehicleSize: varchar('vehicle_size', {
     length: 24,
     enum: [

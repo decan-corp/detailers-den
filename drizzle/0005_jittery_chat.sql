@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` MODIFY COLUMN `plate_number` varchar(12) NOT NULL;

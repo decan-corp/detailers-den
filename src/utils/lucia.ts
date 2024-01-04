@@ -33,7 +33,7 @@ export const auth = lucia({
   },
   sessionExpiresIn: {
     activePeriod: dayjs.duration(1, 'days').as('milliseconds'),
-    idlePeriod: dayjs.duration(7, 'days').as('milliseconds'),
+    idlePeriod: dayjs.duration(3, 'days').as('milliseconds'),
   },
   getUserAttributes: (data) => {
     const userData = transformDbAttributes(data);
