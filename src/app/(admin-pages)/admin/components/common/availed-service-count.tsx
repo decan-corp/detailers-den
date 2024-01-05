@@ -23,7 +23,7 @@ const AvailedServiceCount = ({ startDate, endDate }: { startDate: Date; endDate:
         Array(5)
           .fill(null)
           .map((_, index) => (
-            <div key={Symbol(index).toString()} className="flex items-center">
+            <div key={Symbol(index).toString()} className="flex items-center pr-4">
               <Avatar className="h-9 w-9">
                 <Skeleton className="h-9 w-9" />
               </Avatar>

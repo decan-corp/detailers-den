@@ -24,7 +24,7 @@ const CrewTransactions = ({ startDate, endDate }: { startDate: Date; endDate: Da
         Array(5)
           .fill(null)
           .map((_, index) => (
-            <div key={Symbol(index).toString()} className="flex items-center">
+            <div key={Symbol(index).toString()} className="flex items-center pr-4">
               <Avatar className="h-9 w-9">
                 <Skeleton className="h-9 w-9" />
               </Avatar>
@@ -32,7 +32,7 @@ const CrewTransactions = ({ startDate, endDate }: { startDate: Date; endDate: Da
                 <Skeleton className="h-4 w-44" />
                 <Skeleton className="h-4 w-24" />
               </div>
-              <Skeleton className="ml-auto h-6 w-14" />
+              <Skeleton className="ml-auto h-6 w-20" />
             </div>
           ))}
       {!isLoading &&
