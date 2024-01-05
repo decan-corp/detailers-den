@@ -36,7 +36,7 @@ const AvailedServiceCount = ({ startDate, endDate }: { startDate: Date; endDate:
           ))}
       {!isLoading &&
         records.map((record) => (
-          <div key={record.serviceId} className="flex items-center">
+          <div key={record.serviceId} className="flex items-center pr-4">
             <div className="ml-4 space-y-1">
               <p className="text-sm font-medium leading-none">{record.serviceName}</p>
             </div>

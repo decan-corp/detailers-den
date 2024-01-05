@@ -37,7 +37,7 @@ const CrewTransactions = ({ startDate, endDate }: { startDate: Date; endDate: Da
           ))}
       {!isLoading &&
         crewEarnings.map((crewEarning) => (
-          <div key={crewEarning.crewId} className="flex items-center">
+          <div key={crewEarning.crewId} className="flex items-center pr-4">
             <Avatar className="h-9 w-9">
               <AvatarImage src={crewEarning.image || ''} alt="Avatar" />
               <AvatarFallback>{getInitials(crewEarning.crewName)}</AvatarFallback>
