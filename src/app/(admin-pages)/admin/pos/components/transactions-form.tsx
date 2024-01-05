@@ -340,7 +340,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                         if (data.serviceId === '') return data;
                         const service = serviceOptions.find(({ id }) => id === data.serviceId);
                         const priceMatrix = service?.priceMatrix.find(
-                          ({ vehicleSize }) => vehicleSize === selectedVehicleSize
+                          ({ vehicleSize }) => vehicleSize === (value as VehicleSize)
                         );
 
                         if (!service || !priceMatrix) return data;
