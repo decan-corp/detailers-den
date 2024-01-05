@@ -6,7 +6,7 @@ import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
-import { count, eq, inArray, like, or, desc, asc, isNull, and } from 'drizzle-orm';
+import { count, eq, inArray, like, or, desc, asc, isNull, and, between } from 'drizzle-orm';
 import { MySqlSelect } from 'drizzle-orm/mysql-core';
 import { castArray } from 'lodash';
 import { z } from 'zod';
@@ -71,6 +71,12 @@ const searchSchema = z.object({
     .optional(),
   plateNumber: z.string().toUpperCase().optional(),
   customerName: z.string().toLowerCase().optional(),
+  createdAt: z
+    .object({
+      startDate: z.date(),
+      endDate: z.date(),
+    })
+    .optional(),
 });
 
 export const getTransactions = authAction(
@@ -110,6 +116,12 @@ export const getTransactions = authAction(
         plateNumber: params.plateNumber,
         customerName: params.customerName,
       });
+    }
+
+    if (params.createdAt) {
+      query = query.where(
+        between(transactions.createdAt, params.createdAt.startDate, params.createdAt.endDate)
+      );
     }
 
     query = query.limit(params.pageSize).offset(params.pageIndex * params.pageSize);
@@ -158,6 +170,12 @@ export const getTransactionsCount = authAction(searchSchema, async (params) => {
       plateNumber: params.plateNumber,
       customerName: params.customerName,
     });
+  }
+
+  if (params.createdAt) {
+    query = query.where(
+      between(transactions.createdAt, params.createdAt.startDate, params.createdAt.endDate)
+    );
   }
 
   const [{ value }] = await query;

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import { DateRangePickerWithPresets } from 'src/components/input/date-range-picker-with-presets';
+import { DATE_RANGE_OPTIONS } from 'src/constants/options';
 
 import CrewTransactions from '../common/crew-transactions';
 import { DashboardTab } from '../tabs-container';
@@ -23,7 +24,11 @@ const CrewEarningsTab = () => {
   return (
     <TabsContent value={DashboardTab.CrewEarnings} className="space-y-4">
       <div>
-        <DateRangePickerWithPresets initialDateRange={date} onChange={setDate} />
+        <DateRangePickerWithPresets
+          initialDateRange={date}
+          onChange={setDate}
+          options={DATE_RANGE_OPTIONS}
+        />
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
         <Card className="col-span-4">

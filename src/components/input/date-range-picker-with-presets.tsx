@@ -14,36 +14,23 @@ import { cn } from '@/lib/utils';
 
 import { CalendarIcon } from '@radix-ui/react-icons';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { ComponentProps, useState } from 'react';
 import { DateRange } from 'react-day-picker';
-
-const options = {
-  Today: { from: dayjs().startOf('day').toDate(), to: dayjs().endOf('day').toDate() },
-  'Current Week': { from: dayjs().startOf('week').toDate(), to: dayjs().endOf('week').toDate() },
-  'Last Week': {
-    from: dayjs().startOf('week').subtract(1, 'week').toDate(),
-    to: dayjs().endOf('week').subtract(1, 'week').toDate(),
-  },
-  'Current Month': { from: dayjs().startOf('month').toDate(), to: dayjs().endOf('month').toDate() },
-  'Last Month': {
-    from: dayjs().startOf('month').subtract(1, 'month').toDate(),
-    to: dayjs().endOf('month').subtract(1, 'month').toDate(),
-  },
-};
 
 export const DateRangePickerWithPresets = ({
   initialDateRange,
   onChange,
+  options,
+  buttonSize,
+  placeholder,
 }: {
   initialDateRange?: DateRange;
   onChange?: (value: DateRange | undefined) => void;
+  options: { [label: string]: DateRange };
+  buttonSize?: ComponentProps<typeof Button>['size'];
+  placeholder?: string;
 }) => {
-  const [date, setDate] = useState<DateRange | undefined>(
-    initialDateRange || {
-      from: dayjs().day(-2).startOf('day').toDate(),
-      to: dayjs().day(4).endOf('day').toDate(),
-    }
-  );
+  const [date, setDate] = useState<DateRange | undefined>(initialDateRange);
 
   const handleOnSelect = (value: DateRange | undefined) => {
     setDate(value);
@@ -54,11 +41,9 @@ export const DateRangePickerWithPresets = ({
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          size={buttonSize}
           variant="outline"
-          className={cn(
-            'min-w-[240px] max-w-[300px] justify-start text-left font-normal',
-            !date && 'text-muted-foreground'
-          )}
+          className={cn('justify-start text-left font-normal', !date && 'text-muted-foreground')}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date?.from && date.to && (
@@ -68,7 +53,7 @@ export const DateRangePickerWithPresets = ({
           )}
 
           {date?.from && !date.to && dayjs(date.from).format('MMM D, YYYY')}
-          {!date && <span>Pick a date</span>}
+          {!date?.from && !date?.to && <span>{placeholder || 'Pick a date'}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col space-y-2 p-2">

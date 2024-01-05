@@ -31,6 +31,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
+import { DateRange } from 'react-day-picker';
 import { useDebounce } from 'react-use';
 import { toast } from 'sonner';
 import { create } from 'zustand';
@@ -162,6 +163,11 @@ const TransactionsTable = () => {
     [columnFilters]
   );
 
+  const createdAtFilter = useMemo(
+    () => columnFilters.find((filter) => filter.id === 'createdAt')?.value as DateRange | undefined,
+    [columnFilters]
+  );
+
   const { data: transactionsData, isLoading } = useQuery({
     queryKey: [
       Entity.Transactions,
@@ -172,6 +178,8 @@ const TransactionsTable = () => {
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
+      createdAtFilter?.to,
+      createdAtFilter?.from,
     ],
     queryFn: async () => {
       const { data = [] } = await getTransactions({
@@ -180,6 +188,10 @@ const TransactionsTable = () => {
         ...(vehicleSizeFilter && { vehicleSize: vehicleSizeFilter }),
         ...(modeOfPaymentFilter && { modeOfPayment: modeOfPaymentFilter }),
         ...(transactionStatusFilter && { status: transactionStatusFilter }),
+        ...(createdAtFilter?.from &&
+          createdAtFilter.to && {
+            createdAt: { startDate: createdAtFilter.from, endDate: createdAtFilter.to },
+          }),
         pageSize: pagination.pageSize,
         pageIndex: pagination.pageIndex,
         sortBy: sorting,
@@ -197,6 +209,8 @@ const TransactionsTable = () => {
       modeOfPaymentFilter,
       transactionStatusFilter,
       debouncedSearch,
+      createdAtFilter?.to,
+      createdAtFilter?.from,
     ],
     queryFn: async () => {
       const { data = 0 } = await getTransactionsCount({
@@ -205,6 +219,10 @@ const TransactionsTable = () => {
         ...(vehicleSizeFilter && { vehicleSize: vehicleSizeFilter }),
         ...(modeOfPaymentFilter && { modeOfPayment: modeOfPaymentFilter }),
         ...(transactionStatusFilter && { status: transactionStatusFilter }),
+        ...(createdAtFilter?.from &&
+          createdAtFilter.to && {
+            createdAt: { startDate: createdAtFilter.from, endDate: createdAtFilter.to },
+          }),
       });
       return data;
     },

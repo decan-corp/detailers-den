@@ -2,7 +2,9 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DateRangePickerWithPresets } from 'src/components/input/date-range-picker-with-presets';
 import { DataTableFacetedFilter } from 'src/components/table/data-table-faceted-filter';
+import { DATE_RANGE_OPTIONS } from 'src/constants/options';
 import { AdminRoute } from 'src/constants/routes';
 
 import {
@@ -31,6 +33,23 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
           onChange={(event) => table.getColumn('customerName')?.setFilterValue(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
         />
+
+        {table.getColumn('createdAt') && (
+          <DateRangePickerWithPresets
+            buttonSize="sm"
+            initialDateRange={{ from: undefined, to: undefined }}
+            placeholder="Filter by date"
+            options={{
+              None: {
+                from: undefined,
+                to: undefined,
+              },
+              ...DATE_RANGE_OPTIONS,
+            }}
+            onChange={table.getColumn('createdAt')?.setFilterValue}
+          />
+        )}
+
         {table.getColumn('status') && (
           <DataTableFacetedFilter
             column={table.getColumn('status')}
