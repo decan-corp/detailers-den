@@ -115,6 +115,7 @@ export const addTransaction = authAction(
         ...transactionData,
         id: transactionId,
         createdById: userId,
+        plateNumber: transactionData.plateNumber.replace(/\s/g, ''),
         totalPrice: String(discountedPrice),
         ...(transactionData.status === TransactionStatus.Paid && {
           completedAt: sql`CURRENT_TIMESTAMP`,

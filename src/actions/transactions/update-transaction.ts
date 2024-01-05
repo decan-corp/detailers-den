@@ -177,6 +177,7 @@ export const updateTransaction = authAction(
         .set({
           ...transactionData,
           updatedById: userId,
+          plateNumber: transactionData.plateNumber.replace(/\s/g, ''),
           totalPrice: String(discountedPrice),
           ...(transactionData.status === TransactionStatus.Paid &&
             transaction.completedAt === null && {
