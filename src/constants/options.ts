@@ -5,6 +5,10 @@ export const DATE_RANGE_OPTIONS = {
     from: dayjs().startOf('day').toDate(),
     to: dayjs().endOf('day').toDate(),
   },
+  Yesterday: {
+    from: dayjs().subtract(1, 'day').startOf('day').toDate(),
+    to: dayjs().subtract(1, 'day').endOf('day').toDate(),
+  },
   'Current Week': {
     from: dayjs().startOf('week').toDate(),
     to: dayjs().endOf('week').toDate(),
