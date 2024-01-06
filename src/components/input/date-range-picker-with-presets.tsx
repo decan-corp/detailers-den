@@ -33,6 +33,7 @@ export const DateRangePickerWithPresets = ({
   presetPlaceholder?: string;
 }) => {
   const [date, setDate] = useState<DateRange | undefined>(initialDateRange);
+  const [open, setOpen] = useState(false);
 
   const handleOnSelect = (value: DateRange | undefined) => {
     setDate(value);
@@ -40,7 +41,7 @@ export const DateRangePickerWithPresets = ({
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           size={buttonSize}
@@ -59,7 +60,12 @@ export const DateRangePickerWithPresets = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col space-y-2 p-2">
-        <Select onValueChange={(value) => handleOnSelect(options[value as keyof typeof options])}>
+        <Select
+          onValueChange={(value) => {
+            handleOnSelect(options[value as keyof typeof options]);
+            setOpen(false);
+          }}
+        >
           <SelectTrigger>
             <SelectValue placeholder={presetPlaceholder || 'Select a date preset'} />
           </SelectTrigger>
