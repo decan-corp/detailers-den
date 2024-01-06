@@ -415,7 +415,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                 <Textarea
                   id="note"
                   name="note"
-                  className="col-span-4"
+                  className="col-span-4 min-h-[100px] [field-sizing:content]"
                   defaultValue={transaction?.note || ''}
                   maxLength={360}
                 />
