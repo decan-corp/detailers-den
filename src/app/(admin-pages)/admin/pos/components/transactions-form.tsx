@@ -112,7 +112,9 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   const { data: serviceOptions = [], isLoading: isFetchingServices } = useQuery({
     queryKey: [Entity.Services],
     queryFn: async () => {
-      const { data } = await getServices({});
+      const { data } = await getServices({
+        sortBy: { id: 'serviceName', desc: false },
+      });
       return data;
     },
   });
@@ -120,7 +122,10 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   const { data: crewOptions = [], isLoading: isFetchingCrews } = useQuery({
     queryKey: [Entity.Users, 'crews'],
     queryFn: async () => {
-      const { data } = await getUsers({ role: [Role.Crew, Role.Detailer, Role.StayInCrew] });
+      const { data } = await getUsers({
+        role: [Role.Crew, Role.Detailer, Role.StayInCrew],
+        sortBy: { id: 'name', desc: false },
+      });
       return data;
     },
   });
