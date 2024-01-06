@@ -7,53 +7,38 @@ import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
 import { count, eq, inArray, like, or, desc, asc, isNull, and, between } from 'drizzle-orm';
-import { MySqlSelect } from 'drizzle-orm/mysql-core';
 import { castArray } from 'lodash';
 import { z } from 'zod';
 
-const withStatusFilter = <T extends MySqlSelect>(
-  qb: T,
-  status: TransactionStatus | TransactionStatus[]
-) => {
+const withStatusFilter = (status: TransactionStatus | TransactionStatus[]) => {
   if (Array.isArray(status)) {
-    return qb.where(inArray(transactions.status, status));
+    return inArray(transactions.status, status);
   }
-  return qb.where(eq(transactions.status, status));
+  return eq(transactions.status, status);
 };
 
-const withModeOfPaymentFilter = <T extends MySqlSelect>(
-  qb: T,
-  status: ModeOfPayment | ModeOfPayment[]
-) => {
+const withModeOfPaymentFilter = (status: ModeOfPayment | ModeOfPayment[]) => {
   if (Array.isArray(status)) {
-    return qb.where(inArray(transactions.modeOfPayment, status));
+    return inArray(transactions.modeOfPayment, status);
   }
-  return qb.where(eq(transactions.modeOfPayment, status));
+  return eq(transactions.modeOfPayment, status);
 };
 
-const withVehicleSizeFilter = <T extends MySqlSelect>(qb: T, type: VehicleSize | VehicleSize[]) => {
+const withVehicleSizeFilter = (type: VehicleSize | VehicleSize[]) => {
   if (Array.isArray(type)) {
-    return qb.where(inArray(transactions.vehicleSize, type));
+    return inArray(transactions.vehicleSize, type);
   }
-  return qb.where(eq(transactions.vehicleSize, type));
+  return eq(transactions.vehicleSize, type);
 };
 
-const withSearchFilter = <T extends MySqlSelect>(
-  qb: T,
-  searchParams: {
-    plateNumber?: string;
-    customerName?: string;
-  }
-) =>
-  qb.where(
-    or(
-      searchParams.plateNumber
-        ? like(transactions.plateNumber, `%${searchParams.plateNumber}%`)
-        : undefined,
-      searchParams.customerName
-        ? like(transactions.customerName, `%${searchParams.customerName}%`)
-        : undefined
-    )
+const withSearchFilter = (searchParams: { plateNumber?: string; customerName?: string }) =>
+  or(
+    searchParams.plateNumber
+      ? like(transactions.plateNumber, `%${searchParams.plateNumber}%`)
+      : undefined,
+    searchParams.customerName
+      ? like(transactions.customerName, `%${searchParams.customerName}%`)
+      : undefined
   );
 
 const searchSchema = z.object({
@@ -96,33 +81,25 @@ export const getTransactions = authAction(
         completedAt: transactions.completedAt,
       })
       .from(transactions)
-      .$dynamic()
-      .where(isNull(transactions.deletedAt));
+      .$dynamic();
 
-    if (params.status) {
-      query = withStatusFilter(query, params.status);
-    }
-
-    if (params.vehicleSize) {
-      query = withVehicleSizeFilter(query, params.vehicleSize);
-    }
-
-    if (params.modeOfPayment) {
-      query = withModeOfPaymentFilter(query, params.modeOfPayment);
-    }
-
-    if (params.plateNumber || params.customerName) {
-      query = withSearchFilter(query, {
-        plateNumber: params.plateNumber,
-        customerName: params.customerName,
-      });
-    }
-
-    if (params.createdAt) {
-      query = query.where(
-        between(transactions.createdAt, params.createdAt.startDate, params.createdAt.endDate)
-      );
-    }
+    query = query.where(
+      and(
+        isNull(transactions.deletedAt),
+        params.status ? withStatusFilter(params.status) : undefined,
+        params.vehicleSize ? withVehicleSizeFilter(params.vehicleSize) : undefined,
+        params.modeOfPayment ? withModeOfPaymentFilter(params.modeOfPayment) : undefined,
+        params.plateNumber || params.customerName
+          ? withSearchFilter({
+              plateNumber: params.plateNumber,
+              customerName: params.customerName,
+            })
+          : undefined,
+        params.createdAt
+          ? between(transactions.createdAt, params.createdAt.startDate, params.createdAt.endDate)
+          : undefined
+      )
+    );
 
     query = query.limit(params.pageSize).offset(params.pageIndex * params.pageSize);
 
@@ -150,33 +127,25 @@ export const getTransactionsCount = authAction(searchSchema, async (params) => {
       value: count(),
     })
     .from(transactions)
-    .$dynamic()
-    .where(isNull(transactions.deletedAt));
+    .$dynamic();
 
-  if (params.status) {
-    query = withStatusFilter(query, params.status);
-  }
-
-  if (params.vehicleSize) {
-    query = withVehicleSizeFilter(query, params.vehicleSize);
-  }
-
-  if (params.modeOfPayment) {
-    query = withModeOfPaymentFilter(query, params.modeOfPayment);
-  }
-
-  if (params.plateNumber || params.customerName) {
-    query = withSearchFilter(query, {
-      plateNumber: params.plateNumber,
-      customerName: params.customerName,
-    });
-  }
-
-  if (params.createdAt) {
-    query = query.where(
-      between(transactions.createdAt, params.createdAt.startDate, params.createdAt.endDate)
-    );
-  }
+  query = query.where(
+    and(
+      isNull(transactions.deletedAt),
+      params.status ? withStatusFilter(params.status) : undefined,
+      params.vehicleSize ? withVehicleSizeFilter(params.vehicleSize) : undefined,
+      params.modeOfPayment ? withModeOfPaymentFilter(params.modeOfPayment) : undefined,
+      params.plateNumber || params.customerName
+        ? withSearchFilter({
+            plateNumber: params.plateNumber,
+            customerName: params.customerName,
+          })
+        : undefined,
+      params.createdAt
+        ? between(transactions.createdAt, params.createdAt.startDate, params.createdAt.endDate)
+        : undefined
+    )
+  );
 
   const [{ value }] = await query;
 

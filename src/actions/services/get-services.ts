@@ -5,22 +5,9 @@ import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
-import { count, eq, like, desc, asc, isNull } from 'drizzle-orm';
-import { MySqlSelect } from 'drizzle-orm/mysql-core';
+import { count, eq, like, desc, asc, isNull, and } from 'drizzle-orm';
 import { castArray } from 'lodash';
 import { z } from 'zod';
-
-const withSearchFilter = <T extends MySqlSelect>(
-  qb: T,
-  searchParams: {
-    serviceName?: string;
-  }
-) =>
-  qb.where(
-    searchParams.serviceName
-      ? like(services.serviceName, `%${searchParams.serviceName}%`)
-      : undefined
-  );
 
 const searchSchema = z.object({
   serviceName: z.string().toLowerCase().optional(),
@@ -41,14 +28,14 @@ export const getServices = authAction(
         priceMatrix: services.priceMatrix,
       })
       .from(services)
-      .$dynamic()
-      .where(isNull(services.deletedAt));
+      .$dynamic();
 
-    if (params.serviceName) {
-      query = withSearchFilter(query, {
-        serviceName: params.serviceName,
-      });
-    }
+    query = query.where(
+      and(
+        isNull(services.deletedAt),
+        params.serviceName ? like(services.serviceName, `%${params.serviceName}%`) : undefined
+      )
+    );
 
     query = query.limit(params.pageSize).offset(params.pageIndex * params.pageSize);
 
@@ -76,14 +63,14 @@ export const getServicesCount = authAction(searchSchema, async (params) => {
       value: count(),
     })
     .from(services)
-    .$dynamic()
-    .where(isNull(services.deletedAt));
+    .$dynamic();
 
-  if (params.serviceName) {
-    query = withSearchFilter(query, {
-      serviceName: params.serviceName,
-    });
-  }
+  query = query.where(
+    and(
+      isNull(services.deletedAt),
+      params.serviceName ? like(services.serviceName, `%${params.serviceName}%`) : undefined
+    )
+  );
 
   const [{ value }] = await query;
 

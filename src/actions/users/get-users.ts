@@ -6,30 +6,21 @@ import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
-import { count, eq, inArray, like, or, desc, asc, isNull } from 'drizzle-orm';
-import { MySqlSelect } from 'drizzle-orm/mysql-core';
+import { count, eq, inArray, like, or, desc, asc, isNull, and } from 'drizzle-orm';
 import { castArray } from 'lodash';
 import { z } from 'zod';
 
-const withRoleFilter = <T extends MySqlSelect>(qb: T, role: Role | Role[]) => {
+const withRoleFilter = (role: Role | Role[]) => {
   if (Array.isArray(role)) {
-    return qb.where(inArray(users.role, role));
+    return inArray(users.role, role);
   }
-  return qb.where(eq(users.role, role));
+  return eq(users.role, role);
 };
 
-const withSearchFilter = <T extends MySqlSelect>(
-  qb: T,
-  searchParams: {
-    name?: string;
-    email?: string;
-  }
-) =>
-  qb.where(
-    or(
-      searchParams.name ? like(users.name, `%${searchParams.name}%`) : undefined,
-      searchParams.email ? like(users.email, `%${searchParams.email}%`) : undefined
-    )
+const withSearchFilter = (searchParams: { name?: string; email?: string }) =>
+  or(
+    searchParams.name ? like(users.name, `%${searchParams.name}%`) : undefined,
+    searchParams.email ? like(users.email, `%${searchParams.email}%`) : undefined
   );
 
 const searchSchema = z.object({
@@ -56,19 +47,20 @@ export const getUsers = authAction(
         isFirstTimeLogin: users.isFirstTimeLogin,
       })
       .from(users)
-      .$dynamic()
-      .where(isNull(users.deletedAt));
+      .$dynamic();
 
-    if (params.role) {
-      query = withRoleFilter(query, params.role);
-    }
-
-    if (params.email || params.name) {
-      query = withSearchFilter(query, {
-        name: params.name,
-        email: params.email,
-      });
-    }
+    query = query.where(
+      and(
+        isNull(users.deletedAt),
+        params.role ? withRoleFilter(params.role) : undefined,
+        params.email || params.name
+          ? withSearchFilter({
+              name: params.name,
+              email: params.email,
+            })
+          : undefined
+      )
+    );
 
     query = query.limit(params.pageSize).offset(params.pageIndex * params.pageSize);
 
@@ -96,19 +88,20 @@ export const getUsersCount = authAction(searchSchema, async (params) => {
       value: count(),
     })
     .from(users)
-    .$dynamic()
-    .where(isNull(users.deletedAt));
+    .$dynamic();
 
-  if (params.role) {
-    query = withRoleFilter(query, params.role);
-  }
-
-  if (params.email || params.name) {
-    query = withSearchFilter(query, {
-      name: params.name,
-      email: params.email,
-    });
-  }
+  query = query.where(
+    and(
+      isNull(users.deletedAt),
+      params.role ? withRoleFilter(params.role) : undefined,
+      params.email || params.name
+        ? withSearchFilter({
+            name: params.name,
+            email: params.email,
+          })
+        : undefined
+    )
+  );
 
   const [{ value }] = await query;
 
