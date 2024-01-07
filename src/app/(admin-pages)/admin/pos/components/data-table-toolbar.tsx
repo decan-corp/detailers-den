@@ -13,9 +13,11 @@ import {
   vehicleSizeOptions,
 } from './data-table-options';
 
+import cuid2 from '@paralleldrive/cuid2';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import Link from 'next/link';
+import { useState } from 'react';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -23,6 +25,7 @@ interface DataTableToolbarProps<TData> {
 
 export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
   const isFiltered = table.getState().columnFilters.length > 0;
+  const [resetKey, setResetKey] = useState(cuid2.createId());
 
   return (
     <div className="flex flex-col-reverse justify-between gap-y-4 md:flex-row md:items-center">
@@ -36,6 +39,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
 
         {table.getColumn('createdAt') && (
           <DateRangePickerWithPresets
+            key={resetKey}
             buttonSize="sm"
             initialDateRange={{ from: undefined, to: undefined }}
             placeholder="Filter by date"
@@ -79,7 +83,10 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
         {isFiltered && (
           <Button
             variant="ghost"
-            onClick={() => table.resetColumnFilters()}
+            onClick={() => {
+              table.resetColumnFilters();
+              setResetKey(cuid2.createId());
+            }}
             className="h-8 px-2 lg:px-3"
           >
             Reset
