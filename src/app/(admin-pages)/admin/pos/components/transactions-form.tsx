@@ -180,6 +180,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       }
 
       await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
+      await queryClient.invalidateQueries({ queryKey: [Entity.CrewEarnings, transactionId] });
       await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
       toast.success('Transaction updated successfully.');
       router.push(AdminRoute.POS);
