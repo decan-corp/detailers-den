@@ -25,4 +25,4 @@ export const DATE_RANGE_OPTIONS = {
     from: dayjs().startOf('month').subtract(1, 'month').toDate(),
     to: dayjs().endOf('month').subtract(1, 'month').toDate(),
   },
-};
+} as const;

@@ -85,8 +85,8 @@ const OverviewTab = () => {
 
   const currentWeekDateRange = useMemo(
     () => ({
-      startDate: dayjs().day(-2).startOf('day'),
-      endDate: dayjs().day(4).endOf('day'),
+      startDate: dayjs().startOf('week'),
+      endDate: dayjs().endOf('week'),
     }),
     []
   );

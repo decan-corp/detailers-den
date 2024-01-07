@@ -52,7 +52,7 @@ export const serviceColumns: ColumnDef<
     cell: ({ row }) => {
       const { priceMatrix } = row.original;
       return priceMatrix.map((matrix) => (
-        <div className="flex place-content-between">
+        <div key={matrix.vehicleSize} className="flex place-content-between">
           <div>{matrix.vehicleSize}</div>
           <div>{matrix.price}</div>
         </div>

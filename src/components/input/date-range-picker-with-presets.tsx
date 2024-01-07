@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 import { CalendarIcon } from '@radix-ui/react-icons';
 import dayjs from 'dayjs';
-import { ComponentProps, useState } from 'react';
+import { ComponentProps, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 
 export const DateRangePickerWithPresets = ({
@@ -34,11 +34,32 @@ export const DateRangePickerWithPresets = ({
 }) => {
   const [date, setDate] = useState<DateRange | undefined>(initialDateRange);
   const [open, setOpen] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<string>('');
 
   const handleOnSelect = (value: DateRange | undefined) => {
     setDate(value);
     onChange?.(value);
   };
+
+  const buttonLabel = useMemo(() => {
+    if (selectedPreset && selectedPreset !== 'None') {
+      return selectedPreset;
+    }
+
+    if (date?.from && date.to) {
+      return (
+        <>
+          {dayjs(date.from).format('MMM D, YYYY')} - {dayjs(date.to).format('MMM D, YYYY')}
+        </>
+      );
+    }
+
+    if (date?.from && !date.to) {
+      return dayjs(date.from).format('MMM D, YYYY');
+    }
+
+    return placeholder || 'Pick a date';
+  }, [date?.from, date?.to, placeholder, selectedPreset]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -49,21 +70,16 @@ export const DateRangePickerWithPresets = ({
           className={cn('justify-start text-left font-normal', !date && 'text-muted-foreground')}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date?.from && date.to && (
-            <>
-              {dayjs(date.from).format('MMM D, YYYY')} - {dayjs(date.to).format('MMM D, YYYY')}
-            </>
-          )}
-
-          {date?.from && !date.to && dayjs(date.from).format('MMM D, YYYY')}
-          {!date?.from && !date?.to && <span>{placeholder || 'Pick a date'}</span>}
+          {buttonLabel}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col space-y-2 p-2">
         <Select
+          value={selectedPreset}
           onValueChange={(value) => {
             handleOnSelect(options[value as keyof typeof options]);
             setOpen(false);
+            setSelectedPreset(value);
           }}
         >
           <SelectTrigger>
@@ -82,7 +98,7 @@ export const DateRangePickerWithPresets = ({
             mode="range"
             selected={date}
             defaultMonth={date?.from}
-            onSelect={(value) =>
+            onSelect={(value) => {
               handleOnSelect(
                 value
                   ? {
@@ -90,8 +106,9 @@ export const DateRangePickerWithPresets = ({
                       to: value.to ? dayjs(value.to).endOf('day').toDate() : undefined,
                     }
                   : value
-              )
-            }
+              );
+              setSelectedPreset('');
+            }}
             numberOfMonths={2}
           />
         </div>

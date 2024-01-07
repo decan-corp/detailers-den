@@ -14,8 +14,8 @@ import { DateRange } from 'react-day-picker';
 // TODO: replace list type of card content with charts
 
 const initialDate = {
-  from: dayjs().day(-2).startOf('day').toDate(),
-  to: dayjs().day(4).endOf('day').toDate(),
+  from: dayjs().startOf('week').toDate(),
+  to: dayjs().endOf('week').toDate(),
 };
 
 const CrewEarningsTab = () => {
