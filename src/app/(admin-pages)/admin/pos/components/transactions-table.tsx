@@ -301,7 +301,7 @@ This action helps maintain historical records and allows for data recovery if ne
                       <TableCell
                         key={Symbol(columnIndex).toString()}
                         colSpan={1}
-                        className="h-2 text-center"
+                        className="h-10 text-center"
                       >
                         <Skeleton className="h-4 w-3/4" />
                       </TableCell>
