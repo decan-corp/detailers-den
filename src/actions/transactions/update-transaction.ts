@@ -131,23 +131,18 @@ export const updateTransaction = authAction(
             },
           });
 
-        const highestServiceCut = usersRef.reduce(
-          (acc, value) => Math.max(acc, value.serviceCutPercentage || 0),
-          0
-        );
-        const computedServiceCutPercentage =
-          highestServiceCut + (service?.serviceCutPercentage || 0);
-
         for (const crewId of transactionService.serviceBy) {
           const crewEarning = crewEarningsRef.find(
             (earning) =>
               earning.crewId === crewId &&
               earning.transactionServiceId === updateTransactionService.id
           );
+          const crew = usersRef.find(({ id }) => crewId === id);
 
-          const amount =
-            ((computedServiceCutPercentage / 100) * Number(priceMatrix.price)) /
+          const computedServiceCutPercentage =
+            ((crew?.serviceCutPercentage || 0) + (service?.serviceCutPercentage || 0)) /
             transactionService.serviceBy.length;
+          const amount = (computedServiceCutPercentage / 100) * Number(priceMatrix.price);
 
           const updateCrewEarning = {
             id: crewEarning?.id || cuid2.createId(),
