@@ -9,13 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { generateResetPasswordToken } from 'src/actions/auth/reset-password';
 import { softDeleteUser } from 'src/actions/users/delete-user';
 import { getUsers, getUsersCount } from 'src/actions/users/get-users';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Role } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
+import { AdminRoute } from 'src/constants/routes';
+import { clientEnv } from 'src/env/client';
 import { UserSelect } from 'src/types/schema';
+import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { userColumns } from './data-columns';
 import { DataTableToolbar } from './data-table-toolbar';
@@ -35,11 +39,13 @@ import { toast } from 'sonner';
 import { create } from 'zustand';
 
 export const useUserAlertDialogStore = create<{
+  selectedUserId: string | null;
   isDeleteDialogOpen: boolean;
-  userIdToDelete: string | null;
+  isResetPasswordDialogOpen: boolean;
 }>(() => ({
+  selectedUserId: null,
   isDeleteDialogOpen: false,
-  userIdToDelete: null,
+  isResetPasswordDialogOpen: false,
 }));
 
 const emptyArray: UserSelect[] = [];
@@ -52,31 +58,20 @@ const UsersTable = () => {
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const isDeleteDialogOpen = useUserAlertDialogStore((state) => state.isDeleteDialogOpen);
-  const userIdToDelete = useUserAlertDialogStore((state) => state.userIdToDelete);
+  const { isDeleteDialogOpen, selectedUserId, isResetPasswordDialogOpen } =
+    useUserAlertDialogStore();
 
   const { mutate: mutateSoftDeleteUser } = useMutation({
     mutationFn: softDeleteUser,
     onMutate: () => {
       useUserAlertDialogStore.setState({
         isDeleteDialogOpen: false,
-        userIdToDelete: null,
+        selectedUserId: null,
       });
     },
     onSuccess: async (result) => {
-      if (result.validationError) {
-        toast.error('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationError || result.serverError) {
+        handleSafeActionError(result);
         return;
       }
 
@@ -85,6 +80,29 @@ const UsersTable = () => {
       });
 
       toast.success('Success soft deleting user');
+    },
+  });
+
+  const { mutate: mutateGenerateResetPasswordToken } = useMutation({
+    mutationFn: generateResetPasswordToken,
+    onMutate: () => {
+      useUserAlertDialogStore.setState({
+        isResetPasswordDialogOpen: false,
+        selectedUserId: null,
+      });
+    },
+    onSuccess: async (result) => {
+      if (result.validationError || result.serverError) {
+        handleSafeActionError(result);
+        return;
+      }
+
+      if (result.data) {
+        await navigator.clipboard.writeText(
+          `${clientEnv.NEXT_PUBLIC_VERCEL_URL}/${AdminRoute.ResetPassword}/${result.data}`
+        );
+        toast.info('Password reset link copied!');
+      }
     },
   });
 
@@ -156,27 +174,43 @@ const UsersTable = () => {
     },
   });
 
-  const onDeleteDialogChange = (open: boolean) => {
-    useUserAlertDialogStore.setState({ isDeleteDialogOpen: open });
-  };
-
-  const userToDelete = useMemo(() => {
-    if (!userIdToDelete) {
+  const selectedUserInfo = useMemo(() => {
+    if (!selectedUserId) {
       return undefined;
     }
-    return users?.find((user) => user.id === userIdToDelete);
-  }, [users, userIdToDelete]);
+    return users?.find((user) => user.id === selectedUserId);
+  }, [users, selectedUserId]);
 
   return (
     <div className="space-y-4">
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
-        onOpenChange={onDeleteDialogChange}
+        onOpenChange={(open: boolean) =>
+          useUserAlertDialogStore.setState({
+            isDeleteDialogOpen: open,
+            ...(open === false && { selectedUserId: null }),
+          })
+        }
         hideButtonTrigger
-        title={`Are you sure you want to delete user "${userToDelete?.name}"?`}
+        title={`Are you sure you want to delete user "${selectedUserInfo?.name}"?`}
         description={`This action will perform soft delete. Soft deletion will mark the user as inactive while retaining their data for potential reactivation.
 This action helps maintain historical records and allows for data recovery if needed.`}
-        onClickConfirm={() => mutateSoftDeleteUser(userIdToDelete as string)}
+        onClickConfirm={() => mutateSoftDeleteUser(selectedUserId as string)}
+      />
+      <ConfirmDialog
+        isOpen={isResetPasswordDialogOpen}
+        onOpenChange={(open: boolean) =>
+          useUserAlertDialogStore.setState({
+            isResetPasswordDialogOpen: open,
+            ...(open === false && { selectedUserId: null }),
+          })
+        }
+        hideButtonTrigger
+        title={`Confirm password reset link generation for "${selectedUserInfo?.name}"`}
+        description={`Are you sure you want to generate a password reset link for ${selectedUserInfo?.name}? 
+This link will allow the user to reset their password. 
+Please ensure that the link is securely communicated to the user.`}
+        onClickConfirm={() => mutateGenerateResetPasswordToken(selectedUserId as string)}
       />
       <DataTableToolbar table={table} />
       <div className="rounded-md border">

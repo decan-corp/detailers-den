@@ -26,6 +26,7 @@ import RequiredIndicator from 'src/components/form/required-indicator';
 import { Entity } from 'src/constants/entities';
 import { users } from 'src/schema';
 import { UserSelect } from 'src/types/schema';
+import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { rolesOptions } from './data-table-options';
 
@@ -74,20 +75,9 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
     mutationFn: addUser,
     mutationKey: [Entity.Users],
     onSuccess: async (result) => {
-      if (result.validationError) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        setError(result.validationError as UserValidationError);
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationError || result.serverError) {
+        handleSafeActionError(result);
+        setError((result.validationError as UserValidationError) || {});
         return;
       }
 
@@ -101,20 +91,9 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
     mutationFn: updateUser,
     mutationKey: [Entity.Users, userIdToEdit],
     onSuccess: async (result) => {
-      if (result.validationError) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        setError(result.validationError as UserValidationError);
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationError || result.serverError) {
+        handleSafeActionError(result);
+        setError((result.validationError as UserValidationError) || {});
         return;
       }
 

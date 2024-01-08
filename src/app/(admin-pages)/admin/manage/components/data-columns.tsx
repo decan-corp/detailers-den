@@ -74,6 +74,17 @@ export const userColumns: ColumnDef<
             >
               Copy ID
             </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() =>
+                useUserAlertDialogStore.setState({
+                  isResetPasswordDialogOpen: true,
+                  selectedUserId: user.id,
+                })
+              }
+            >
+              Reset Password
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer"
@@ -88,7 +99,7 @@ export const userColumns: ColumnDef<
               onClick={() => {
                 useUserAlertDialogStore.setState({
                   isDeleteDialogOpen: true,
-                  userIdToDelete: user.id,
+                  selectedUserId: user.id,
                 });
               }}
             >

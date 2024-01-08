@@ -4,7 +4,7 @@ import { AdminRoute } from 'src/constants/routes';
 
 import { redirect } from 'next/navigation';
 
-const AccountSettingsLayout = async ({ children }: { children: React.ReactNode }) => {
+const AccountSetupLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await getPageSession();
 
   if (!session) {
@@ -14,4 +14,4 @@ const AccountSettingsLayout = async ({ children }: { children: React.ReactNode }
   return <>{children}</>;
 };
 
-export default AccountSettingsLayout;
+export default AccountSetupLayout;
