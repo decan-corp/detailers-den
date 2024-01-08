@@ -116,6 +116,7 @@ const OverviewTab = () => {
             )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Current Month Transactions</CardTitle>
@@ -138,6 +139,7 @@ const OverviewTab = () => {
             )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Yearly Revenue</CardTitle>
@@ -163,6 +165,7 @@ const OverviewTab = () => {
             )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Yearly Transactions</CardTitle>
@@ -188,6 +191,7 @@ const OverviewTab = () => {
           </CardContent>
         </Card>
       </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
@@ -198,21 +202,25 @@ const OverviewTab = () => {
             <OverviewChart />
           </CardContent>
         </Card>
+
         <Card className="col-span-4 lg:col-span-3">
           <CardHeader>
-            <CardTitle>Current Month Employee Earnings</CardTitle>
+            <CardTitle>Current Week Employee Earnings</CardTitle>
             <CardDescription>
-              Total earnings of each employee for the current month.
+              Total earnings of each employee for the current week (
+              {currentWeekDateRange.startDate.format('MMM DD')} -{' '}
+              {currentWeekDateRange.endDate.format('MMM DD')}).
             </CardDescription>
           </CardHeader>
           <CardContent>
             <CrewTransactions
-              startDate={dayjs().startOf('month').toDate()}
-              endDate={dayjs().endOf('month').toDate()}
+              startDate={currentWeekDateRange.startDate.toDate()}
+              endDate={currentWeekDateRange.endDate.toDate()}
             />
           </CardContent>
         </Card>
       </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         <Card className="col-span-4 lg:col-span-3">
           <CardHeader>
@@ -231,17 +239,15 @@ const OverviewTab = () => {
 
         <Card className="col-span-4 lg:col-span-3">
           <CardHeader>
-            <CardTitle>Current Week Employee Earnings</CardTitle>
+            <CardTitle>Current Month Employee Earnings</CardTitle>
             <CardDescription>
-              Total earnings of each employee for the current week (
-              {currentWeekDateRange.startDate.format('MMM DD')} -{' '}
-              {currentWeekDateRange.endDate.format('MMM DD')}).
+              Total earnings of each employee for the current month.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <CrewTransactions
-              startDate={currentWeekDateRange.startDate.toDate()}
-              endDate={currentWeekDateRange.endDate.toDate()}
+              startDate={dayjs().startOf('month').toDate()}
+              endDate={dayjs().endOf('month').toDate()}
             />
           </CardContent>
         </Card>
