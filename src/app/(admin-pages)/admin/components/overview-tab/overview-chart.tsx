@@ -40,7 +40,7 @@ const OverviewChart = () => {
       } else {
         list.push({
           name: day === now.format(dateFormat) ? 'Now' : day,
-          total: 0,
+          total: null,
         });
       }
     }
@@ -61,7 +61,12 @@ const OverviewChart = () => {
           tickFormatter={(value) => `${value}`}
         />
         {/* <Tooltip /> */}
-        <Bar dataKey="total" fill="#adfa1d" radius={[4, 4, 0, 0]} />
+        <Bar
+          dataKey="total"
+          fill="#adfa1d"
+          radius={[4, 4, 0, 0]}
+          label={{ position: 'top', className: 'fill-muted-foreground' }}
+        />
       </BarChart>
     </ResponsiveContainer>
   );

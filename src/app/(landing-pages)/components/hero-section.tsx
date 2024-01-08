@@ -39,7 +39,7 @@ const HeroSection = () => (
               Location:
               <div className="w-40 border-2 border-b border-yellow-400" />
             </div>
-            <div className={twJoin('font-sans text-base font-medium leading-tight')}>
+            <div className={twJoin(inter.className, 'text-base font-medium leading-tight')}>
               L1 B4 Malanting, Amparo Subd., Brgy. 179 Tala, North Caloocan City, Metro Manila, 1425
             </div>
           </div>
@@ -47,7 +47,7 @@ const HeroSection = () => (
             <div className={twJoin(inter.className, 'text-2xl font-semibold')}>
               About Us: <div className="w-40 border-2 border-b border-yellow-400" />
             </div>
-            <div className={twJoin('font-sans text-base font-medium leading-tight')}>
+            <div className={twJoin(inter.className, 'text-base font-medium leading-tight')}>
               Welcome to 185 Detailers Den, your destination for excellence in car care, right here
               in Caloocan. Our passionate team is dedicated to delivering top-notch car detailing
               and washing services. With advanced techniques and an eco-friendly approach, we bring

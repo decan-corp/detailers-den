@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html className="bg-background" lang="en" data-theme="light" suppressHydrationWarning>
-    <body className={twJoin(inter.className, 'h-screen w-full font-sans antialiased')}>
+    <body className={twJoin('h-screen w-full font-sans antialiased', inter.variable)}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
         <QueryProvider>{children}</QueryProvider>
         <Toaster />
