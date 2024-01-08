@@ -17,7 +17,6 @@ import { DataTablePagination } from 'src/components/table/data-table-pagination'
 import { Role } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
-import { clientEnv } from 'src/env/client';
 import { UserSelect } from 'src/types/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -99,7 +98,7 @@ const UsersTable = () => {
 
       if (result.data) {
         await navigator.clipboard.writeText(
-          `${clientEnv.NEXT_PUBLIC_VERCEL_URL}/${AdminRoute.ResetPassword}/${result.data}`
+          `${window.location.origin}${AdminRoute.ResetPassword}/${result.data}`
         );
         toast.info('Password reset link copied!');
       }

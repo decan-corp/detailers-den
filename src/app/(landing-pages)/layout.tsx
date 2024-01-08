@@ -16,9 +16,6 @@ export const viewport: Viewport = {
   ],
 };
 
-// TODO: remove
-// eslint-disable-next-line no-console
-console.log('URL', clientEnv.NEXT_PUBLIC_VERCEL_URL);
 export const metadata: Metadata = {
   metadataBase: new URL(clientEnv.NEXT_PUBLIC_VERCEL_URL),
   title: {

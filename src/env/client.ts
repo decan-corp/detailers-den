@@ -7,8 +7,6 @@ export const clientEnv = createEnv({
   },
 
   experimental__runtimeEnv: {
-    NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : 'http://localhost:3000',
+    NEXT_PUBLIC_VERCEL_URL: `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`,
   },
 });
