@@ -224,7 +224,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   if (isEdit && isFetchingTransactionToEdit) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
+        <span className="loading loading-ring loading-lg text-foreground" />
       </div>
     );
   }
