@@ -26,6 +26,12 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html className="bg-background" lang="en" data-theme="light" suppressHydrationWarning>
+    <head>
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      />
+    </head>
     <body className={twJoin('h-screen w-full font-sans antialiased', inter.variable)}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
         <QueryProvider>{children}</QueryProvider>
