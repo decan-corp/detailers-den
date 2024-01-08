@@ -158,4 +158,17 @@ export const userSessions = mysqlTable('user_sessions', {
   ...dateSchema,
 });
 
+export const resetPasswordTokens = mysqlTable('reset_password_tokens', {
+  id: varchar('id', { length: 255 })
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  userId: varchar('user_id', {
+    length: 255,
+  }).notNull(),
+  // .references(() => users.id),
+  expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
+  isValid: boolean('is_valid').default(true).notNull(),
+  ...commonSchema,
+});
+
 // TODO: profile

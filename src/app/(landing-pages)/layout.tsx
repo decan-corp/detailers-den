@@ -1,5 +1,7 @@
 import './globals.css';
 
+import { clientEnv } from 'src/env/client';
+
 import Footer from './components/footer';
 import Header from './components/header';
 
@@ -15,7 +17,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(`https://${process.env.VERCEL_URL}}`),
+  metadataBase: new URL(clientEnv.NEXT_PUBLIC_SITE_URL),
   title: {
     template: '%s | 185 Detailers Den',
     default: '185 Detailers Den',
@@ -27,7 +29,7 @@ export const metadata: Metadata = {
     title: '185 Detailers Den',
     description:
       '185 Detailers Den is a car detailing and car wash business located in Caloocan City, Philippines.',
-    url: `https://${process.env.VERCEL_URL}`,
+    url: clientEnv.NEXT_PUBLIC_SITE_URL,
     siteName: '185 Detailers Den',
     type: 'website',
   },

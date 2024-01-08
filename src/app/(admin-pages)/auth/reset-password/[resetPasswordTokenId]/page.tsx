@@ -1,5 +1,6 @@
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,46 +12,50 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { setupPassword } from 'src/actions/auth/setup-password';
+import { resetPassword, verifyResetPasswordToken } from 'src/actions/auth/reset-password';
 import RequiredIndicator from 'src/components/form/required-indicator';
+import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
+import { handleSafeActionError } from 'src/utils/error-handling';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { ComponentProps, useState } from 'react';
 import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 
-type ValidationError = Partial<Parameters<typeof setupPassword>[number]>;
+type ValidationError = Partial<Parameters<typeof resetPassword>[number]>;
 
-const AccountSetup = () => {
+const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }) => {
+  const { resetPasswordTokenId } = params;
   const router = useRouter();
   const [error, setError] = useState<ValidationError>({});
-  const {
-    mutate: mutateSetupPassword,
-    isPending,
-    isSuccess,
-  } = useMutation({
-    mutationFn: setupPassword,
+
+  const { error: tokenErrorMessage, isLoading } = useQuery({
+    queryKey: [Entity.ResetPasswordTokens, resetPasswordTokenId],
+    queryFn: async () => {
+      const { data, serverError, validationError } = await verifyResetPasswordToken({
+        resetPasswordTokenId,
+      });
+
+      if (serverError) throw new Error(serverError);
+      if (validationError) throw new Error('Invalid reset token format');
+      return data;
+    },
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+
+  const { mutate: mutateResetPassword, isPending } = useMutation({
+    mutationFn: resetPassword,
     onSuccess: (result) => {
-      if (result.validationError) {
-        toast.error('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        setError(result.validationError as ValidationError);
+      if (result.validationError || result.serverError) {
+        handleSafeActionError(result);
+        setError((result.validationError as ValidationError) || {});
         return;
       }
 
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
-        return;
-      }
-
-      toast.success('Account secured successfully!');
+      toast.success('Password changed successfully!');
 
       setTimeout(() => {
         router.replace(AdminRoute.Login);
@@ -65,20 +70,44 @@ const AccountSetup = () => {
 
     const formData = new FormData(event.currentTarget);
 
-    mutateSetupPassword({
+    mutateResetPassword({
+      resetPasswordTokenId,
       password: formData.get('password') as string,
       confirmPassword: formData.get('confirmPassword') as string,
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <span className="loading loading-ring loading-lg text-foreground" />
+      </div>
+    );
+  }
+
+  if (tokenErrorMessage) {
+    return (
+      <div className="flex h-screen items-center justify-center p-8">
+        <Alert
+          variant="vibrant"
+          className="pointer-events-none z-0 mb-2 min-h-[64px] w-80 text-center"
+        >
+          <AlertTitle>Oops! Something went wrong.</AlertTitle>
+          <AlertDescription>{tokenErrorMessage.message}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen items-center justify-center p-8">
       <Card className="w-full max-w-md">
         <form onSubmit={onSubmit}>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-center text-2xl">Secure Your Account</CardTitle>
+            <CardTitle className="text-center text-2xl">Reset Password</CardTitle>
             <CardDescription className="text-center">
-              Create a strong password to protect your account.
+              You&apos;re almost there! Enter your new password below to regain access to your
+              account. Choose a strong and secure password to keep your account safe.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -86,14 +115,7 @@ const AccountSetup = () => {
               <Label className="flex" htmlFor="password">
                 Password <RequiredIndicator />
               </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={6}
-                disabled={isSuccess}
-              />
+              <Input id="password" name="password" type="password" required minLength={6} />
             </div>
             <div>
               <div className="grid gap-2">
@@ -107,7 +129,6 @@ const AccountSetup = () => {
                   type="password"
                   required
                   minLength={6}
-                  disabled={isSuccess}
                 />
               </div>
               {error.confirmPassword && (
@@ -118,7 +139,7 @@ const AccountSetup = () => {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full" disabled={isPending || isSuccess}>
+            <Button type="submit" className="w-full" disabled={isPending}>
               Submit
             </Button>
           </CardFooter>
@@ -128,4 +149,4 @@ const AccountSetup = () => {
   );
 };
 
-export default AccountSetup;
+export default ForgotPassword;

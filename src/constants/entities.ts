@@ -5,4 +5,5 @@ export enum Entity {
   TransactionServices = 'transactionServices',
   CrewEarnings = 'crewEarnings',
   Metrics = 'metrics',
+  ResetPasswordTokens = 'resetPasswordTokens',
 }
