@@ -3,6 +3,7 @@
 import { Role } from 'src/constants/common';
 import { users } from 'src/schema';
 import { db } from 'src/utils/db';
+import { auth } from 'src/utils/lucia';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import { eq, sql } from 'drizzle-orm';
@@ -15,13 +16,17 @@ export const softDeleteUser = authAction(z.string().cuid2(), async (id, { sessio
     throw new SafeActionError('Forbidden access');
   }
 
-  await db
-    .update(users)
-    .set({
-      deletedById: userId,
-      deletedAt: sql`CURRENT_TIMESTAMP`,
-    })
-    .where(eq(users.id, id));
+  await db.transaction(async (tx) => {
+    await tx
+      .update(users)
+      .set({
+        deletedById: userId,
+        deletedAt: sql`CURRENT_TIMESTAMP`,
+      })
+      .where(eq(users.id, id));
+
+    await auth.invalidateAllUserSessions(id);
+  });
 });
 
 export const recoverUser = authAction(z.string().cuid2(), async (id, { session }) => {
