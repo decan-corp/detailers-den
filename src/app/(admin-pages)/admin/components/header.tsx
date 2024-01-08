@@ -17,7 +17,7 @@ const Header = async () => {
   }
 
   return (
-    <div className="sticky top-0 select-none border-b">
+    <div className="sticky top-0 z-10 select-none border-b">
       <div className="flex h-16 items-center justify-between gap-12 bg-background/30 px-6 backdrop-blur md:justify-normal md:px-12">
         <Drawer>
           <DrawerTrigger asChild className="block sm:hidden">
