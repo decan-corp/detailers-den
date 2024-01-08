@@ -29,7 +29,7 @@ export const login = action(
         .limit(1);
 
       if (!user) {
-        throw new SafeActionError("User doesn't exist");
+        throw new SafeActionError('Incorrect username or password');
       }
 
       const session = await auth.createSession({
