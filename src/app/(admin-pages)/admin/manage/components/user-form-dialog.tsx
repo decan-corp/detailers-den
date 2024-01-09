@@ -36,7 +36,7 @@ import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 import { create } from 'zustand';
 
-type UserValidationError = {
+type ValidationError = {
   [Field in keyof (UserSelect & { confirmPassword: string })]?: string;
 };
 
@@ -51,17 +51,17 @@ export const useUserFormStore = create<{
 const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
   const queryClient = useQueryClient();
 
-  const [error, setError] = useState<UserValidationError>({});
+  const [error, setError] = useState<ValidationError>({});
 
   const isEdit = Boolean(userIdToEdit);
 
   const { data: user, isLoading: isFetchingUserToEdit } = useQuery({
     queryKey: [Entity.Users, userIdToEdit],
     queryFn: async () => {
-      const { data, serverError, validationError } = await getUser(userIdToEdit as string);
+      const { data, serverError, validationErrors } = await getUser(userIdToEdit as string);
 
-      if (serverError || validationError) {
-        toast.error(validationError ? 'Validation error' : 'Server Error', {
+      if (serverError || validationErrors) {
+        toast.error(validationErrors ? 'Validation error' : 'Server Error', {
           description: serverError || 'Invalid user id',
         });
       }
@@ -75,9 +75,9 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
     mutationFn: addUser,
     mutationKey: [Entity.Users],
     onSuccess: async (result) => {
-      if (result.validationError || result.serverError) {
+      if (result.validationErrors || result.serverError) {
         handleSafeActionError(result);
-        setError((result.validationError as UserValidationError) || {});
+        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 
@@ -91,9 +91,9 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
     mutationFn: updateUser,
     mutationKey: [Entity.Users, userIdToEdit],
     onSuccess: async (result) => {
-      if (result.validationError || result.serverError) {
+      if (result.validationErrors || result.serverError) {
         handleSafeActionError(result);
-        setError((result.validationError as UserValidationError) || {});
+        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 

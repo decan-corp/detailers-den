@@ -9,14 +9,10 @@ export class SafeActionError extends Error {}
 const handleReturnedServerError = (e: Error) => {
   console.log('API Error', e);
   if (e instanceof SafeActionError) {
-    return {
-      serverError: e.message,
-    };
+    return e.message;
   }
 
-  return {
-    serverError: 'Something went wrong while executing the operation',
-  };
+  return 'Something went wrong while executing the operation';
 };
 
 export const action = createSafeActionClient({

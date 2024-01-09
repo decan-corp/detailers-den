@@ -26,6 +26,7 @@ import RequiredIndicator from 'src/components/form/required-indicator';
 import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { services } from 'src/schema';
+import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { vehicleSizeOptions } from '../../../pos/components/data-table-options';
 
@@ -39,7 +40,7 @@ import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 import { create } from 'zustand';
 
-type ServiceValidationError = {
+type ValidationError = {
   [Field in keyof typeof services.$inferSelect]?: string;
 };
 
@@ -63,7 +64,7 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
     () => [getDefaultPriceMatrix()]
   );
 
-  const [error, setError] = useState<ServiceValidationError>({});
+  const [error, setError] = useState<ValidationError>({});
 
   const isEdit = Boolean(serviceIdToEdit);
 
@@ -74,10 +75,10 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
   } = useQuery({
     queryKey: [Entity.Services, serviceIdToEdit],
     queryFn: async () => {
-      const { data, serverError, validationError } = await getService(serviceIdToEdit as string);
+      const { data, serverError, validationErrors } = await getService(serviceIdToEdit as string);
 
-      if (serverError || validationError) {
-        toast.error(validationError ? 'Validation error' : 'Server Error', {
+      if (serverError || validationErrors) {
+        toast.error(validationErrors ? 'Validation error' : 'Server Error', {
           description: serverError || 'Invalid service id',
         });
       }
@@ -102,20 +103,9 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
     mutationFn: addService,
     mutationKey: [Entity.Services],
     onSuccess: async (result) => {
-      if (result.validationError) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        setError(result.validationError as ServiceValidationError);
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
+        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 
@@ -129,19 +119,9 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
     mutationFn: updateService,
     mutationKey: [Entity.Services, serviceIdToEdit],
     onSuccess: async (result) => {
-      if (result.validationError) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-        setError(result.validationError as ServiceValidationError);
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
+        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 

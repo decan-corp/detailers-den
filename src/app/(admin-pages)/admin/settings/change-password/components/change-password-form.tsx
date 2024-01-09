@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { changePassword } from 'src/actions/auth/change-password';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { AdminRoute } from 'src/constants/routes';
+import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -24,20 +25,9 @@ const ChangePasswordForm = () => {
   const { mutate: mutateChangePassword, isPending } = useMutation({
     mutationFn: changePassword,
     onSuccess: (result) => {
-      if (result.validationError) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        setError(result.validationError as ValidationError);
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
+        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 

@@ -25,7 +25,7 @@ const LoginForm = () => {
 
     const result = await login({ email, password });
 
-    if (result?.serverError || result?.validationError) {
+    if (result?.serverError || result?.validationErrors) {
       setIsLoading(false);
       setError(result.serverError || 'Validation error');
     }

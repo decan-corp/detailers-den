@@ -33,13 +33,13 @@ const AccountSetup = () => {
   } = useMutation({
     mutationFn: setupPassword,
     onSuccess: (result) => {
-      if (result.validationError) {
+      if (result.validationErrors) {
         toast.error('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
         });
 
-        setError(result.validationError as ValidationError);
+        setError(result.validationErrors as ValidationError);
         return;
       }
 

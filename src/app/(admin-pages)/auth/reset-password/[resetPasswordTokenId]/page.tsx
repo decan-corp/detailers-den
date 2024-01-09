@@ -34,12 +34,12 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
   const { error: tokenErrorMessage, isLoading } = useQuery({
     queryKey: [Entity.ResetPasswordTokens, resetPasswordTokenId],
     queryFn: async () => {
-      const { data, serverError, validationError } = await verifyResetPasswordToken({
+      const { data, serverError, validationErrors } = await verifyResetPasswordToken({
         resetPasswordTokenId,
       });
 
       if (serverError) throw new Error(serverError);
-      if (validationError) throw new Error('Invalid reset token format');
+      if (validationErrors) throw new Error('Invalid reset token format');
       return data;
     },
     retry: 1,
@@ -49,9 +49,9 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
   const { mutate: mutateResetPassword, isPending } = useMutation({
     mutationFn: resetPassword,
     onSuccess: (result) => {
-      if (result.validationError || result.serverError) {
+      if (result.validationErrors || result.serverError) {
         handleSafeActionError(result);
-        setError((result.validationError as ValidationError) || {});
+        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 
