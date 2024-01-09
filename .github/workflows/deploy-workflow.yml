@@ -80,7 +80,7 @@ jobs:
       - name: Get Environment Variables from Vercel
         run: |
           pnpm vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes
-          pnpm vercel --token=${{ secrets.VERCEL_TOKEN }} env pull
+          pnpm vercel --token=${{ secrets.VERCEL_TOKEN }} env pull .env
 
       - name: Run Database Migration
         run: pnpm drizzle:migrate
@@ -111,7 +111,7 @@ jobs:
       - name: Get Environment Variables from Vercel
         run: |
           pnpm vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes --environment=production
-          pnpm vercel --token=${{ secrets.VERCEL_TOKEN }} env pull --environment=production
+          pnpm vercel --token=${{ secrets.VERCEL_TOKEN }} env pull --environment=production .env
 
       - name: Run Database Migration
         run: pnpm drizzle:migrate
