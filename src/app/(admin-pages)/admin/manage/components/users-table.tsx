@@ -69,7 +69,7 @@ const UsersTable = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.validationError || result.serverError) {
+      if (result.validationErrors || result.serverError) {
         handleSafeActionError(result);
         return;
       }
@@ -91,7 +91,7 @@ const UsersTable = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.validationError || result.serverError) {
+      if (result.validationErrors || result.serverError) {
         handleSafeActionError(result);
         return;
       }

@@ -32,6 +32,7 @@ import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from 'src/constan
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
 import { transactionServices, transactions } from 'src/schema';
+import { handleSafeActionError } from 'src/utils/error-handling';
 
 import {
   modeOfPaymentOptions,
@@ -49,7 +50,7 @@ import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 
-type UserValidationError = {
+type ValidationError = {
   [Field in keyof typeof transactions.$inferSelect]?: string;
 };
 
@@ -76,7 +77,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     VehicleSize.Motorcycle
   );
 
-  const [error, setError] = useState<UserValidationError>({});
+  const [error, setError] = useState<ValidationError>({});
 
   const isEdit = Boolean(transactionId);
 
@@ -87,10 +88,10 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   } = useQuery({
     queryKey: [Entity.Transactions, transactionId],
     queryFn: async () => {
-      const { data, serverError, validationError } = await getTransaction(transactionId as string);
+      const { data, serverError, validationErrors } = await getTransaction(transactionId as string);
 
-      if (serverError || validationError) {
-        toast.error(validationError ? 'Validation error' : 'Server Error');
+      if (serverError || validationErrors) {
+        toast.error(validationErrors ? 'Validation error' : 'Server Error');
       }
 
       return data;
@@ -134,20 +135,9 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     mutationFn: addTransaction,
     mutationKey: [Entity.Transactions],
     onSuccess: async (result) => {
-      if (result.validationError) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        setError(result.validationError as UserValidationError);
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
+        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 
@@ -162,20 +152,9 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     mutationFn: updateTransaction,
     mutationKey: [Entity.Transactions, transactionId],
     onSuccess: async (result) => {
-      if (result.validationError) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        setError(result.validationError as UserValidationError);
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
+        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 

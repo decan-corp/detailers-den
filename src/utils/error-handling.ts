@@ -5,8 +5,8 @@ import { z } from 'zod';
 export const handleSafeActionError = (
   params: Awaited<ReturnType<SafeAction<z.ZodTypeAny, unknown>>>
 ) => {
-  if (params.validationError) {
-    toast.error('Invalid Input', {
+  if (params.validationErrors) {
+    toast.warning('Invalid Input', {
       description:
         'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
     });

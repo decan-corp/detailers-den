@@ -70,7 +70,7 @@ const TransactionsTable = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.validationError) {
+      if (result.validationErrors) {
         toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
@@ -104,7 +104,7 @@ const TransactionsTable = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.validationError) {
+      if (result.validationErrors) {
         toast.warning('Invalid Input', {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
