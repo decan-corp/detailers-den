@@ -65,7 +65,7 @@ const OverviewChart = () => {
           dataKey="total"
           fill="#adfa1d"
           radius={[4, 4, 0, 0]}
-          label={{ position: 'top', className: 'fill-muted-foreground' }}
+          label={{ position: 'top', className: 'fill-muted-foreground text-sm' }}
         />
       </BarChart>
     </ResponsiveContainer>
