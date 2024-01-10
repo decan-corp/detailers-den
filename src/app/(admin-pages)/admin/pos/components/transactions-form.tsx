@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { getServices } from 'src/actions/services/get-services';
 import { addTransaction } from 'src/actions/transactions/add-transaction';
@@ -189,7 +190,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     },
   });
 
-  const saveMostRecentSelectedCrew = () => {
+  const saveRecentSelectedCrew = () => {
     const combinedList = [...savedRecentCrewList, ...recentSelectedCrew];
     const derivedList = combinedList.slice(
       combinedList.length - MAX_LENGTH_RECENT_LIST,
@@ -199,7 +200,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     LocalStorage.set(LocalStorageKey.RecentSelectedCrew, derivedList);
   };
 
-  const saveMostRecentSelectedService = () => {
+  const saveRecentSelectedService = () => {
     const combinedList = [...savedRecentServiceList, ...recentSelectedService];
     const derivedList = combinedList.slice(
       combinedList.length - MAX_LENGTH_RECENT_LIST,
@@ -237,8 +238,8 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       });
     }
 
-    saveMostRecentSelectedCrew();
-    saveMostRecentSelectedService();
+    saveRecentSelectedCrew();
+    saveRecentSelectedService();
   };
 
   const savedTransactionServiceIds = useMemo(
@@ -469,6 +470,8 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                   const orderedServiceOptions = derivedServiceOptions.filter(
                     ({ id }) => !savedRecentServiceList.includes(id)
                   );
+                  const hasBothServiceOptions =
+                    mostRecentServices.length > 0 && orderedServiceOptions.length > 0;
                   return (
                     <div
                       key={service.id}
@@ -525,7 +528,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              {mostRecentServices.length > 0 && (
+                              {hasBothServiceOptions && (
                                 <SelectLabel className="text-muted-foreground/60">
                                   Most Recent
                                 </SelectLabel>
@@ -538,12 +541,8 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                                 </SelectItem>
                               ))}
                             </SelectGroup>
+                            {hasBothServiceOptions && <Separator className="my-1" />}
                             <SelectGroup>
-                              {orderedServiceOptions.length > 0 && (
-                                <SelectLabel className="text-muted-foreground/60">
-                                  Services
-                                </SelectLabel>
-                              )}
                               {orderedServiceOptions.map(({ id, serviceName, description }) => (
                                 <SelectItem key={id} value={id}>
                                   <div className="flex flex-row items-center gap-3">
@@ -579,6 +578,8 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                           const orderedCrewOptions = derivedCrewOptions.filter(
                             ({ id }) => !savedRecentCrewList.includes(id)
                           );
+                          const hasBothCrewOptions =
+                            mostRecentCrewOptions.length > 0 && orderedCrewOptions.length > 0;
                           return (
                             <div
                               key={serviceById || serviceByIndex}
@@ -606,7 +607,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectGroup>
-                                    {mostRecentCrewOptions.length > 0 && (
+                                    {hasBothCrewOptions && (
                                       <SelectLabel className="text-muted-foreground/60">
                                         Most Recent
                                       </SelectLabel>
@@ -619,12 +620,8 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                                       </SelectItem>
                                     ))}
                                   </SelectGroup>
+                                  {hasBothCrewOptions && <Separator className="my-1" />}
                                   <SelectGroup>
-                                    {orderedCrewOptions.length > 0 && (
-                                      <SelectLabel className="text-muted-foreground/60">
-                                        Crews
-                                      </SelectLabel>
-                                    )}
                                     {orderedCrewOptions.map(({ id, name, role }) => (
                                       <SelectItem key={id} value={id}>
                                         <div className="flex flex-row items-center gap-3">
