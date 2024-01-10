@@ -621,7 +621,9 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                                   </SelectGroup>
                                   <SelectGroup>
                                     {orderedCrewOptions.length > 0 && (
-                                      <SelectLabel>Crews</SelectLabel>
+                                      <SelectLabel className="text-muted-foreground/60">
+                                        Crews
+                                      </SelectLabel>
                                     )}
                                     {orderedCrewOptions.map(({ id, name, role }) => (
                                       <SelectItem key={id} value={id}>
