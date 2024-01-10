@@ -37,9 +37,7 @@ jobs:
       # - uses: actions/setup-node@v4
       #   with:
       #     node-version: 18.17.0
-      #     # cache: 'bun' # TODO: bun cache is not yet supported
       #
-      # # TODO: temporary support for caching dependencies
       # - uses: actions/cache@v3
       #   with:
       #     key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
