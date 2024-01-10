@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
 import { TransactionStatus } from 'src/constants/common';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
@@ -33,7 +34,7 @@ export const transactionColumns: ColumnDef<
     | 'vehicleSize'
     | 'modeOfPayment'
     | 'createdAt'
-    | 'completedAt'
+    | 'note'
   >
 >[] = [
   {
@@ -61,15 +62,27 @@ export const transactionColumns: ColumnDef<
     header: ({ column }) => <DataTableColumnHeader column={column} title="MOP" />,
   },
   {
+    accessorKey: 'note',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Note" />,
+    cell: ({ row }) => {
+      const record = row.original;
+      const maxLength = 40;
+      const shortened = record.note?.substring(0, maxLength);
+      return (
+        <HoverCard>
+          <HoverCardTrigger className="cursor-help">
+            {shortened}
+            {(shortened?.length || 0) >= maxLength && '...'}
+          </HoverCardTrigger>
+          <HoverCardContent>{record.note}</HoverCardContent>
+        </HoverCard>
+      );
+    },
+  },
+  {
     accessorKey: 'createdAt',
     accessorFn: ({ createdAt }) => dayjs(createdAt).format(DATE_TABLE_DATE_FORMAT),
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
-  },
-  {
-    accessorKey: 'completedAt',
-    accessorFn: ({ completedAt }) =>
-      completedAt ? dayjs(completedAt).format(DATE_TABLE_DATE_FORMAT) : '',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Completed At" />,
   },
   {
     id: 'actions',

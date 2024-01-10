@@ -78,7 +78,7 @@ export const getTransactions = authAction(
         modeOfPayment: transactions.modeOfPayment,
         createdAt: transactions.createdAt,
         updatedAt: transactions.updatedAt,
-        completedAt: transactions.completedAt,
+        note: transactions.note,
       })
       .from(transactions)
       .$dynamic();
