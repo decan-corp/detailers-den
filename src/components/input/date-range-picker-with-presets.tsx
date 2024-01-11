@@ -42,7 +42,7 @@ export const DateRangePickerWithPresets = ({
   };
 
   const buttonLabel = useMemo(() => {
-    if (selectedPreset && selectedPreset !== 'None') {
+    if (selectedPreset && selectedPreset !== 'All') {
       return selectedPreset;
     }
 

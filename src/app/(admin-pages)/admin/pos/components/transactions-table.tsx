@@ -29,6 +29,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { omit } from 'lodash';
 import { useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
 import { toast } from 'sonner';
@@ -161,9 +162,11 @@ const TransactionsTable = () => {
       sorting,
     ],
     queryFn: async () => {
+      const { createdAt } = filters;
       const { data = [] } = await getTransactions({
         ...(debouncedSearch && { customerName: debouncedSearch, plateNumber: debouncedSearch }),
-        ...filters,
+        ...omit(filters, ['createdAt']),
+        ...(createdAt?.from && createdAt.to && { createdAt }),
         pageSize: pagination.pageSize,
         pageIndex: pagination.pageIndex,
         sortBy: sorting,
@@ -176,9 +179,11 @@ const TransactionsTable = () => {
   const { data: count = 0 } = useQuery({
     queryKey: [Entity.Transactions, 'count', filters, debouncedSearch],
     queryFn: async () => {
+      const { createdAt } = filters;
       const { data = 0 } = await getTransactionsCount({
         ...(debouncedSearch && { customerName: debouncedSearch, plateNumber: debouncedSearch }),
-        ...filters,
+        ...omit(filters, ['createdAt']),
+        ...(createdAt?.from && createdAt.to && { createdAt }),
       });
       return data;
     },
