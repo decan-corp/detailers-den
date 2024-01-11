@@ -107,7 +107,9 @@ export const transactionColumns: ColumnDef<
             </DropdownMenuItem>
             <DropdownMenuItem
               className="cursor-pointer"
-              disabled={transaction.status === TransactionStatus.Paid}
+              disabled={[TransactionStatus.Paid, TransactionStatus.Void].includes(
+                transaction.status
+              )}
               onClick={() => {
                 useTransactionAlertDialogStore.setState({
                   isMarkAsPaidDialogOpen: true,
