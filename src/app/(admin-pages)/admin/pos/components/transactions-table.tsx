@@ -14,7 +14,6 @@ import { getTransactions, getTransactionsCount } from 'src/actions/transactions/
 import { markAsPaidTransaction } from 'src/actions/transactions/mark-as-paid';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
-import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { transactions } from 'src/schema';
 
@@ -31,7 +30,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
-import { DateRange } from 'react-day-picker';
 import { useDebounce } from 'react-use';
 import { toast } from 'sonner';
 import { create } from 'zustand';
@@ -128,6 +126,23 @@ const TransactionsTable = () => {
     },
   });
 
+  const filters = useMemo(
+    () =>
+      columnFilters
+        .filter(({ id }) => id !== 'customerName') // searching with customerName is handled with debounce
+        .reduce(
+          (acc, filter) => ({
+            ...acc,
+            [filter.id]: filter.value,
+          }),
+          {} as Pick<
+            Parameters<typeof getTransactions>[0],
+            'createdAt' | 'modeOfPayment' | 'status' | 'vehicleSize'
+          >
+        ),
+    [columnFilters]
+  );
+
   useDebounce(
     () => {
       const search = columnFilters.find((filter) => filter.id === 'customerName')?.value as
@@ -139,59 +154,19 @@ const TransactionsTable = () => {
     [columnFilters]
   );
 
-  const vehicleSizeFilter = useMemo(
-    () =>
-      columnFilters.find((filter) => filter.id === 'vehicleSize')?.value as
-        | VehicleSize[]
-        | undefined,
-    [columnFilters]
-  );
-
-  const modeOfPaymentFilter = useMemo(
-    () =>
-      columnFilters.find((filter) => filter.id === 'modeOfPayment')?.value as
-        | ModeOfPayment[]
-        | undefined,
-    [columnFilters]
-  );
-
-  const transactionStatusFilter = useMemo(
-    () =>
-      columnFilters.find((filter) => filter.id === 'status')?.value as
-        | TransactionStatus[]
-        | undefined,
-    [columnFilters]
-  );
-
-  const createdAtFilter = useMemo(
-    () => columnFilters.find((filter) => filter.id === 'createdAt')?.value as DateRange | undefined,
-    [columnFilters]
-  );
-
   const { data: transactionsData, isLoading } = useQuery({
     queryKey: [
       Entity.Transactions,
-      vehicleSizeFilter,
-      modeOfPaymentFilter,
-      transactionStatusFilter,
+      filters,
       debouncedSearch,
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
-      createdAtFilter?.to,
-      createdAtFilter?.from,
     ],
     queryFn: async () => {
       const { data = [] } = await getTransactions({
-        ...(debouncedSearch && { customerName: debouncedSearch }),
-        ...(debouncedSearch && { plateNumber: debouncedSearch }),
-        ...(vehicleSizeFilter && { vehicleSize: vehicleSizeFilter }),
-        ...(modeOfPaymentFilter && { modeOfPayment: modeOfPaymentFilter }),
-        ...(transactionStatusFilter && { status: transactionStatusFilter }),
-        ...(createdAtFilter?.from &&
-          createdAtFilter.to && {
-            createdAt: { startDate: createdAtFilter.from, endDate: createdAtFilter.to },
-          }),
+        ...(debouncedSearch && { customerName: debouncedSearch, plateNumber: debouncedSearch }),
+        ...filters,
         pageSize: pagination.pageSize,
         pageIndex: pagination.pageIndex,
         sortBy: sorting,
@@ -202,27 +177,11 @@ const TransactionsTable = () => {
   });
 
   const { data: count = 0 } = useQuery({
-    queryKey: [
-      Entity.Transactions,
-      'count',
-      vehicleSizeFilter,
-      modeOfPaymentFilter,
-      transactionStatusFilter,
-      debouncedSearch,
-      createdAtFilter?.to,
-      createdAtFilter?.from,
-    ],
+    queryKey: [Entity.Transactions, 'count', filters, debouncedSearch],
     queryFn: async () => {
       const { data = 0 } = await getTransactionsCount({
-        ...(debouncedSearch && { customerName: debouncedSearch }),
-        ...(debouncedSearch && { plateNumber: debouncedSearch }),
-        ...(vehicleSizeFilter && { vehicleSize: vehicleSizeFilter }),
-        ...(modeOfPaymentFilter && { modeOfPayment: modeOfPaymentFilter }),
-        ...(transactionStatusFilter && { status: transactionStatusFilter }),
-        ...(createdAtFilter?.from &&
-          createdAtFilter.to && {
-            createdAt: { startDate: createdAtFilter.from, endDate: createdAtFilter.to },
-          }),
+        ...(debouncedSearch && { customerName: debouncedSearch, plateNumber: debouncedSearch }),
+        ...filters,
       });
       return data;
     },
