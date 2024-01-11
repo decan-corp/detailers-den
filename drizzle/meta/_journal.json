@@ -57,6 +57,13 @@
       "when": 1704700527901,
       "tag": "0007_shocking_blockbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1704948187753,
+      "tag": "0008_cold_rumiko_fujikawa",
+      "breakpoints": true
     }
   ]
 }

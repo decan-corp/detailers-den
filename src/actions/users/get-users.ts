@@ -44,7 +44,6 @@ export const getUsers = authAction(
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
         serviceCutPercentage: users.serviceCutPercentage,
-        isFirstTimeLogin: users.isFirstTimeLogin,
       })
       .from(users)
       .$dynamic();

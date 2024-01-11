@@ -55,6 +55,8 @@ import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
 
+const MAX_LENGTH_RECENT_LIST = 2;
+
 type ValidationError = {
   [Field in keyof typeof transactions.$inferSelect]?: string;
 };
@@ -71,7 +73,7 @@ const getDefaultServiceValue = () => ({
   id: cuid2.createId(),
 });
 
-const MAX_LENGTH_RECENT_LIST = 2;
+// TODO: optimize and create components for transaction services
 const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -91,17 +93,15 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
 
   const savedRecentCrewList = useMemo(() => {
     const savedList = LocalStorage.get<string[]>(LocalStorageKey.RecentSelectedCrew);
-    if (!savedList || !Array.isArray(savedList)) {
-      return [];
-    }
+    if (!savedList || !Array.isArray(savedList)) return [];
+
     return savedList;
   }, []);
 
   const savedRecentServiceList = useMemo(() => {
     const savedList = LocalStorage.get<string[]>(LocalStorageKey.RecentSelectedService);
-    if (!savedList || !Array.isArray(savedList)) {
-      return [];
-    }
+    if (!savedList || !Array.isArray(savedList)) return [];
+
     return savedList;
   }, []);
 
