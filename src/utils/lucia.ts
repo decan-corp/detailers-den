@@ -11,7 +11,7 @@ import { nextjs_future } from 'lucia/middleware';
 
 dayjs.extend(duration);
 
-const transformDbAttributes = <T extends Record<string, unknown>>(data: T): T =>
+const transformDbColumns = <T extends Record<string, unknown>>(data: T): T =>
   Object.entries(data).reduce(
     (acc, [key, value]) => ({
       ...acc,
@@ -36,7 +36,7 @@ export const auth = lucia({
     idlePeriod: dayjs.duration(3, 'days').as('milliseconds'),
   },
   getUserAttributes: (data) => {
-    const userData = transformDbAttributes(data);
+    const userData = transformDbColumns(data);
     return {
       email: userData.email,
       role: userData.role,

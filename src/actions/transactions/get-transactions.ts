@@ -58,8 +58,8 @@ const searchSchema = z.object({
   customerName: z.string().toLowerCase().optional(),
   createdAt: z
     .object({
-      startDate: z.date(),
-      endDate: z.date(),
+      from: z.date(),
+      to: z.date(),
     })
     .optional(),
 });
@@ -78,7 +78,7 @@ export const getTransactions = authAction(
         modeOfPayment: transactions.modeOfPayment,
         createdAt: transactions.createdAt,
         updatedAt: transactions.updatedAt,
-        completedAt: transactions.completedAt,
+        note: transactions.note,
       })
       .from(transactions)
       .$dynamic();
@@ -96,7 +96,7 @@ export const getTransactions = authAction(
             })
           : undefined,
         params.createdAt
-          ? between(transactions.createdAt, params.createdAt.startDate, params.createdAt.endDate)
+          ? between(transactions.createdAt, params.createdAt.from, params.createdAt.to)
           : undefined
       )
     );
@@ -142,7 +142,7 @@ export const getTransactionsCount = authAction(searchSchema, async (params) => {
           })
         : undefined,
       params.createdAt
-        ? between(transactions.createdAt, params.createdAt.startDate, params.createdAt.endDate)
+        ? between(transactions.createdAt, params.createdAt.from, params.createdAt.to)
         : undefined
     )
   );

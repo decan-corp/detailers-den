@@ -44,7 +44,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
             initialDateRange={{ from: undefined, to: undefined }}
             placeholder="Filter by date"
             options={{
-              None: {
+              All: {
                 from: undefined,
                 to: undefined,
               },

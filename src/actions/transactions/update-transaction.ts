@@ -131,6 +131,9 @@ export const updateTransaction = authAction(
             },
           });
 
+        // TODO: This should be list of transaction services with transaction service ID
+        // TODO: in order for us to be able to edit the crew which is currently disabled.
+        // TODO: This will also able us to edit the amount as well in the future
         for (const crewId of transactionService.serviceBy) {
           const crewEarning = crewEarningsRef.find(
             (earning) =>
