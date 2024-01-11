@@ -131,10 +131,7 @@ const TransactionsTable = () => {
       columnFilters
         .filter(({ id }) => id !== 'customerName') // searching with customerName is handled with debounce
         .reduce(
-          (acc, filter) => ({
-            ...acc,
-            [filter.id]: filter.value,
-          }),
+          (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
           {} as Pick<
             Parameters<typeof getTransactions>[0],
             'createdAt' | 'modeOfPayment' | 'status' | 'vehicleSize'
@@ -145,7 +142,7 @@ const TransactionsTable = () => {
 
   useDebounce(
     () => {
-      const search = columnFilters.find((filter) => filter.id === 'customerName')?.value as
+      const search = columnFilters.find(({ id }) => id === 'customerName')?.value as
         | string
         | undefined;
       setDebouncedSearch(search || '');

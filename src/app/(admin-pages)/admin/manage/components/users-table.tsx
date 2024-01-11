@@ -14,7 +14,6 @@ import { softDeleteUser } from 'src/actions/users/delete-user';
 import { getUsers, getUsersCount } from 'src/actions/users/get-users';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
-import { Role } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
 import { UserSelect } from 'src/types/schema';
@@ -116,15 +115,21 @@ const UsersTable = () => {
     [columnFilters]
   );
 
-  const roleFilter = useMemo(
-    () => columnFilters.find((filter) => filter.id === 'role')?.value as Role[] | undefined,
+  const filters = useMemo(
+    () =>
+      columnFilters
+        .filter(({ id }) => id !== 'email') // searching with email is handled with debounce
+        .reduce(
+          (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
+          {} as Pick<Parameters<typeof getUsers>[0], 'role'>
+        ),
     [columnFilters]
   );
 
   const { data: users, isLoading } = useQuery({
     queryKey: [
       Entity.Users,
-      roleFilter,
+      filters,
       debouncedSearch,
       pagination.pageIndex,
       pagination.pageSize,
@@ -132,9 +137,8 @@ const UsersTable = () => {
     ],
     queryFn: async () => {
       const { data = [] } = await getUsers({
-        ...(roleFilter && { role: roleFilter }),
-        ...(debouncedSearch && { name: debouncedSearch }),
-        ...(debouncedSearch && { email: debouncedSearch }),
+        ...filters,
+        ...(debouncedSearch && { name: debouncedSearch, email: debouncedSearch }),
         pageSize: pagination.pageSize,
         pageIndex: pagination.pageIndex,
         sortBy: sorting,
@@ -144,12 +148,11 @@ const UsersTable = () => {
   });
 
   const { data: count = 0 } = useQuery({
-    queryKey: [Entity.Users, 'count', roleFilter, debouncedSearch],
+    queryKey: [Entity.Users, 'count', filters, debouncedSearch],
     queryFn: async () => {
       const { data = 0 } = await getUsersCount({
-        ...(roleFilter && { role: roleFilter }),
-        ...(debouncedSearch && { name: debouncedSearch }),
-        ...(debouncedSearch && { email: debouncedSearch }),
+        ...filters,
+        ...(debouncedSearch && { name: debouncedSearch, email: debouncedSearch }),
       });
       return data;
     },
