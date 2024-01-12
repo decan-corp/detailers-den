@@ -171,6 +171,10 @@ export const updateTransaction = authAction(
         }
       }
 
+      if (totalPrice < Number(transactionData.discount)) {
+        throw new SafeActionError("Discount can't be higher than the total price.");
+      }
+
       const discountedPrice = totalPrice - (Number(transactionData.discount) || 0);
 
       await tx

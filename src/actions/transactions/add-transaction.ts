@@ -41,7 +41,7 @@ export const addTransaction = authAction(
               return value.length === uniqueServiceIds.length;
             },
             {
-              message: 'Service must be unique',
+              message: 'Service must be unique.',
             }
           ),
       })
@@ -72,11 +72,11 @@ export const addTransaction = authAction(
         );
 
         if (!priceMatrix) {
-          throw new SafeActionError('Invalid price matrix');
+          throw new SafeActionError('Invalid price matrix.');
         }
 
         if (!service) {
-          throw new SafeActionError('Invalid transaction service id');
+          throw new SafeActionError('Invalid transaction service id.');
         }
 
         const transactionServiceId = cuid2.createId();
@@ -111,6 +111,10 @@ export const addTransaction = authAction(
         (total, value) => total + Number(value.price),
         0
       );
+
+      if (totalPrice < Number(transactionData.discount)) {
+        throw new SafeActionError("Discount can't be higher than the total price.");
+      }
 
       const discountedPrice = totalPrice - (Number(transactionData.discount) || 0);
 
