@@ -56,6 +56,13 @@ export const updateTransaction = authAction(
       throw new SafeActionError("Transaction doesn't exist.");
     }
 
+    const updateThresholdDays = 30;
+    if (dayjs().diff(dayjs(transaction.createdAt), 'days') > updateThresholdDays) {
+      throw new SafeActionError(
+        `You may no longer update a transaction that was created more than ${updateThresholdDays} days ago.`
+      );
+    }
+
     const crewUpdateThreshold = 20;
     if (
       ![Role.Admin, Role.Cashier].includes(role) &&
