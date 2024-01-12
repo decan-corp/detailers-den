@@ -1,6 +1,6 @@
 'use client';
 
-import { LocalStorageKey } from 'src/constants/local-storage';
+import { LocalStorageKey } from 'src/constants/storage-keys';
 
 class LocalStorage {
   static get<T = unknown>(key: LocalStorageKey) {

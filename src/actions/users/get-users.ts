@@ -114,7 +114,15 @@ export const getUser = authAction(z.string().cuid2(), async (id, { session }) =>
     throw new SafeActionError('Forbidden access');
   }
 
-  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  const [user] = await db.select().from(users).where(eq(users.id, id));
+
+  return user || undefined;
+});
+
+export const getUserBySession = authAction(z.object({}), async (_, { session }) => {
+  const { userId } = session.user;
+
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
 
   return user || undefined;
 });

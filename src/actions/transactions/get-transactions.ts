@@ -77,6 +77,7 @@ export const getTransactions = authAction(
         totalPrice: transactions.totalPrice,
         modeOfPayment: transactions.modeOfPayment,
         createdAt: transactions.createdAt,
+        completedAt: transactions.completedAt,
         updatedAt: transactions.updatedAt,
         note: transactions.note,
       })
