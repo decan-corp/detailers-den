@@ -15,7 +15,7 @@ import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { eq, inArray, sql } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-zod';
-import { omit, uniq, uniqBy } from 'lodash';
+import { clamp, omit, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
 
 export const updateTransaction = authAction(
@@ -142,9 +142,12 @@ export const updateTransaction = authAction(
           );
           const crew = usersRef.find(({ id }) => crewId === id);
 
-          const computedServiceCutPercentage =
+          const computedServiceCutPercentage = clamp(
             ((crew?.serviceCutPercentage || 0) + (service?.serviceCutPercentage || 0)) /
-            transactionService.serviceBy.length;
+              transactionService.serviceBy.length,
+            0,
+            100
+          );
           const amount = (computedServiceCutPercentage / 100) * Number(priceMatrix.price);
 
           const updateCrewEarning = {
