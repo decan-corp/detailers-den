@@ -15,7 +15,9 @@ import { markAsPaidTransaction } from 'src/actions/transactions/mark-as-paid';
 import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
+import { LocalStorageKey } from 'src/constants/storage-keys';
 import { transactions } from 'src/schema';
+import LocalStorage from 'src/utils/local-storage';
 
 import { transactionColumns } from './data-columns';
 import { DataTableToolbar } from './data-table-toolbar';
@@ -25,13 +27,14 @@ import {
   ColumnFiltersState,
   PaginationState,
   SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { omit } from 'lodash';
-import { useMemo, useState } from 'react';
-import { useDebounce } from 'react-use';
+import { isEqual, omit } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
+import { useDebounce, useEffectOnce, usePrevious } from 'react-use';
 import { toast } from 'sonner';
 import { create } from 'zustand';
 
@@ -51,14 +54,28 @@ const emptyArray: (typeof transactions.$inferSelect)[] = [];
 
 const TransactionsTable = () => {
   const queryClient = useQueryClient();
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const prevColumnVisibility = usePrevious(columnVisibility);
 
   const { isDeleteDialogOpen, userIdToDelete, isMarkAsPaidDialogOpen, userIdToMarkAsPaid } =
     useTransactionAlertDialogStore((state) => state);
+
+  useEffect(() => {
+    if (!isEqual(prevColumnVisibility || {}, columnVisibility)) {
+      LocalStorage.set(LocalStorageKey.ColumnVisibility, columnVisibility);
+    }
+  }, [columnVisibility, prevColumnVisibility]);
+
+  useEffectOnce(() => {
+    setColumnVisibility(
+      (LocalStorage.get(LocalStorageKey.ColumnVisibility) as VisibilityState) || {}
+    );
+  });
 
   const { mutate: mutateSoftDeleteUser, isPending: isSoftDeletingUser } = useMutation({
     mutationFn: softDeleteTransaction,
@@ -197,6 +214,7 @@ const TransactionsTable = () => {
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     manualSorting: true,
     manualFiltering: true,
     manualPagination: true,
@@ -205,6 +223,7 @@ const TransactionsTable = () => {
       sorting,
       columnFilters,
       pagination,
+      columnVisibility,
     },
   });
 

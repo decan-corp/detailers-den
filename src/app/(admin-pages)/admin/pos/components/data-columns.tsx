@@ -35,6 +35,8 @@ export const transactionColumns: ColumnDef<
     | 'modeOfPayment'
     | 'createdAt'
     | 'note'
+    | 'completedAt'
+    | 'updatedAt'
   >
 >[] = [
   {
@@ -83,6 +85,18 @@ export const transactionColumns: ColumnDef<
     accessorKey: 'createdAt',
     accessorFn: ({ createdAt }) => dayjs(createdAt).format(DATE_TABLE_DATE_FORMAT),
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
+  },
+  {
+    accessorKey: 'completedAt',
+    accessorFn: ({ completedAt }) =>
+      completedAt ? dayjs(completedAt).format(DATE_TABLE_DATE_FORMAT) : '',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Completed At" />,
+  },
+  {
+    accessorKey: 'updatedAt',
+    accessorFn: ({ updatedAt }) =>
+      updatedAt ? dayjs(updatedAt).format(DATE_TABLE_DATE_FORMAT) : '',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
   },
   {
     id: 'actions',

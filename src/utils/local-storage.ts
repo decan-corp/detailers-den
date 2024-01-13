@@ -19,7 +19,7 @@ class LocalStorage {
   }
 
   static set(key: LocalStorageKey, payload: Record<string, unknown> | number | string | string[]) {
-    localStorage.setItem(key, JSON.stringify(payload));
+    localStorage.setItem(key, JSON.stringify(payload ?? {}));
   }
 
   static delete(key: LocalStorageKey) {
