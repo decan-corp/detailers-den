@@ -104,7 +104,7 @@ export const resetPassword = action(
       }
 
       const [user] = await tx
-        .select({ email: users.email })
+        .select({ id: users.id, email: users.email })
         .from(users)
         .where(and(isNull(users.deletedAt), eq(users.id, resetPasswordToken.userId)));
 
@@ -119,6 +119,13 @@ export const resetPassword = action(
           updatedById: resetPasswordToken.userId,
         })
         .where(eq(resetPasswordTokens.id, data.resetPasswordTokenId));
+
+      await tx
+        .update(users)
+        .set({
+          isFirstTimeLogin: false,
+        })
+        .where(eq(users.id, user.id));
 
       await auth.updateKeyPassword(ProviderId.email, user.email, data.password);
       await auth.invalidateAllUserSessions(resetPasswordToken.userId);
