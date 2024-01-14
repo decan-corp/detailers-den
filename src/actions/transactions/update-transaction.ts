@@ -15,7 +15,7 @@ import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { eq, inArray, sql } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-zod';
-import { omit, uniq, uniqBy } from 'lodash';
+import { clamp, omit, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
 
 export const updateTransaction = authAction(
@@ -54,6 +54,13 @@ export const updateTransaction = authAction(
 
     if (!transaction) {
       throw new SafeActionError("Transaction doesn't exist.");
+    }
+
+    const updateThresholdDays = 30;
+    if (dayjs().diff(dayjs(transaction.createdAt), 'days') > updateThresholdDays) {
+      throw new SafeActionError(
+        `You may no longer update a transaction that was created more than ${updateThresholdDays} days ago.`
+      );
     }
 
     const crewUpdateThreshold = 20;
@@ -142,9 +149,12 @@ export const updateTransaction = authAction(
           );
           const crew = usersRef.find(({ id }) => crewId === id);
 
-          const computedServiceCutPercentage =
+          const computedServiceCutPercentage = clamp(
             ((crew?.serviceCutPercentage || 0) + (service?.serviceCutPercentage || 0)) /
-            transactionService.serviceBy.length;
+              transactionService.serviceBy.length,
+            0,
+            100
+          );
           const amount = (computedServiceCutPercentage / 100) * Number(priceMatrix.price);
 
           const updateCrewEarning = {
@@ -166,6 +176,10 @@ export const updateTransaction = authAction(
               },
             });
         }
+      }
+
+      if (totalPrice < Number(transactionData.discount)) {
+        throw new SafeActionError("Discount can't be higher than the total price.");
       }
 
       const discountedPrice = totalPrice - (Number(transactionData.discount) || 0);

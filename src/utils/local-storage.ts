@@ -1,6 +1,6 @@
 'use client';
 
-import { LocalStorageKey } from 'src/constants/local-storage';
+import { LocalStorageKey } from 'src/constants/storage-keys';
 
 class LocalStorage {
   static get<T = unknown>(key: LocalStorageKey) {
@@ -19,7 +19,7 @@ class LocalStorage {
   }
 
   static set(key: LocalStorageKey, payload: Record<string, unknown> | number | string | string[]) {
-    localStorage.setItem(key, JSON.stringify(payload));
+    localStorage.setItem(key, JSON.stringify(payload ?? {}));
   }
 
   static delete(key: LocalStorageKey) {

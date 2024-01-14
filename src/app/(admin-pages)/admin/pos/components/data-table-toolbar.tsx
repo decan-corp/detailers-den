@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DateRangePickerWithPresets } from 'src/components/input/date-range-picker-with-presets';
 import { DataTableFacetedFilter } from 'src/components/table/data-table-faceted-filter';
+import DataTableViewOptions from 'src/components/table/data-table-view-options';
 import { DATE_RANGE_OPTIONS } from 'src/constants/options';
 import { AdminRoute } from 'src/constants/routes';
 
@@ -28,7 +29,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
   const [resetKey, setResetKey] = useState(cuid2.createId());
 
   return (
-    <div className="flex flex-col-reverse justify-between gap-y-4 md:flex-row md:items-center">
+    <div className="flex flex-col-reverse justify-between gap-x-2 gap-y-4 md:flex-row md:items-center">
       <div className="flex flex-1 flex-wrap items-center gap-2">
         <Input
           placeholder="Search by name or plate number"
@@ -94,9 +95,12 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
           </Button>
         )}
       </div>
-      <Button className="w-max" variant="outline">
-        <Link href={AdminRoute.AddTransaction}>Add Transaction</Link>
-      </Button>
+      <div className="flex flex-row-reverse justify-end gap-4 md:flex-row">
+        <DataTableViewOptions table={table} />
+        <Button className="w-max" variant="outline">
+          <Link href={AdminRoute.AddTransaction}>Add Transaction</Link>
+        </Button>
+      </div>
     </div>
   );
 };

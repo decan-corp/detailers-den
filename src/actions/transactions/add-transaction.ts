@@ -13,7 +13,7 @@ import { transactionServicesSchema } from './zod-schema';
 import cuid2 from '@paralleldrive/cuid2';
 import { inArray, sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
-import { uniq, uniqBy } from 'lodash';
+import { clamp, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
 
 export const addTransaction = authAction(
@@ -41,7 +41,7 @@ export const addTransaction = authAction(
               return value.length === uniqueServiceIds.length;
             },
             {
-              message: 'Service must be unique',
+              message: 'Service must be unique.',
             }
           ),
       })
@@ -72,11 +72,11 @@ export const addTransaction = authAction(
         );
 
         if (!priceMatrix) {
-          throw new SafeActionError('Invalid price matrix');
+          throw new SafeActionError('Invalid price matrix.');
         }
 
         if (!service) {
-          throw new SafeActionError('Invalid transaction service id');
+          throw new SafeActionError('Invalid transaction service id.');
         }
 
         const transactionServiceId = cuid2.createId();
@@ -90,9 +90,12 @@ export const addTransaction = authAction(
 
         transactionService.serviceBy.forEach((crewId) => {
           const crew = usersRef.find(({ id }) => crewId === id);
-          const computedServiceCutPercentage =
+          const computedServiceCutPercentage = clamp(
             ((crew?.serviceCutPercentage || 0) + (service?.serviceCutPercentage || 0)) /
-            transactionService.serviceBy.length;
+              transactionService.serviceBy.length,
+            0,
+            100
+          );
           const amount = (computedServiceCutPercentage / 100) * Number(priceMatrix.price);
 
           insertCrewEarnings.push({
@@ -108,6 +111,10 @@ export const addTransaction = authAction(
         (total, value) => total + Number(value.price),
         0
       );
+
+      if (totalPrice < Number(transactionData.discount)) {
+        throw new SafeActionError("Discount can't be higher than the total price.");
+      }
 
       const discountedPrice = totalPrice - (Number(transactionData.discount) || 0);
 

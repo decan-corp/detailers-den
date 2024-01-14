@@ -1,4 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
+
 import { AdminRoute } from 'src/constants/routes';
 
 import { getPageSession } from './get-page-session';
