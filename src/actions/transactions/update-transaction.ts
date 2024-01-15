@@ -24,7 +24,6 @@ export const updateTransaction = authAction(
       createdById: true,
       updatedById: true,
       deletedById: true,
-      createdAt: true,
       updatedAt: true,
       deletedAt: true,
       totalPrice: true,
@@ -124,6 +123,7 @@ export const updateTransaction = authAction(
           createdById: userId,
           price: String(priceMatrix.price),
           transactionId: transactionData.id,
+          createdAt: data.createdAt,
         };
 
         totalPrice += Number(priceMatrix.price);
@@ -164,6 +164,7 @@ export const updateTransaction = authAction(
             crewId,
             amount: String(amount),
             createdById: userId,
+            createdAt: data.createdAt,
           };
 
           await tx

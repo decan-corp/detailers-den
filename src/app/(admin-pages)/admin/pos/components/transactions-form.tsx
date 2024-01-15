@@ -34,6 +34,7 @@ import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from 'src/constan
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
 import { LocalStorageKey } from 'src/constants/storage-keys';
+import useClientSession from 'src/hooks/use-client-session';
 import { transactionServices, transactions } from 'src/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 import LocalStorage from 'src/utils/local-storage';
@@ -48,6 +49,7 @@ import { useAutoAnimate } from '@formkit/auto-animate/react';
 import cuid2 from '@paralleldrive/cuid2';
 import { SelectGroup } from '@radix-ui/react-select';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 import { PlusCircleIcon, XIcon } from 'lucide-react';
 import { notFound, useRouter } from 'next/navigation';
 import { ComponentProps, useEffect, useMemo, useState } from 'react';
@@ -78,6 +80,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [parent] = useAutoAnimate();
+
   const [transactionServicesState, setTransactionServicesState] = useImmer<Service[]>(() => [
     getDefaultServiceValue(),
   ]);
@@ -86,8 +89,9 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   const [selectedVehicleSize, setSelectedVehicleSize] = useState<VehicleSize>(
     VehicleSize.Motorcycle
   );
-
   const [error, setError] = useState<ValidationError>({});
+
+  const { data: loggedInUser, isLoading: isFetchingSession } = useClientSession();
 
   const isEdit = Boolean(transactionId);
 
@@ -228,6 +232,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
         id: transactionId,
         plateNumber: data.plateNumber.toUpperCase(),
         transactionServices: transactionServicesState,
+        createdAt: dayjs(data.createdAt).toDate(),
       });
     } else {
       const data = payload as typeof transactions.$inferInsert;
@@ -247,7 +252,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     [transaction?.transactionServices]
   );
 
-  if (isEdit && isFetchingTransactionToEdit) {
+  if (isEdit && (isFetchingTransactionToEdit || isFetchingSession)) {
     return (
       <div className="flex h-96 items-center justify-center">
         <span className="loading loading-ring loading-lg text-foreground" />
@@ -269,6 +274,22 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 py-4">
+              {isEdit &&
+                loggedInUser &&
+                [Role.Admin, Role.Accounting].includes(loggedInUser.role) && (
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="createdAt" className="col-span-2 flex justify-end">
+                      Created At
+                    </Label>
+                    <Input
+                      id="createdAt"
+                      name="createdAt"
+                      className="col-span-4"
+                      defaultValue={dayjs(transaction?.createdAt).format('YYYY-MM-DDTHH:mm')}
+                      type="datetime-local"
+                    />
+                  </div>
+                )}
               <div className="grid grid-cols-6 items-center gap-4">
                 <Label htmlFor="customerName" className="col-span-2 flex justify-end">
                   Customer Name
