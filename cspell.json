@@ -24,7 +24,8 @@
     "immer",
     "formkit",
     "availment",
-    "sonner"
+    "sonner",
+    "ddthh"
   ],
   "ignorePaths": [
     "node_modules/",

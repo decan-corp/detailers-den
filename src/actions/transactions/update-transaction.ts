@@ -21,10 +21,10 @@ import { z } from 'zod';
 export const updateTransaction = authAction(
   createSelectSchema(transactions)
     .omit({
+      createdAt: true,
       createdById: true,
       updatedById: true,
       deletedById: true,
-      createdAt: true,
       updatedAt: true,
       deletedAt: true,
       totalPrice: true,
@@ -33,6 +33,13 @@ export const updateTransaction = authAction(
     })
     .merge(
       z.object({
+        createdAt: z
+          .date({ invalid_type_error: 'Invalid date and time format.' })
+          .max(dayjs().toDate(), 'Please select a date and time on or before today.')
+          .min(
+            dayjs().startOf('year').toDate(),
+            'Please enter a date and time within the current year.'
+          ),
         transactionServices: z
           .array(transactionServicesSchema.extend({ id: z.string().cuid2().optional() }))
           .min(1)
@@ -124,6 +131,7 @@ export const updateTransaction = authAction(
           createdById: userId,
           price: String(priceMatrix.price),
           transactionId: transactionData.id,
+          createdAt: data.createdAt,
         };
 
         totalPrice += Number(priceMatrix.price);
@@ -164,6 +172,7 @@ export const updateTransaction = authAction(
             crewId,
             amount: String(amount),
             createdById: userId,
+            createdAt: data.createdAt,
           };
 
           await tx
