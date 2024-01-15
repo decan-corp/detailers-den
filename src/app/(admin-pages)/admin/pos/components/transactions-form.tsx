@@ -277,17 +277,26 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
               {isEdit &&
                 loggedInUser &&
                 [Role.Admin, Role.Accounting].includes(loggedInUser.role) && (
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="createdAt" className="col-span-2 flex justify-end">
-                      Created At
-                    </Label>
-                    <Input
-                      id="createdAt"
-                      name="createdAt"
-                      className="col-span-4"
-                      defaultValue={dayjs(transaction?.createdAt).format('YYYY-MM-DDTHH:mm')}
-                      type="datetime-local"
-                    />
+                  <div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="createdAt" className="col-span-2 flex justify-end">
+                        Created At
+                      </Label>
+                      <Input
+                        id="createdAt"
+                        name="createdAt"
+                        className={twJoin('col-span-4', error.discount && 'border-destructive-200')}
+                        defaultValue={dayjs(transaction?.createdAt).format('YYYY-MM-DDTHH:mm')}
+                        type="datetime-local"
+                      />
+                    </div>
+                    {error.createdAt && (
+                      <div className="grid grid-cols-6">
+                        <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
+                          {error.createdAt}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               <div className="grid grid-cols-6 items-center gap-4">

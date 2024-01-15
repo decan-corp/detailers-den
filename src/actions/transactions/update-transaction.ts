@@ -21,6 +21,7 @@ import { z } from 'zod';
 export const updateTransaction = authAction(
   createSelectSchema(transactions)
     .omit({
+      createdAt: true,
       createdById: true,
       updatedById: true,
       deletedById: true,
@@ -32,6 +33,13 @@ export const updateTransaction = authAction(
     })
     .merge(
       z.object({
+        createdAt: z
+          .date({ invalid_type_error: 'Invalid date and time format.' })
+          .max(dayjs().toDate(), 'Please select a date and time on or before today.')
+          .min(
+            dayjs().startOf('year').toDate(),
+            'Please enter a date and time within the current year.'
+          ),
         transactionServices: z
           .array(transactionServicesSchema.extend({ id: z.string().cuid2().optional() }))
           .min(1)
