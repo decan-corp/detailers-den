@@ -135,6 +135,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   useEffect(() => {
     if (isEdit && transaction) {
       setTransactionServicesState(transaction.transactionServices);
+      setSelectedVehicleSize(transaction.vehicleSize);
     }
   }, [isEdit, transaction, setTransactionServicesState]);
 
@@ -143,6 +144,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     queryFn: async () => {
       const { data } = await getServices({
         sortBy: { id: 'serviceName', desc: false },
+        pageSize: 99,
       });
       return data;
     },
@@ -154,6 +156,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       const { data } = await getUsers({
         role: [Role.Crew, Role.Detailer, Role.StayInCrew],
         sortBy: { id: 'name', desc: false },
+        pageSize: 99,
       });
       return data;
     },
