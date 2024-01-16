@@ -37,7 +37,7 @@ export const updateTransaction = authAction(
           .date({ invalid_type_error: 'Invalid date and time format.' })
           .max(dayjs().toDate(), 'Please select a date and time on or before today.')
           .min(
-            dayjs().startOf('year').toDate(),
+            dayjs().subtract(60, 'days').startOf('day').toDate(),
             'Please enter a date and time within the current year.'
           ),
         transactionServices: z
