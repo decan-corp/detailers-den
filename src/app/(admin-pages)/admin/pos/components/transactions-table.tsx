@@ -12,7 +12,7 @@ import {
 import { softDeleteTransaction } from 'src/actions/transactions/delete-transaction';
 import { getTransactions, getTransactionsCount } from 'src/actions/transactions/get-transactions';
 import { markAsPaidTransaction } from 'src/actions/transactions/mark-as-paid';
-import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
+import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import { LocalStorageKey } from 'src/constants/storage-keys';

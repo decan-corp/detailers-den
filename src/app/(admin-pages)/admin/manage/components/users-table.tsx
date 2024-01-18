@@ -12,7 +12,7 @@ import {
 import { generateResetPasswordToken } from 'src/actions/auth/reset-password';
 import { softDeleteUser } from 'src/actions/users/delete-user';
 import { getUsers, getUsersCount } from 'src/actions/users/get-users';
-import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
+import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';

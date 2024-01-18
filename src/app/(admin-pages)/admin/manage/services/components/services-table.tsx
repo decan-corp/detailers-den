@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { softDeleteService } from 'src/actions/services/delete-service';
 import { getServices, getServicesCount } from 'src/actions/services/get-services';
-import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
+import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import { services } from 'src/schema';
