@@ -127,7 +127,7 @@ export const transactionColumns: ColumnDef<
               onClick={() => {
                 useTransactionAlertDialogStore.setState({
                   isMarkAsPaidDialogOpen: true,
-                  userIdToMarkAsPaid: transaction.id,
+                  selectedId: transaction.id,
                 });
               }}
             >
@@ -145,7 +145,7 @@ export const transactionColumns: ColumnDef<
               onClick={() => {
                 useTransactionAlertDialogStore.setState({
                   isDeleteDialogOpen: true,
-                  userIdToDelete: transaction.id,
+                  selectedId: transaction.id,
                 });
               }}
             >
