@@ -1,6 +1,6 @@
 import { Separator } from '@/components/ui/separator';
 
-import ServicesTable from './components/services-table';
+import ServicesTable from './components/data-table';
 
 const Services = () => (
   <main className="space-y-6 bg-background">

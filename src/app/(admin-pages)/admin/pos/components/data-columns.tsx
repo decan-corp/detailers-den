@@ -16,7 +16,7 @@ import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
 import { AdminRoute } from 'src/constants/routes';
 import { transactions } from 'src/schema';
 
-import { useTransactionAlertDialogStore } from './transactions-table';
+import { useTransactionAlertDialogStore } from './data-table';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';

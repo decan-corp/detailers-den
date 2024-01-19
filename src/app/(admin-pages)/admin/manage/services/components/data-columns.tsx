@@ -13,8 +13,8 @@ import { DataTableColumnHeader } from 'src/components/table/data-table-column-he
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
 import { services } from 'src/schema';
 
-import { useServiceFormStore } from './service-form-dialog';
-import { useServiceAlertDialogStore } from './services-table';
+import { useServiceFormStore } from './data-form-dialog';
+import { useServiceAlertDialogStore } from './data-table';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';

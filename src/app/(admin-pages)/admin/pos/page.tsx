@@ -1,6 +1,6 @@
 import { Separator } from '@/components/ui/separator';
 
-import TransactionsTable from './components/transactions-table';
+import TransactionsTable from './components/data-table';
 
 import { Metadata } from 'next';
 
