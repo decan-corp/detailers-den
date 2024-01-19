@@ -14,12 +14,12 @@ import { transactionServicesSchema } from './zod-schema';
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { eq, inArray, sql } from 'drizzle-orm';
-import { createSelectSchema } from 'drizzle-zod';
+import { createInsertSchema } from 'drizzle-zod';
 import { clamp, omit, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
 
 export const updateTransaction = authAction(
-  createSelectSchema(transactions)
+  createInsertSchema(transactions)
     .omit({
       createdAt: true,
       createdById: true,
@@ -33,6 +33,7 @@ export const updateTransaction = authAction(
     })
     .merge(
       z.object({
+        id: z.string().cuid2(),
         createdAt: z
           .date({ invalid_type_error: 'Invalid date and time format.' })
           .max(dayjs().toDate(), 'Please select a date and time on or before today.')

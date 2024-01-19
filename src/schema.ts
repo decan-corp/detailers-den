@@ -40,7 +40,7 @@ export const transactions = mysqlTable(
     })
       .notNull()
       .default(TransactionStatus.Pending),
-    totalPrice: decimal('total_price', { scale: 2, precision: 5 }).notNull(),
+    totalPrice: decimal('total_price', { scale: 2, precision: 8 }).notNull(),
     note: text('note'),
     plateNumber: varchar('plate_number', { length: 12 }).notNull(),
     vehicleSize: varchar('vehicle_size', {
@@ -53,8 +53,8 @@ export const transactions = mysqlTable(
         VehicleSize.ExtraLarge,
       ],
     }).notNull(),
-    discount: decimal('discount', { scale: 2, precision: 5 }).default('0.00'),
-    tip: decimal('tip', { scale: 2, precision: 5 }).default('0.00'),
+    discount: decimal('discount', { scale: 2, precision: 8 }).default('0.00'),
+    tip: decimal('tip', { scale: 2, precision: 8 }).default('0.00'),
     modeOfPayment: varchar('mode_of_payment', {
       length: 64,
       enum: [
@@ -121,7 +121,7 @@ export const transactionServices = mysqlTable(
     serviceId: varchar('service_id', { length: 255 })
       // .references(() => services.id) // TODO: foreign key constraint is not yet supported in planetscale
       .notNull(),
-    price: decimal('price', { scale: 2, precision: 5 }).notNull(),
+    price: decimal('price', { scale: 2, precision: 8 }).notNull(),
     serviceBy: json('service_by').$type<string[]>().notNull(),
     ...commonSchema,
   },
@@ -145,7 +145,7 @@ export const crewEarnings = mysqlTable(
       // .references(() => users.id)
       .notNull(),
     computedServiceCutPercentage: int('computed_service_cut_percentage'),
-    amount: decimal('amount', { scale: 2, precision: 5 }).notNull(),
+    amount: decimal('amount', { scale: 2, precision: 8 }).notNull(),
     ...commonSchema,
   },
   (table) => ({

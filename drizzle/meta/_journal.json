@@ -64,6 +64,13 @@
       "when": 1704948187753,
       "tag": "0008_cold_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1705666464957,
+      "tag": "0009_glossy_carmella_unuscione",
+      "breakpoints": true
     }
   ]
 }

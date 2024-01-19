@@ -8,19 +8,24 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { priceMatrixSchema } from './zod-schema';
 
 import { eq } from 'drizzle-orm';
-import { createSelectSchema } from 'drizzle-zod';
+import { createInsertSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
 export const updateService = authAction(
-  createSelectSchema(services, {
+  createInsertSchema(services, {
     priceMatrix: priceMatrixSchema,
-  }).omit({
-    createdById: true,
-    updatedById: true,
-    deletedById: true,
-    createdAt: true,
-    updatedAt: true,
-    deletedAt: true,
-  }),
+  })
+    .omit({
+      createdById: true,
+      updatedById: true,
+      deletedById: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
+    })
+    .extend({
+      id: z.string().cuid2(),
+    }),
   async (params, { session }) => {
     const { id, ...serviceData } = params;
     const { role, userId } = session.user;

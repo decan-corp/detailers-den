@@ -12,7 +12,7 @@ import {
 import { softDeleteTransaction } from 'src/actions/transactions/delete-transaction';
 import { getTransactions, getTransactionsCount } from 'src/actions/transactions/get-transactions';
 import { markAsPaidTransaction } from 'src/actions/transactions/mark-as-paid';
-import { ConfirmDialog } from 'src/components/auth/dialog/confirmation-dialog';
+import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import { LocalStorageKey } from 'src/constants/storage-keys';
@@ -39,15 +39,13 @@ import { toast } from 'sonner';
 import { create } from 'zustand';
 
 export const useTransactionAlertDialogStore = create<{
+  selectedId: string | null;
   isDeleteDialogOpen: boolean;
-  userIdToDelete: string | null;
   isMarkAsPaidDialogOpen: boolean;
-  userIdToMarkAsPaid: string | null;
 }>(() => ({
+  selectedId: null,
   isDeleteDialogOpen: false,
-  userIdToDelete: null,
   isMarkAsPaidDialogOpen: false,
-  userIdToMarkAsPaid: null,
 }));
 
 const emptyArray: (typeof transactions.$inferSelect)[] = [];
@@ -62,8 +60,9 @@ const TransactionsTable = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const prevColumnVisibility = usePrevious(columnVisibility);
 
-  const { isDeleteDialogOpen, userIdToDelete, isMarkAsPaidDialogOpen, userIdToMarkAsPaid } =
-    useTransactionAlertDialogStore((state) => state);
+  const { isDeleteDialogOpen, selectedId, isMarkAsPaidDialogOpen } = useTransactionAlertDialogStore(
+    (state) => state
+  );
 
   useEffect(() => {
     if (!isEqual(prevColumnVisibility || {}, columnVisibility)) {
@@ -82,7 +81,7 @@ const TransactionsTable = () => {
     onMutate: () => {
       useTransactionAlertDialogStore.setState({
         isDeleteDialogOpen: false,
-        userIdToDelete: null,
+        selectedId: null,
       });
     },
     onSuccess: async (result) => {
@@ -116,7 +115,7 @@ const TransactionsTable = () => {
     onMutate: () => {
       useTransactionAlertDialogStore.setState({
         isMarkAsPaidDialogOpen: false,
-        userIdToMarkAsPaid: null,
+        selectedId: null,
       });
     },
     onSuccess: async (result) => {
@@ -238,7 +237,7 @@ const TransactionsTable = () => {
         title="Are you sure you want to delete this transaction?"
         description={`This action will perform soft delete. Soft deletion will mark the transaction as inactive while retaining their data for potential reactivation.
 This action helps maintain historical records and allows for data recovery if needed.`}
-        onClickConfirm={() => mutateSoftDeleteUser(userIdToDelete as string)}
+        onClickConfirm={() => mutateSoftDeleteUser(selectedId as string)}
         disableConfirm={isSoftDeletingUser}
         disableCancel={isSoftDeletingUser}
       />
@@ -250,7 +249,7 @@ This action helps maintain historical records and allows for data recovery if ne
         hideButtonTrigger
         title="Are you sure you want to mark this transaction as paid? "
         description="This action signifies the completion of the service, so please ensure the payment has been made."
-        onClickConfirm={() => mutateMarkAsPaid(userIdToMarkAsPaid as string)}
+        onClickConfirm={() => mutateMarkAsPaid(selectedId as string)}
         disableConfirm={isMarkingAsPaid}
         disableCancel={isMarkingAsPaid}
       />
