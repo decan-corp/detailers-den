@@ -7,12 +7,12 @@ import { ProviderId } from 'src/utils/lucia';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import { and, eq, like } from 'drizzle-orm';
-import { createSelectSchema } from 'drizzle-zod';
+import { createInsertSchema } from 'drizzle-zod';
 import { createKeyId } from 'lucia';
 import { z } from 'zod';
 
 export const updateUser = authAction(
-  createSelectSchema(users, {
+  createInsertSchema(users, {
     image: (schema) => schema.image.optional(),
     serviceCutPercentage: z.coerce
       .number()
@@ -29,6 +29,9 @@ export const updateUser = authAction(
       updatedAt: true,
       deletedAt: true,
       isFirstTimeLogin: true,
+    })
+    .extend({
+      id: z.string().cuid2(),
     })
     .refine(
       (value) => {
