@@ -2,9 +2,9 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserFormDialog } from 'src/app/(admin-pages)/admin/manage/components/user-form-dialog';
 import { DataTableFacetedFilter } from 'src/components/table/data-table-faceted-filter';
 
+import { UserFormDialog } from './data-form-dialog';
 import { rolesOptions } from './data-table-options';
 
 import { Cross2Icon } from '@radix-ui/react-icons';
