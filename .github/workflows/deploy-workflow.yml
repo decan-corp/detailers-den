@@ -49,8 +49,8 @@ jobs:
       - name: Run lint and type checks
         run: |
           pnpm concurrently -g \
-          "pnpm lint" \
-          "pnpm typecheck"
+          "bun lint" \
+          "bun typecheck"
 
   db-migration-dev:
     name: Run Database Migration in Dev
