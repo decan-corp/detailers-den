@@ -13,7 +13,7 @@ import { transactionServicesSchema } from './zod-schema';
 
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, notInArray, sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { clamp, omit, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
@@ -96,7 +96,7 @@ export const updateTransaction = authAction(
       const serviceIds = transactionServicesList.map(({ serviceId }) => serviceId);
       const crewIds = uniq(transactionServicesList.flatMap(({ serviceBy }) => serviceBy));
       const transactionServiceIds = uniq(
-        transactionServicesList.map(({ id }) => id || '').filter((id) => Boolean(id))
+        transactionServicesList.map(({ id }) => id || '').filter(Boolean)
       );
 
       const servicesRef = await tx.select().from(services).where(inArray(services.id, serviceIds));
@@ -147,9 +147,6 @@ export const updateTransaction = authAction(
             },
           });
 
-        // TODO: This should be list of transaction services with transaction service ID
-        // TODO: in order for us to be able to edit the crew which is currently disabled.
-        // TODO: This will also able us to edit the amount as well in the future
         for (const crewId of transactionService.serviceBy) {
           const crewEarning = crewEarningsRef.find(
             (earning) =>
@@ -186,6 +183,37 @@ export const updateTransaction = authAction(
               },
             });
         }
+
+        if (transactionService.id) {
+          await tx
+            .delete(crewEarnings)
+            .where(
+              and(
+                eq(crewEarnings.transactionServiceId, transactionService.id),
+                notInArray(crewEarnings.crewId, transactionService.serviceBy)
+              )
+            );
+        }
+      }
+
+      const deleteServiceList = await tx
+        .select({ id: transactionServices.id })
+        .from(transactionServices)
+        .where(
+          and(
+            eq(transactionServices.transactionId, transactionData.id),
+            notInArray(transactionServices.id, transactionServiceIds)
+          )
+        );
+
+      if (deleteServiceList.length) {
+        const deleteServiceIds = deleteServiceList.map(({ id }) => id);
+        await tx
+          .delete(transactionServices)
+          .where(inArray(transactionServices.id, deleteServiceIds));
+        await tx
+          .delete(crewEarnings)
+          .where(inArray(crewEarnings.transactionServiceId, deleteServiceIds));
       }
 
       if (totalPrice < Number(transactionData.discount)) {
