@@ -37,7 +37,6 @@
     ".open-next",
     "*.svg",
     "bun.lockb",
-    "pnpm-lock.yaml",
     "package.json",
     "eslint-config-base/",
     "*.tsbuildinfo",

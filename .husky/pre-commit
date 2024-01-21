@@ -2,7 +2,6 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 npm run env -- concurrently -g \
-"pnpm lint-staged --concurrent false" \
-"pnpm typecheck" \
-"git diff --cached --name-only | npx cspell --no-summary --no-progress --no-must-find-files --file-list stdin" \
-
+	"bun lint-staged --concurrent false" \
+	"bun typecheck" \
+	"git diff --cached --name-only | npx cspell --no-summary --no-progress --no-must-find-files --file-list stdin"
