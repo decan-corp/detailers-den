@@ -80,8 +80,16 @@ export const getTransactions = authAction(
         completedAt: transactions.completedAt,
         updatedAt: transactions.updatedAt,
         note: transactions.note,
-        services: sql`GROUP_CONCAT(${services.serviceName})`.mapWith(String),
-        crews: sql`GROUP_CONCAT(${users.name})`.mapWith(String),
+        services: sql`GROUP_CONCAT(${services.serviceName})`.mapWith({
+          mapFromDriverValue(value: unknown) {
+            return String(value).split(',');
+          },
+        }),
+        crews: sql`GROUP_CONCAT(${users.name})`.mapWith({
+          mapFromDriverValue(value: unknown) {
+            return String(value).split(',');
+          },
+        }),
       })
       .from(transactions)
       .innerJoin(transactionServices, eq(transactionServices.transactionId, transactions.id))

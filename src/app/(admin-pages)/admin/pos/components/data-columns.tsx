@@ -37,7 +37,7 @@ export const transactionColumns: ColumnDef<
     | 'note'
     | 'completedAt'
     | 'updatedAt'
-  > & { services: string; crews: string }
+  > & { services: string[]; crews: string[] }
 >[] = [
   {
     accessorKey: 'customerName',
@@ -87,7 +87,7 @@ export const transactionColumns: ColumnDef<
     enableSorting: false,
     cell: ({ row }) => {
       const record = row.original;
-      return record.crews.split(',').map((crew) => <div>{crew}</div>);
+      return record.crews.map((crew) => <div>{crew}</div>);
     },
   },
   {
@@ -96,7 +96,7 @@ export const transactionColumns: ColumnDef<
     enableSorting: false,
     cell: ({ row }) => {
       const record = row.original;
-      return record.services.split(',').map((service) => <div>{service}</div>);
+      return record.services.map((service) => <div>{service}</div>);
     },
   },
 
