@@ -16,7 +16,6 @@ import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import { LocalStorageKey } from 'src/constants/storage-keys';
-import { transactions } from 'src/schema';
 import LocalStorage from 'src/utils/local-storage';
 
 import { transactionColumns } from './data-columns';
@@ -48,7 +47,7 @@ export const useTransactionAlertDialogStore = create<{
   isMarkAsPaidDialogOpen: false,
 }));
 
-const emptyArray: (typeof transactions.$inferSelect)[] = [];
+const emptyArray: NonNullable<Awaited<ReturnType<typeof getTransactions>>['data']> = [];
 
 const TransactionsTable = () => {
   const queryClient = useQueryClient();

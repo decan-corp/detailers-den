@@ -37,7 +37,7 @@ export const transactionColumns: ColumnDef<
     | 'note'
     | 'completedAt'
     | 'updatedAt'
-  >
+  > & { services: string; crews: string }
 >[] = [
   {
     accessorKey: 'customerName',
@@ -81,6 +81,25 @@ export const transactionColumns: ColumnDef<
       );
     },
   },
+  {
+    accessorKey: 'crews',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Crews" />,
+    enableSorting: false,
+    cell: ({ row }) => {
+      const record = row.original;
+      return record.crews.split(',').map((crew) => <div>{crew}</div>);
+    },
+  },
+  {
+    accessorKey: 'services',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Services" />,
+    enableSorting: false,
+    cell: ({ row }) => {
+      const record = row.original;
+      return record.services.split(',').map((service) => <div>{service}</div>);
+    },
+  },
+
   {
     accessorKey: 'createdAt',
     accessorFn: ({ createdAt }) => dayjs(createdAt).format(DATE_TABLE_DATE_FORMAT),

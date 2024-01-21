@@ -1,12 +1,12 @@
 'use server';
 
 import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
-import { transactionServices, transactions } from 'src/schema';
+import { crewEarnings, services, transactionServices, transactions, users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
-import { count, eq, inArray, like, or, desc, asc, isNull, and, between } from 'drizzle-orm';
+import { count, eq, inArray, like, or, desc, asc, isNull, and, between, sql } from 'drizzle-orm';
 import { castArray } from 'lodash';
 import { z } from 'zod';
 
@@ -80,8 +80,15 @@ export const getTransactions = authAction(
         completedAt: transactions.completedAt,
         updatedAt: transactions.updatedAt,
         note: transactions.note,
+        services: sql`GROUP_CONCAT(${services.serviceName})`.mapWith(String),
+        crews: sql`GROUP_CONCAT(${users.name})`.mapWith(String),
       })
       .from(transactions)
+      .innerJoin(transactionServices, eq(transactionServices.transactionId, transactions.id))
+      .innerJoin(services, eq(services.id, transactionServices.serviceId))
+      .innerJoin(crewEarnings, eq(crewEarnings.transactionServiceId, transactionServices.id))
+      .innerJoin(users, eq(users.id, crewEarnings.crewId))
+      .groupBy(transactions.id)
       .$dynamic();
 
     query = query.where(
