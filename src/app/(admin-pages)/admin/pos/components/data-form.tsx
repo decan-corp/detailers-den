@@ -47,7 +47,7 @@ import {
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import cuid2 from '@paralleldrive/cuid2';
-import { SelectGroup } from '@radix-ui/react-select';
+import { SelectGroup, SelectProps } from '@radix-ui/react-select';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { PlusCircleIcon, XIcon } from 'lucide-react';
@@ -75,21 +75,25 @@ const getDefaultServiceValue = () => ({
   id: cuid2.createId(),
 });
 
-// TODO: optimize and create components for transaction services
+export interface TransactionFormState {
+  selectedVehicleSize: VehicleSize;
+  transactionServices: Service[];
+}
+
 const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [parent] = useAutoAnimate();
 
-  const [transactionServicesState, setTransactionServicesState] = useImmer<Service[]>(() => [
-    getDefaultServiceValue(),
-  ]);
   const [recentSelectedCrew, setRecentSelectedCrew] = useImmer<string[]>([]);
   const [recentSelectedService, setRecentSelectedService] = useImmer<string[]>([]);
-  const [selectedVehicleSize, setSelectedVehicleSize] = useState<VehicleSize>(
-    VehicleSize.Motorcycle
-  );
+
   const [error, setError] = useState<ValidationError>({});
+
+  const [formState, setFormState] = useImmer<TransactionFormState>(() => ({
+    selectedVehicleSize: VehicleSize.Motorcycle,
+    transactionServices: [getDefaultServiceValue()],
+  }));
 
   const { data: loggedInUser, isLoading: isFetchingSession } = useClientSession();
 
@@ -134,10 +138,12 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
 
   useEffect(() => {
     if (isEdit && transaction) {
-      setTransactionServicesState(transaction.transactionServices);
-      setSelectedVehicleSize(transaction.vehicleSize);
+      setFormState((draft) => {
+        draft.transactionServices = transaction.transactionServices;
+        draft.selectedVehicleSize = transaction.vehicleSize;
+      });
     }
-  }, [isEdit, transaction, setTransactionServicesState]);
+  }, [isEdit, transaction, setFormState]);
 
   const { data: serviceOptions = [], isLoading: isFetchingServices } = useQuery({
     queryKey: [Entity.Services],
@@ -228,21 +234,20 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       payload[key] = value;
     }
 
+    const data = payload as typeof transactions.$inferInsert;
     if (transactionId) {
-      const data = payload as typeof transactions.$inferSelect;
       mutateUpdateTransaction({
         ...data,
         id: transactionId,
         plateNumber: data.plateNumber.toUpperCase(),
-        transactionServices: transactionServicesState,
+        transactionServices: formState.transactionServices,
         createdAt: dayjs(data.createdAt).toDate(),
       });
     } else {
-      const data = payload as typeof transactions.$inferInsert;
       mutateAddTransaction({
         ...data,
         plateNumber: data.plateNumber.toUpperCase(),
-        transactionServices: transactionServicesState,
+        transactionServices: formState.transactionServices,
       });
     }
 
@@ -254,6 +259,38 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     () => transaction?.transactionServices.map((transactionService) => transactionService.id) || [],
     [transaction?.transactionServices]
   );
+
+  const onChangeVehicleSize: SelectProps['onValueChange'] = (value) => {
+    setFormState((prevState) => {
+      prevState.selectedVehicleSize = value as VehicleSize;
+      prevState.transactionServices = prevState.transactionServices
+        .filter(({ serviceId }) => {
+          if (serviceId === '') return true;
+
+          const service = serviceOptions.find(({ id }) => id === serviceId);
+          const priceMatrixByVehicleSize = service?.priceMatrix.find(
+            ({ vehicleSize }) => vehicleSize === (value as VehicleSize)
+          );
+
+          return !!priceMatrixByVehicleSize;
+        })
+        .map((data) => {
+          if (data.serviceId === '') return data;
+
+          const service = serviceOptions.find(({ id }) => id === data.serviceId);
+          const priceMatrix = service?.priceMatrix.find(
+            ({ vehicleSize }) => vehicleSize === (value as VehicleSize)
+          );
+
+          if (!service || !priceMatrix) return data;
+
+          return {
+            ...data,
+            price: String(priceMatrix.price),
+          };
+        });
+    });
+  };
 
   if (isEdit && (isFetchingTransactionToEdit || isFetchingSession)) {
     return (
@@ -276,454 +313,440 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
                 {isEdit ? 'Edit' : 'Add new'} transaction here. Click save when you&apos;re done.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 py-4">
-              {isEdit &&
-                loggedInUser &&
-                [Role.Admin, Role.Accounting].includes(loggedInUser.role) && (
-                  <div>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="createdAt" className="col-span-2 flex justify-end">
-                        Created At
-                      </Label>
-                      <Input
-                        id="createdAt"
-                        name="createdAt"
-                        className={twJoin('col-span-4', error.discount && 'border-destructive-200')}
-                        defaultValue={dayjs(transaction?.createdAt).format('YYYY-MM-DDTHH:mm')}
-                        type="datetime-local"
-                      />
-                    </div>
-                    {error.createdAt && (
-                      <div className="grid grid-cols-6">
-                        <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
-                          {error.createdAt}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="customerName" className="col-span-2 flex justify-end">
-                  Customer Name
-                </Label>
-                <Input
-                  id="customerName"
-                  name="customerName"
-                  className="col-span-4"
-                  defaultValue={transaction?.customerName || ''}
-                />
-              </div>
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="plateNumber" className="col-span-2 flex justify-end">
-                  Plate Number <RequiredIndicator />
-                </Label>
-                <Input
-                  id="plateNumber"
-                  type="text"
-                  name="plateNumber"
-                  required
-                  className="col-span-4"
-                  minLength={6}
-                  maxLength={12}
-                  defaultValue={transaction?.plateNumber || ''}
-                  onKeyDown={(e) => {
-                    if (e.code === 'Space') {
-                      e.preventDefault();
-                    }
-                  }}
-                  onChange={(e) => {
-                    e.currentTarget.value = e.currentTarget.value.toUpperCase();
-                  }}
-                />
-              </div>
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="status" className="col-span-2 flex justify-end">
-                  Status <RequiredIndicator />
-                </Label>
-                <Select
-                  required
-                  name="status"
-                  defaultValue={transaction?.status || TransactionStatus.Pending}
-                >
-                  <SelectTrigger id="status" className="col-span-4">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {transactionStatusOptions.map(({ value, label }) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="modeOfPayment" className="col-span-2 flex justify-end">
-                  Mode of Payment <RequiredIndicator />
-                </Label>
-                <Select
-                  required
-                  name="modeOfPayment"
-                  defaultValue={transaction?.modeOfPayment || ModeOfPayment.Cash}
-                >
-                  <SelectTrigger id="modeOfPayment" className="col-span-4">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modeOfPaymentOptions.map(({ value, label, icon: Icon }) => (
-                      <SelectItem key={value} value={value}>
-                        <div className="flex flex-row items-center gap-3">
-                          <Icon className="h-4 w-4 text-muted-foreground" /> {label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="vehicleSize" className="col-span-2 flex justify-end">
-                  Vehicle Size <RequiredIndicator />
-                </Label>
-                <Select
-                  required
-                  name="vehicleSize"
-                  defaultValue={transaction?.vehicleSize || selectedVehicleSize}
-                  onValueChange={(value) => {
-                    setSelectedVehicleSize(value as VehicleSize);
-                    setTransactionServicesState((prevState) => {
-                      const newState = prevState.filter(({ serviceId }) => {
-                        if (serviceId === '') return true;
-
-                        const service = serviceOptions.find(({ id }) => id === serviceId);
-                        const priceMatrixByVehicleSize = service?.priceMatrix.find(
-                          ({ vehicleSize }) => vehicleSize === (value as VehicleSize)
-                        );
-
-                        return !!priceMatrixByVehicleSize;
-                      });
-                      return newState.map((data) => {
-                        if (data.serviceId === '') return data;
-                        const service = serviceOptions.find(({ id }) => id === data.serviceId);
-                        const priceMatrix = service?.priceMatrix.find(
-                          ({ vehicleSize }) => vehicleSize === (value as VehicleSize)
-                        );
-
-                        if (!service || !priceMatrix) return data;
-
-                        return {
-                          ...data,
-                          price: priceMatrix.price,
-                        };
-                      });
-                    });
-                  }}
-                >
-                  <SelectTrigger id="vehicleSize" className="col-span-4">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {vehicleSizeOptions.map(({ value, label, icon: Icon }) => (
-                      <SelectItem key={value} value={value}>
-                        <div className="flex flex-row items-center gap-3">
-                          <Icon className="h-4 w-4 text-muted-foreground" /> {label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <div className="grid grid-cols-6 items-center gap-4">
-                  <Label htmlFor="discount" className="col-span-2 text-right">
-                    Discount (in PHP)
-                  </Label>
-                  <Input
-                    id="discount"
-                    name="discount"
-                    defaultValue={transaction?.discount || 0}
-                    type="number"
-                    min={0}
-                    className={twJoin('col-span-4', error.discount && 'border-destructive-200')}
-                  />
-                </div>
-                {error.discount && (
-                  <div className="grid grid-cols-6">
-                    <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
-                      {error.discount}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="tip" className="col-span-2 text-right">
-                  Tip
-                </Label>
-                <Input
-                  id="tip"
-                  name="tip"
-                  defaultValue={transaction?.tip || 0}
-                  type="number"
-                  min={0}
-                  className="col-span-4"
-                />
-              </div>
-
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="note" className="col-span-2 flex justify-end">
-                  Note
-                </Label>
-                <Textarea
-                  id="note"
-                  name="note"
-                  className="col-span-4 min-h-[100px] [field-sizing:content]"
-                  defaultValue={transaction?.note || ''}
-                  maxLength={360}
-                />
-              </div>
-
-              <div className="py-2 font-semibold leading-none tracking-tight">Services</div>
-
-              <div ref={parent} className="flex flex-col gap-4">
-                {transactionServicesState.map((service, index) => {
-                  const derivedServiceOptions = serviceOptions
-                    .filter(({ priceMatrix }) => {
-                      const availableVehicleSizes = priceMatrix.map(
-                        ({ vehicleSize }) => vehicleSize
-                      );
-                      return availableVehicleSizes.includes(selectedVehicleSize);
-                    })
-                    .filter(({ id }) => {
-                      const serviceIds = transactionServicesState.map(({ serviceId }) => serviceId);
-                      return id === service.serviceId || !serviceIds.includes(id);
-                    });
-
-                  const mostRecentServices = derivedServiceOptions.filter(({ id }) =>
-                    savedRecentServiceList.includes(id)
-                  );
-                  const orderedServiceOptions = derivedServiceOptions.filter(
-                    ({ id }) => !savedRecentServiceList.includes(id)
-                  );
-                  const hasBothServiceOptions =
-                    mostRecentServices.length > 0 && orderedServiceOptions.length > 0;
-                  return (
-                    <div
-                      key={service.id}
-                      className="flex flex-col gap-4 rounded-lg border border-border p-4 pl-5 pt-2"
-                    >
-                      <div className="flex flex-row place-content-between items-center">
-                        <div className="font-semibold leading-none tracking-tight">
-                          Service {index + 1}
-                        </div>
-                        <Button
-                          className=""
-                          variant="ghost"
-                          type="button"
-                          disabled={
-                            transactionServicesState.length === 1 ||
-                            isSaving ||
-                            savedTransactionServiceIds.includes(service.id)
-                          }
-                          onClick={() =>
-                            setTransactionServicesState((prevState) =>
-                              prevState.toSpliced(index, 1)
-                            )
-                          }
-                        >
-                          <XIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
+            <CardContent className="space-y-10 py-4">
+              <div className="space-y-4">
+                {isEdit &&
+                  loggedInUser &&
+                  [Role.Admin, Role.Accounting].includes(loggedInUser.role) && (
+                    <div>
                       <div className="grid grid-cols-6 items-center gap-4">
-                        <Label className="col-span-2 flex justify-end">
-                          Service <RequiredIndicator />
+                        <Label htmlFor="createdAt" className="col-span-2 flex justify-end">
+                          Created At
                         </Label>
-                        <Select
-                          required
-                          defaultValue={service.serviceId || undefined}
-                          onValueChange={(serviceId) => {
-                            setTransactionServicesState((prevState) => {
-                              const serviceOption = serviceOptions.find(
-                                ({ id }) => id === serviceId
-                              );
-                              const priceMatrix = serviceOption?.priceMatrix.find(
-                                ({ vehicleSize }) => vehicleSize === selectedVehicleSize
-                              );
-                              prevState[index].serviceId = serviceId;
-                              prevState[index].price = String(priceMatrix?.price || 0);
-                            });
-                            setRecentSelectedService((prevState) => {
-                              prevState.push(serviceId);
-                            });
-                          }}
-                          disabled={isFetchingServices}
-                        >
-                          <SelectTrigger className="col-span-4">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              {hasBothServiceOptions && (
-                                <SelectLabel className="text-muted-foreground/60">
-                                  Most Recent
-                                </SelectLabel>
-                              )}
-                              {mostRecentServices.map(({ id, serviceName, description }) => (
-                                <SelectItem key={id} value={id}>
-                                  <div className="flex flex-row items-center gap-3">
-                                    {serviceName} - {description?.slice(0, 36 - serviceName.length)}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                            {hasBothServiceOptions && <Separator className="my-1" />}
-                            <SelectGroup>
-                              {orderedServiceOptions.map(({ id, serviceName, description }) => (
-                                <SelectItem key={id} value={id}>
-                                  <div className="flex flex-row items-center gap-3">
-                                    {serviceName} - {description?.slice(0, 36 - serviceName.length)}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-6 items-center gap-4">
-                        <Label className="col-span-2 text-right">Price</Label>
                         <Input
-                          value={service.price}
-                          type="number"
-                          disabled
-                          className="col-span-4"
+                          id="createdAt"
+                          name="createdAt"
+                          className={twJoin(
+                            'col-span-4',
+                            error.discount && 'border-destructive-200'
+                          )}
+                          defaultValue={dayjs(transaction?.createdAt).format('YYYY-MM-DDTHH:mm')}
+                          type="datetime-local"
                         />
                       </div>
-                      <div ref={parent} className="flex flex-col gap-2">
-                        {service.serviceBy.map((serviceById, serviceByIndex) => {
-                          const isDisabled =
-                            !!transaction?.transactionServices[index] &&
-                            transaction?.transactionServices[index].serviceBy.length >
-                              serviceByIndex;
-                          const derivedCrewOptions = crewOptions.filter(
-                            ({ id }) => id === serviceById || !service.serviceBy.includes(id)
-                          );
-                          const mostRecentCrewOptions = derivedCrewOptions.filter(({ id }) =>
-                            savedRecentCrewList.includes(id)
-                          );
-                          const orderedCrewOptions = derivedCrewOptions.filter(
-                            ({ id }) => !savedRecentCrewList.includes(id)
-                          );
-                          const hasBothCrewOptions =
-                            mostRecentCrewOptions.length > 0 && orderedCrewOptions.length > 0;
-                          return (
-                            <div
-                              key={serviceById || serviceByIndex}
-                              className="grid grid-cols-6 items-center gap-4"
-                            >
-                              <Label className="col-span-2 flex justify-end">
-                                Crew #{serviceByIndex + 1} <RequiredIndicator />
-                              </Label>
-                              <Select
-                                required
-                                defaultValue={serviceById || undefined}
-                                onValueChange={(id) => {
-                                  setTransactionServicesState((prevState) => {
-                                    prevState[index].serviceBy[serviceByIndex] = id;
-                                  });
-
-                                  setRecentSelectedCrew((prevState) => {
-                                    prevState.push(id);
-                                  });
-                                }}
-                                disabled={isFetchingCrews || isDisabled}
-                              >
-                                <SelectTrigger className="col-span-3">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectGroup>
-                                    {hasBothCrewOptions && (
-                                      <SelectLabel className="text-muted-foreground/60">
-                                        Most Recent
-                                      </SelectLabel>
-                                    )}
-                                    {mostRecentCrewOptions.map(({ id, name, role }) => (
-                                      <SelectItem key={id} value={id}>
-                                        <div className="flex flex-row items-center gap-3">
-                                          {name} - {role}
-                                        </div>
-                                      </SelectItem>
-                                    ))}
-                                  </SelectGroup>
-                                  {hasBothCrewOptions && <Separator className="my-1" />}
-                                  <SelectGroup>
-                                    {orderedCrewOptions.map(({ id, name, role }) => (
-                                      <SelectItem key={id} value={id}>
-                                        <div className="flex flex-row items-center gap-3">
-                                          {name} - {role}
-                                        </div>
-                                      </SelectItem>
-                                    ))}
-                                  </SelectGroup>
-                                </SelectContent>
-                              </Select>
-                              <Button
-                                className="col-span-1 w-fit"
-                                variant="ghost"
-                                type="button"
-                                disabled={service.serviceBy.length === 1 || isSaving || isDisabled}
-                                onClick={() =>
-                                  setTransactionServicesState((prevState) => {
-                                    prevState[index].serviceBy.splice(serviceByIndex, 1);
-                                  })
-                                }
-                              >
-                                <XIcon className="w-4" />
-                              </Button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <Button
-                        className="gap-2 text-center"
-                        variant="outline"
-                        type="button"
-                        onClick={() =>
-                          setTransactionServicesState((prevState) => {
-                            prevState[index].serviceBy.push('');
-                          })
-                        }
-                      >
-                        <PlusCircleIcon className="h-4 w-4" /> Add Crew
-                      </Button>
+                      {error.createdAt && (
+                        <div className="grid grid-cols-6">
+                          <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
+                            {error.createdAt}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
+                  )}
+                <div className="grid grid-cols-6 items-center gap-4">
+                  <Label htmlFor="customerName" className="col-span-2 flex justify-end">
+                    Customer Name
+                  </Label>
+                  <Input
+                    id="customerName"
+                    name="customerName"
+                    className="col-span-4"
+                    defaultValue={transaction?.customerName || ''}
+                  />
+                </div>
+                <div className="grid grid-cols-6 items-center gap-4">
+                  <Label htmlFor="plateNumber" className="col-span-2 flex justify-end">
+                    Plate Number <RequiredIndicator />
+                  </Label>
+                  <Input
+                    id="plateNumber"
+                    type="text"
+                    name="plateNumber"
+                    required
+                    className="col-span-4"
+                    minLength={6}
+                    maxLength={12}
+                    defaultValue={transaction?.plateNumber || ''}
+                    onKeyDown={(e) => {
+                      if (e.code === 'Space') {
+                        e.preventDefault();
+                      }
+                    }}
+                    onChange={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.toUpperCase();
+                    }}
+                  />
+                </div>
+                <div className="grid grid-cols-6 items-center gap-4">
+                  <Label htmlFor="status" className="col-span-2 flex justify-end">
+                    Status <RequiredIndicator />
+                  </Label>
+                  <Select
+                    required
+                    name="status"
+                    defaultValue={transaction?.status || TransactionStatus.Pending}
+                  >
+                    <SelectTrigger id="status" className="col-span-4">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {transactionStatusOptions.map(({ value, label }) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-6 items-center gap-4">
+                  <Label htmlFor="modeOfPayment" className="col-span-2 flex justify-end">
+                    Mode of Payment <RequiredIndicator />
+                  </Label>
+                  <Select
+                    required
+                    name="modeOfPayment"
+                    defaultValue={transaction?.modeOfPayment || ModeOfPayment.Cash}
+                  >
+                    <SelectTrigger id="modeOfPayment" className="col-span-4">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {modeOfPaymentOptions.map(({ value, label, icon: Icon }) => (
+                        <SelectItem key={value} value={value}>
+                          <div className="flex flex-row items-center gap-3">
+                            <Icon className="h-4 w-4 text-muted-foreground" /> {label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-6 items-center gap-4">
+                  <Label htmlFor="vehicleSize" className="col-span-2 flex justify-end">
+                    Vehicle Size <RequiredIndicator />
+                  </Label>
+                  <Select
+                    required
+                    name="vehicleSize"
+                    defaultValue={transaction?.vehicleSize || formState.selectedVehicleSize}
+                    onValueChange={onChangeVehicleSize}
+                  >
+                    <SelectTrigger id="vehicleSize" className="col-span-4">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicleSizeOptions.map(({ value, label, icon: Icon }) => (
+                        <SelectItem key={value} value={value}>
+                          <div className="flex flex-row items-center gap-3">
+                            <Icon className="h-4 w-4 text-muted-foreground" /> {label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="discount" className="col-span-2 text-right">
+                      Discount (in PHP)
+                    </Label>
+                    <Input
+                      id="discount"
+                      name="discount"
+                      defaultValue={transaction?.discount || 0}
+                      type="number"
+                      min={0}
+                      className={twJoin('col-span-4', error.discount && 'border-destructive-200')}
+                    />
+                  </div>
+                  {error.discount && (
+                    <div className="grid grid-cols-6">
+                      <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
+                        {error.discount}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-6 items-center gap-4">
+                  <Label htmlFor="tip" className="col-span-2 text-right">
+                    Tip
+                  </Label>
+                  <Input
+                    id="tip"
+                    name="tip"
+                    defaultValue={transaction?.tip || 0}
+                    type="number"
+                    min={0}
+                    className="col-span-4"
+                  />
+                </div>
+
+                <div className="grid grid-cols-6 items-center gap-4">
+                  <Label htmlFor="note" className="col-span-2 flex justify-end">
+                    Note
+                  </Label>
+                  <Textarea
+                    id="note"
+                    name="note"
+                    className="col-span-4 min-h-[100px] [field-sizing:content]"
+                    defaultValue={transaction?.note || ''}
+                    maxLength={360}
+                  />
+                </div>
               </div>
 
-              <Button
-                className="gap-2 text-center"
-                variant="outline"
-                onClick={() =>
-                  setTransactionServicesState((prevState) => {
-                    prevState.push(getDefaultServiceValue());
-                  })
-                }
-                type="button"
-              >
-                <PlusCircleIcon className="h-4 w-4" /> Add Service
-              </Button>
+              <Separator className="opacity-70" />
+
+              <div className="space-y-6">
+                <div className="font-semibold leading-none tracking-tight">Services</div>
+                <div ref={parent} className="flex flex-col gap-4">
+                  {formState.transactionServices.map((service, index) => {
+                    const derivedServiceOptions = serviceOptions
+                      .filter(({ priceMatrix }) => {
+                        const availableVehicleSizes = priceMatrix.map(
+                          ({ vehicleSize }) => vehicleSize
+                        );
+                        return availableVehicleSizes.includes(formState.selectedVehicleSize);
+                      })
+                      .filter(({ id }) => {
+                        const serviceIds = formState.transactionServices.map(
+                          ({ serviceId }) => serviceId
+                        );
+                        return id === service.serviceId || !serviceIds.includes(id);
+                      });
+
+                    const mostRecentServices = derivedServiceOptions.filter(({ id }) =>
+                      savedRecentServiceList.includes(id)
+                    );
+                    const orderedServiceOptions = derivedServiceOptions.filter(
+                      ({ id }) => !savedRecentServiceList.includes(id)
+                    );
+                    const hasBothServiceOptions =
+                      mostRecentServices.length > 0 && orderedServiceOptions.length > 0;
+                    return (
+                      <div
+                        key={service.id}
+                        className="flex flex-col gap-4 rounded-lg border border-border p-4 pl-5 pt-2"
+                      >
+                        <div className="flex flex-row place-content-between items-center">
+                          <div className="font-semibold leading-none tracking-tight">
+                            Service {index + 1}
+                          </div>
+                          <Button
+                            className=""
+                            variant="ghost"
+                            type="button"
+                            disabled={
+                              formState.transactionServices.length === 1 ||
+                              isSaving ||
+                              savedTransactionServiceIds.includes(service.id)
+                            }
+                            onClick={() =>
+                              setFormState((prevState) => {
+                                prevState.transactionServices.splice(index, 1);
+                              })
+                            }
+                          >
+                            <XIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-6 items-center gap-4">
+                          <Label className="col-span-2 flex justify-end">
+                            Service <RequiredIndicator />
+                          </Label>
+                          <Select
+                            required
+                            defaultValue={service.serviceId || undefined}
+                            onValueChange={(serviceId) => {
+                              setFormState((prevState) => {
+                                const serviceOption = serviceOptions.find(
+                                  ({ id }) => id === serviceId
+                                );
+                                const priceMatrix = serviceOption?.priceMatrix.find(
+                                  ({ vehicleSize }) => vehicleSize === prevState.selectedVehicleSize
+                                );
+                                prevState.transactionServices[index].serviceId = serviceId;
+                                prevState.transactionServices[index].price = String(
+                                  priceMatrix?.price || 0
+                                );
+                              });
+                              setRecentSelectedService((prevState) => {
+                                prevState.push(serviceId);
+                              });
+                            }}
+                            disabled={isFetchingServices}
+                          >
+                            <SelectTrigger className="col-span-4">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                {hasBothServiceOptions && (
+                                  <SelectLabel className="text-muted-foreground/60">
+                                    Most Recent
+                                  </SelectLabel>
+                                )}
+                                {mostRecentServices.map(({ id, serviceName, description }) => (
+                                  <SelectItem key={id} value={id}>
+                                    <div className="flex flex-row items-center gap-3">
+                                      {serviceName} -{' '}
+                                      {description?.slice(0, 36 - serviceName.length)}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                              {hasBothServiceOptions && <Separator className="my-1" />}
+                              <SelectGroup>
+                                {orderedServiceOptions.map(({ id, serviceName, description }) => (
+                                  <SelectItem key={id} value={id}>
+                                    <div className="flex flex-row items-center gap-3">
+                                      {serviceName} -{' '}
+                                      {description?.slice(0, 36 - serviceName.length)}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-6 items-center gap-4">
+                          <Label className="col-span-2 text-right">Price</Label>
+                          <Input
+                            value={service.price}
+                            type="number"
+                            disabled
+                            className="col-span-4"
+                          />
+                        </div>
+                        <div ref={parent} className="flex flex-col gap-2">
+                          {service.serviceBy.map((serviceById, serviceByIndex) => {
+                            const isDisabled =
+                              !!transaction?.transactionServices[index] &&
+                              transaction?.transactionServices[index].serviceBy.length >
+                                serviceByIndex;
+                            const derivedCrewOptions = crewOptions.filter(
+                              ({ id }) => id === serviceById || !service.serviceBy.includes(id)
+                            );
+                            const mostRecentCrewOptions = derivedCrewOptions.filter(({ id }) =>
+                              savedRecentCrewList.includes(id)
+                            );
+                            const orderedCrewOptions = derivedCrewOptions.filter(
+                              ({ id }) => !savedRecentCrewList.includes(id)
+                            );
+                            const hasBothCrewOptions =
+                              mostRecentCrewOptions.length > 0 && orderedCrewOptions.length > 0;
+                            return (
+                              <div
+                                key={serviceById || serviceByIndex}
+                                className="grid grid-cols-6 items-center gap-4"
+                              >
+                                <Label className="col-span-2 flex justify-end">
+                                  Crew #{serviceByIndex + 1} <RequiredIndicator />
+                                </Label>
+                                <Select
+                                  required
+                                  defaultValue={serviceById || undefined}
+                                  onValueChange={(id) => {
+                                    setFormState((prevState) => {
+                                      prevState.transactionServices[index].serviceBy[
+                                        serviceByIndex
+                                      ] = id;
+                                    });
+
+                                    setRecentSelectedCrew((prevState) => {
+                                      prevState.push(id);
+                                    });
+                                  }}
+                                  disabled={isFetchingCrews || isDisabled}
+                                >
+                                  <SelectTrigger className="col-span-3">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectGroup>
+                                      {hasBothCrewOptions && (
+                                        <SelectLabel className="text-muted-foreground/60">
+                                          Most Recent
+                                        </SelectLabel>
+                                      )}
+                                      {mostRecentCrewOptions.map(({ id, name, role }) => (
+                                        <SelectItem key={id} value={id}>
+                                          <div className="flex flex-row items-center gap-3">
+                                            {name} - {role}
+                                          </div>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                    {hasBothCrewOptions && <Separator className="my-1" />}
+                                    <SelectGroup>
+                                      {orderedCrewOptions.map(({ id, name, role }) => (
+                                        <SelectItem key={id} value={id}>
+                                          <div className="flex flex-row items-center gap-3">
+                                            {name} - {role}
+                                          </div>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  className="col-span-1 w-fit"
+                                  variant="ghost"
+                                  type="button"
+                                  disabled={
+                                    service.serviceBy.length === 1 || isSaving || isDisabled
+                                  }
+                                  onClick={() =>
+                                    setFormState((prevState) => {
+                                      prevState.transactionServices[index].serviceBy.splice(
+                                        serviceByIndex,
+                                        1
+                                      );
+                                    })
+                                  }
+                                >
+                                  <XIcon className="w-4" />
+                                </Button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <Button
+                          className="gap-2 text-center"
+                          variant="outline"
+                          type="button"
+                          onClick={() =>
+                            setFormState((prevState) => {
+                              prevState.transactionServices[index].serviceBy.push('');
+                            })
+                          }
+                        >
+                          <PlusCircleIcon className="h-4 w-4" /> Add Crew
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Button
+                  className="gap-2 text-center"
+                  variant="outline"
+                  onClick={() =>
+                    setFormState((prevState) => {
+                      prevState.transactionServices.push(getDefaultServiceValue());
+                    })
+                  }
+                  type="button"
+                >
+                  <PlusCircleIcon className="h-4 w-4" /> Add Service
+                </Button>
+              </div>
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button
                 type="submit"
-                disabled={
-                  isAddingTransaction ||
-                  isUpdatingTransaction ||
-                  (!!transactionId && isFetchingTransactionToEdit)
-                }
+                disabled={isSaving || (!!transactionId && isFetchingTransactionToEdit)}
               >
-                {(isAddingTransaction || isUpdatingTransaction) && (
-                  <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {isSaving && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
                 Save
               </Button>
             </CardFooter>
