@@ -7,6 +7,8 @@ import { DataTableFacetedFilter } from 'src/components/table/data-table-faceted-
 import DataTableViewOptions from 'src/components/table/data-table-view-options';
 import { DATE_RANGE_OPTIONS } from 'src/constants/options';
 import { AdminRoute } from 'src/constants/routes';
+import { useServiceOptions } from 'src/queries/services';
+import { useCrewOptions } from 'src/queries/users';
 
 import {
   modeOfPaymentOptions,
@@ -18,7 +20,7 @@ import cuid2 from '@paralleldrive/cuid2';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -27,6 +29,17 @@ interface DataTableToolbarProps<TData> {
 export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
   const isFiltered = table.getState().columnFilters.length > 0;
   const [resetKey, setResetKey] = useState(cuid2.createId());
+  const { data: services = [] } = useServiceOptions();
+  const { data: crews = [] } = useCrewOptions();
+  //
+  const serviceOptions = useMemo(
+    () => services.map((service) => ({ value: service.id, label: service.serviceName })),
+    [services]
+  );
+  const crewOptions = useMemo(
+    () => crews.map((crew) => ({ value: crew.id, label: crew.name })),
+    [crews]
+  );
 
   return (
     <div className="flex flex-col-reverse justify-between gap-x-2 gap-y-4 md:flex-row md:items-center">
@@ -79,7 +92,21 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
           />
         )}
 
-        {/* TODO: filter by crew/detailer/stay-in-crew */}
+        {table.getColumn('services') && (
+          <DataTableFacetedFilter
+            column={table.getColumn('services')}
+            title="Service"
+            options={serviceOptions}
+          />
+        )}
+
+        {table.getColumn('crews') && (
+          <DataTableFacetedFilter
+            column={table.getColumn('crews')}
+            title="Crew"
+            options={crewOptions}
+          />
+        )}
 
         {isFiltered && (
           <Button

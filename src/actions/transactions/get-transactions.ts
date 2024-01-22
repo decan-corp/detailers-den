@@ -54,6 +54,8 @@ const searchSchema = z.object({
     .nativeEnum(ModeOfPayment)
     .or(z.array(z.nativeEnum(ModeOfPayment)))
     .optional(),
+  services: z.array(z.string().cuid2()).optional(),
+  crews: z.array(z.string().cuid2()).optional(),
   plateNumber: z.string().toUpperCase().optional(),
   customerName: z.string().toLowerCase().optional(),
   createdAt: z
@@ -80,12 +82,12 @@ export const getTransactions = authAction(
         completedAt: transactions.completedAt,
         updatedAt: transactions.updatedAt,
         note: transactions.note,
-        services: sql`GROUP_CONCAT(${services.serviceName})`.mapWith({
+        services: sql`GROUP_CONCAT(DISTINCT ${services.serviceName})`.mapWith({
           mapFromDriverValue(value: unknown) {
             return String(value).split(',');
           },
         }),
-        crews: sql`GROUP_CONCAT(${users.name})`.mapWith({
+        crews: sql`GROUP_CONCAT(DISTINCT ${users.name})`.mapWith({
           mapFromDriverValue(value: unknown) {
             return String(value).split(',');
           },
@@ -113,7 +115,9 @@ export const getTransactions = authAction(
           : undefined,
         params.createdAt
           ? between(transactions.createdAt, params.createdAt.from, params.createdAt.to)
-          : undefined
+          : undefined,
+        params.services ? inArray(services.id, params.services) : undefined,
+        params.crews ? inArray(users.id, params.crews) : undefined
       )
     );
 
@@ -140,9 +144,14 @@ export const getTransactions = authAction(
 export const getTransactionsCount = authAction(searchSchema, async (params) => {
   let query = db
     .select({
-      value: count(),
+      id: transactions.id,
     })
     .from(transactions)
+    .innerJoin(transactionServices, eq(transactionServices.transactionId, transactions.id))
+    .innerJoin(services, eq(services.id, transactionServices.serviceId))
+    .innerJoin(crewEarnings, eq(crewEarnings.transactionServiceId, transactionServices.id))
+    .innerJoin(users, eq(users.id, crewEarnings.crewId))
+    .groupBy(transactions.id)
     .$dynamic();
 
   query = query.where(
@@ -159,11 +168,13 @@ export const getTransactionsCount = authAction(searchSchema, async (params) => {
         : undefined,
       params.createdAt
         ? between(transactions.createdAt, params.createdAt.from, params.createdAt.to)
-        : undefined
+        : undefined,
+      params.services ? inArray(services.id, params.services) : undefined,
+      params.crews ? inArray(users.id, params.crews) : undefined
     )
   );
 
-  const [{ value }] = await query;
+  const [{ value }] = await db.select({ value: count() }).from(query.as('aggregated_transactions'));
 
   return value;
 });
