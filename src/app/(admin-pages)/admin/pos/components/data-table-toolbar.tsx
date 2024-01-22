@@ -31,7 +31,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
   const [resetKey, setResetKey] = useState(cuid2.createId());
   const { data: services = [] } = useServiceOptions();
   const { data: crews = [] } = useCrewOptions();
-  //
+
   const serviceOptions = useMemo(
     () => services.map((service) => ({ value: service.id, label: service.serviceName })),
     [services]

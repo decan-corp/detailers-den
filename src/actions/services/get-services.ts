@@ -82,3 +82,38 @@ export const getService = authAction(z.string().cuid2(), async (id) => {
 
   return service || undefined;
 });
+
+export const getServiceOptions = authAction(
+  sortingSchema.merge(paginationSchema),
+  async (params) => {
+    let query = db
+      .select({
+        id: services.id,
+        serviceName: services.serviceName,
+        priceMatrix: services.priceMatrix,
+        description: services.description,
+      })
+      .from(services)
+      .$dynamic();
+
+    query = query.where(isNull(services.deletedAt));
+
+    query = query.limit(params.pageSize).offset(params.pageIndex * params.pageSize);
+
+    if (params.sortBy) {
+      const sortBy = castArray(params.sortBy);
+      query = query.orderBy(
+        ...sortBy.map(({ id, desc: isDesc }) => {
+          const field = id as keyof typeof services.$inferSelect;
+          if (isDesc) {
+            return desc(services[field]);
+          }
+          return asc(services[field]);
+        })
+      );
+    }
+
+    const records = await query;
+    return records;
+  }
+);
