@@ -287,6 +287,7 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
                   required
                   min={1}
                   max={100000}
+                  step={0.01}
                   onChange={(e) =>
                     setPriceMatrix((prevState) => {
                       prevState[index].price = Number(e.target.value);

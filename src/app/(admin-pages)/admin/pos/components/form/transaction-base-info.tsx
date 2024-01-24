@@ -232,6 +232,7 @@ const TransactionBaseInfo = ({
             defaultValue={transaction?.discount || 0}
             type="number"
             min={0}
+            step={0.01}
             className={twJoin('col-span-4', formState.error.discount && 'border-destructive-200')}
           />
         </div>
@@ -253,6 +254,7 @@ const TransactionBaseInfo = ({
           defaultValue={transaction?.tip || 0}
           type="number"
           min={0}
+          step={0.01}
           className="col-span-4"
         />
       </div>
