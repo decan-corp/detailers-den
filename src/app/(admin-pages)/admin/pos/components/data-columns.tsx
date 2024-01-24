@@ -87,7 +87,7 @@ export const transactionColumns: ColumnDef<
     enableSorting: false,
     cell: ({ row }) => {
       const record = row.original;
-      return record.crews.map((crew) => <div>{crew}</div>);
+      return record.crews.map((crew, index) => <div key={Symbol(index).toString()}>{crew}</div>);
     },
   },
   {
@@ -96,7 +96,9 @@ export const transactionColumns: ColumnDef<
     enableSorting: false,
     cell: ({ row }) => {
       const record = row.original;
-      return record.services.map((service) => <div>{service}</div>);
+      return record.services.map((service, index) => (
+        <div key={Symbol(index).toString()}>{service}</div>
+      ));
     },
   },
 

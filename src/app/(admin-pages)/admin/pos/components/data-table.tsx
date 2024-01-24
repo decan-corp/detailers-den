@@ -56,6 +56,7 @@ const TransactionsTable = () => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
+  const [globalFilter, setGlobalFilter] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const prevColumnVisibility = usePrevious(columnVisibility);
 
@@ -144,26 +145,13 @@ const TransactionsTable = () => {
 
   const filters = useMemo(
     () =>
-      columnFilters
-        .filter(({ id }) => id !== 'customerName') // searching with customerName is handled with debounce
-        .reduce(
-          (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
-          {} as Pick<
-            Parameters<typeof getTransactions>[0],
-            'createdAt' | 'modeOfPayment' | 'status' | 'vehicleSize'
-          >
-        ),
-    [columnFilters]
-  );
-
-  useDebounce(
-    () => {
-      const search = columnFilters.find(({ id }) => id === 'customerName')?.value as
-        | string
-        | undefined;
-      setDebouncedSearch(search || '');
-    },
-    250,
+      columnFilters.reduce(
+        (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
+        {} as Pick<
+          Parameters<typeof getTransactions>[0],
+          'createdAt' | 'modeOfPayment' | 'status' | 'vehicleSize'
+        >
+      ),
     [columnFilters]
   );
 
@@ -213,17 +201,28 @@ const TransactionsTable = () => {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
+    onGlobalFilterChange: setGlobalFilter,
     manualSorting: true,
     manualFiltering: true,
     manualPagination: true,
-    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
       pagination,
       columnVisibility,
+      globalFilter,
     },
   });
+
+  useDebounce(
+    () => {
+      setDebouncedSearch(globalFilter || '');
+      table.resetPageIndex();
+    },
+    250,
+    [globalFilter]
+  );
 
   return (
     <div className="space-y-4">

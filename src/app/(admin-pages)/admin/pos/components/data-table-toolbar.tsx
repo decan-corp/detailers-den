@@ -40,14 +40,19 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     () => crews.map((crew) => ({ value: crew.id, label: crew.name })),
     [crews]
   );
+  const reset = () => {
+    table.resetColumnFilters();
+    table.resetPageIndex();
+    setResetKey(cuid2.createId());
+  };
 
   return (
     <div className="flex flex-col-reverse justify-between gap-x-2 gap-y-4 md:flex-row md:items-center">
       <div className="flex flex-1 flex-wrap items-center gap-2">
         <Input
           placeholder="Search by name or plate number"
-          value={(table.getColumn('customerName')?.getFilterValue() as string) ?? ''}
-          onChange={(event) => table.getColumn('customerName')?.setFilterValue(event.target.value)}
+          value={(table.getState()?.globalFilter as string) ?? ''}
+          onChange={(event) => table.setGlobalFilter(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
         />
 
@@ -109,14 +114,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
         )}
 
         {isFiltered && (
-          <Button
-            variant="ghost"
-            onClick={() => {
-              table.resetColumnFilters();
-              setResetKey(cuid2.createId());
-            }}
-            className="h-8 px-2 lg:px-3"
-          >
+          <Button variant="ghost" onClick={reset} className="h-8 px-2 lg:px-3">
             Reset
             <Cross2Icon className="ml-2 h-4 w-4" />
           </Button>

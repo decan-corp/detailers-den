@@ -54,6 +54,7 @@ const UsersTable = () => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
+  const [globalFilter, setGlobalFilter] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const { isDeleteDialogOpen, selectedUserId, isResetPasswordDialogOpen } =
@@ -104,25 +105,12 @@ const UsersTable = () => {
     },
   });
 
-  useDebounce(
-    () => {
-      const search = columnFilters.find((filter) => filter.id === 'email')?.value as
-        | string
-        | undefined;
-      setDebouncedSearch(search || '');
-    },
-    250,
-    [columnFilters]
-  );
-
   const filters = useMemo(
     () =>
-      columnFilters
-        .filter(({ id }) => id !== 'email') // searching with email is handled with debounce
-        .reduce(
-          (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
-          {} as Pick<Parameters<typeof getUsers>[0], 'role'>
-        ),
+      columnFilters.reduce(
+        (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
+        {} as Pick<Parameters<typeof getUsers>[0], 'role'>
+      ),
     [columnFilters]
   );
 
@@ -165,16 +153,27 @@ const UsersTable = () => {
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
+    onGlobalFilterChange: setGlobalFilter,
     manualSorting: true,
     manualFiltering: true,
     manualPagination: true,
-    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
       pagination,
+      globalFilter,
     },
   });
+
+  useDebounce(
+    () => {
+      setDebouncedSearch(globalFilter || '');
+      table.resetPageIndex();
+    },
+    250,
+    [globalFilter]
+  );
 
   const selectedUserInfo = useMemo(() => {
     if (!selectedUserId) {
