@@ -79,13 +79,7 @@ const ServicesTable = () => {
   });
 
   const { data: servicesData, isLoading } = useQuery({
-    queryKey: [
-      Entity.Services,
-      debouncedSearch,
-      pagination.pageIndex,
-      pagination.pageSize,
-      sorting,
-    ],
+    queryKey: [Entity.Services, debouncedSearch, pagination, sorting],
     queryFn: async () => {
       const { data = [] } = await getServices({
         ...(debouncedSearch && { serviceName: debouncedSearch }),

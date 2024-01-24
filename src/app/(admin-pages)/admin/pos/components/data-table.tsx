@@ -156,14 +156,7 @@ const TransactionsTable = () => {
   );
 
   const { data: transactionsData, isLoading } = useQuery({
-    queryKey: [
-      Entity.Transactions,
-      filters,
-      debouncedSearch,
-      pagination.pageIndex,
-      pagination.pageSize,
-      sorting,
-    ],
+    queryKey: [Entity.Transactions, filters, debouncedSearch, pagination, sorting],
     queryFn: async () => {
       const { createdAt } = filters;
       const { data = [] } = await getTransactions({

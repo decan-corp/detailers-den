@@ -115,14 +115,7 @@ const UsersTable = () => {
   );
 
   const { data: users, isLoading } = useQuery({
-    queryKey: [
-      Entity.Users,
-      filters,
-      debouncedSearch,
-      pagination.pageIndex,
-      pagination.pageSize,
-      sorting,
-    ],
+    queryKey: [Entity.Users, filters, debouncedSearch, pagination, sorting],
     queryFn: async () => {
       const { data = [] } = await getUsers({
         ...filters,
