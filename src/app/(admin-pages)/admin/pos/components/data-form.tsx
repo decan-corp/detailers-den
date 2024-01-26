@@ -72,7 +72,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   }));
 
   const isEdit = Boolean(transactionId);
-  const { data: loggedInUser } = useClientSession();
+  const { data: loggedInUser, isLoading: isFetchingSession } = useClientSession();
 
   const {
     data: transaction,
@@ -141,39 +141,36 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
 
     const formData = new FormData(event.currentTarget);
 
-    const payload: Record<string, unknown> = {};
+    const formEntries: Record<string, unknown> = {};
 
     for (const [key, value] of formData.entries()) {
-      payload[key] = value;
+      formEntries[key] = value;
     }
 
-    const data = payload as typeof transactions.$inferInsert;
+    const data = formEntries as typeof transactions.$inferInsert;
+    const payload = {
+      ...data,
+      plateNumber: data.plateNumber.toUpperCase(),
+      transactionServices: formState.transactionServices,
+      discount: Number(data.discount || 0),
+      tip: Number(data.tip || 0),
+    };
+
+    if (loggedInUser && [Role.Admin, Role.Accounting].includes(loggedInUser?.role)) {
+      payload.createdAt = dayjs(data.createdAt).toDate();
+    }
 
     if (transactionId) {
       mutateUpdateTransaction({
-        ...data,
+        ...payload,
         id: transactionId,
-        plateNumber: data.plateNumber.toUpperCase(),
-        transactionServices: formState.transactionServices,
-        discount: Number(data.discount || 0),
-        tip: Number(data.tip || 0),
-        ...(loggedInUser &&
-          [Role.Admin, Role.Accounting].includes(loggedInUser?.role) && {
-            createdAt: dayjs(data.createdAt).toDate(),
-          }),
       });
     } else {
-      mutateAddTransaction({
-        ...data,
-        plateNumber: data.plateNumber.toUpperCase(),
-        transactionServices: formState.transactionServices,
-        discount: Number(data.discount || 0),
-        tip: Number(data.tip || 0),
-      });
+      mutateAddTransaction(payload);
     }
   };
 
-  if (isEdit && isFetchingTransactionToEdit) {
+  if ((isEdit && isFetchingTransactionToEdit) || isFetchingSession) {
     return (
       <div className="flex h-96 items-center justify-center">
         <span className="loading loading-ring loading-lg text-foreground" />
