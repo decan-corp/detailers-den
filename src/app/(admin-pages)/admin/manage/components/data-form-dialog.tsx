@@ -115,15 +115,14 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
       payload[key] = value;
     }
 
+    const data = payload as typeof users.$inferSelect;
     if (userIdToEdit) {
       mutateUpdateUser({
-        ...(payload as typeof users.$inferSelect),
+        ...data,
         id: userIdToEdit,
       });
     } else {
-      mutateAddUser(
-        payload as typeof users.$inferInsert & { confirmPassword: string; password: string }
-      );
+      mutateAddUser(data as typeof data & { confirmPassword: string; password: string });
     }
   };
 

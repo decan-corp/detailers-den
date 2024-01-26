@@ -136,27 +136,26 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
 
     const formData = new FormData(event.currentTarget);
 
-    const payload: Record<string, unknown> = {};
+    const formEntries: Record<string, unknown> = {};
 
     for (const [key, value] of formData.entries()) {
-      payload[key] = value;
+      formEntries[key] = value;
     }
 
+    const data = formEntries as typeof services.$inferInsert;
+    const payload = {
+      ...data,
+      serviceCutPercentage: Number(data.serviceCutPercentage),
+      priceMatrix: priceMatrix as typeof services.$inferInsert.priceMatrix,
+    };
+
     if (serviceIdToEdit) {
-      const updateData = payload as typeof services.$inferSelect;
       mutateUpdateService({
-        ...updateData,
-        serviceCutPercentage: Number(updateData.serviceCutPercentage),
+        ...payload,
         id: serviceIdToEdit,
-        priceMatrix: priceMatrix as typeof services.$inferInsert.priceMatrix,
       });
     } else {
-      const addData = payload as typeof services.$inferInsert;
-      mutateAddService({
-        ...addData,
-        serviceCutPercentage: Number(addData.serviceCutPercentage),
-        priceMatrix: priceMatrix as typeof services.$inferInsert.priceMatrix,
-      });
+      mutateAddService(payload);
     }
   };
 
