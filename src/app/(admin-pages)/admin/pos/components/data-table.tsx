@@ -16,7 +16,7 @@ import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import { LocalStorageKey } from 'src/constants/storage-keys';
-import { transactions } from 'src/schema';
+import useQueryParams from 'src/hooks/use-query-params';
 import LocalStorage from 'src/utils/local-storage';
 
 import { transactionColumns } from './data-columns';
@@ -48,15 +48,21 @@ export const useTransactionAlertDialogStore = create<{
   isMarkAsPaidDialogOpen: false,
 }));
 
-const emptyArray: (typeof transactions.$inferSelect)[] = [];
+const emptyArray: NonNullable<Awaited<ReturnType<typeof getTransactions>>['data']> = [];
 
 const TransactionsTable = () => {
   const queryClient = useQueryClient();
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [sorting, setSorting] = useQueryParams<SortingState>('sorting', [
+    { id: 'createdAt', desc: true },
+  ]);
+  const [columnFilters, setColumnFilters] = useQueryParams<ColumnFiltersState>('columnFilters', []);
+  const [pagination, setPagination] = useQueryParams<PaginationState>('pagination', {
+    pageSize: 10,
+    pageIndex: 0,
+  });
+  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const prevColumnVisibility = usePrevious(columnVisibility);
 
@@ -145,38 +151,18 @@ const TransactionsTable = () => {
 
   const filters = useMemo(
     () =>
-      columnFilters
-        .filter(({ id }) => id !== 'customerName') // searching with customerName is handled with debounce
-        .reduce(
-          (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
-          {} as Pick<
-            Parameters<typeof getTransactions>[0],
-            'createdAt' | 'modeOfPayment' | 'status' | 'vehicleSize'
-          >
-        ),
-    [columnFilters]
-  );
-
-  useDebounce(
-    () => {
-      const search = columnFilters.find(({ id }) => id === 'customerName')?.value as
-        | string
-        | undefined;
-      setDebouncedSearch(search || '');
-    },
-    250,
+      columnFilters.reduce(
+        (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
+        {} as Pick<
+          Parameters<typeof getTransactions>[0],
+          'createdAt' | 'modeOfPayment' | 'status' | 'vehicleSize'
+        >
+      ),
     [columnFilters]
   );
 
   const { data: transactionsData, isLoading } = useQuery({
-    queryKey: [
-      Entity.Transactions,
-      filters,
-      debouncedSearch,
-      pagination.pageIndex,
-      pagination.pageSize,
-      sorting,
-    ],
+    queryKey: [Entity.Transactions, filters, debouncedSearch, pagination, sorting],
     queryFn: async () => {
       const { createdAt } = filters;
       const { data = [] } = await getTransactions({
@@ -214,17 +200,21 @@ const TransactionsTable = () => {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
+    onGlobalFilterChange: setGlobalFilter,
     manualSorting: true,
     manualFiltering: true,
     manualPagination: true,
-    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
       pagination,
       columnVisibility,
+      globalFilter,
     },
   });
+
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   return (
     <div className="space-y-4">

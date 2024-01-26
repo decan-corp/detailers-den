@@ -1,12 +1,12 @@
 'use server';
 
 import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
-import { transactionServices, transactions } from 'src/schema';
+import { crewEarnings, services, transactionServices, transactions, users } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
-import { count, eq, inArray, like, or, desc, asc, isNull, and, between } from 'drizzle-orm';
+import { count, eq, inArray, like, or, desc, asc, isNull, and, between, sql } from 'drizzle-orm';
 import { castArray } from 'lodash';
 import { z } from 'zod';
 
@@ -54,6 +54,8 @@ const searchSchema = z.object({
     .nativeEnum(ModeOfPayment)
     .or(z.array(z.nativeEnum(ModeOfPayment)))
     .optional(),
+  services: z.array(z.string().cuid2()).optional(),
+  crews: z.array(z.string().cuid2()).optional(),
   plateNumber: z.string().toUpperCase().optional(),
   customerName: z.string().toLowerCase().optional(),
   createdAt: z
@@ -80,8 +82,23 @@ export const getTransactions = authAction(
         completedAt: transactions.completedAt,
         updatedAt: transactions.updatedAt,
         note: transactions.note,
+        services: sql`GROUP_CONCAT(DISTINCT ${services.serviceName})`.mapWith({
+          mapFromDriverValue(value: unknown) {
+            return String(value).split(',');
+          },
+        }),
+        crews: sql`GROUP_CONCAT(DISTINCT ${users.name})`.mapWith({
+          mapFromDriverValue(value: unknown) {
+            return String(value).split(',');
+          },
+        }),
       })
       .from(transactions)
+      .innerJoin(transactionServices, eq(transactionServices.transactionId, transactions.id))
+      .innerJoin(services, eq(services.id, transactionServices.serviceId))
+      .innerJoin(crewEarnings, eq(crewEarnings.transactionServiceId, transactionServices.id))
+      .innerJoin(users, eq(users.id, crewEarnings.crewId))
+      .groupBy(transactions.id)
       .$dynamic();
 
     query = query.where(
@@ -98,7 +115,9 @@ export const getTransactions = authAction(
           : undefined,
         params.createdAt
           ? between(transactions.createdAt, params.createdAt.from, params.createdAt.to)
-          : undefined
+          : undefined,
+        params.services ? inArray(services.id, params.services) : undefined,
+        params.crews ? inArray(users.id, params.crews) : undefined
       )
     );
 
@@ -125,9 +144,14 @@ export const getTransactions = authAction(
 export const getTransactionsCount = authAction(searchSchema, async (params) => {
   let query = db
     .select({
-      value: count(),
+      id: transactions.id,
     })
     .from(transactions)
+    .innerJoin(transactionServices, eq(transactionServices.transactionId, transactions.id))
+    .innerJoin(services, eq(services.id, transactionServices.serviceId))
+    .innerJoin(crewEarnings, eq(crewEarnings.transactionServiceId, transactionServices.id))
+    .innerJoin(users, eq(users.id, crewEarnings.crewId))
+    .groupBy(transactions.id)
     .$dynamic();
 
   query = query.where(
@@ -144,11 +168,13 @@ export const getTransactionsCount = authAction(searchSchema, async (params) => {
         : undefined,
       params.createdAt
         ? between(transactions.createdAt, params.createdAt.from, params.createdAt.to)
-        : undefined
+        : undefined,
+      params.services ? inArray(services.id, params.services) : undefined,
+      params.crews ? inArray(users.id, params.crews) : undefined
     )
   );
 
-  const [{ value }] = await query;
+  const [{ value }] = await db.select({ value: count() }).from(query.as('aggregated_transactions'));
 
   return value;
 });

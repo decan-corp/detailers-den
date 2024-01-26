@@ -3,7 +3,7 @@ import { getPageSession } from 'src/components/auth/get-page-session';
 import { Role } from 'src/constants/common';
 import { AdminRoute } from 'src/constants/routes';
 
-import UsersTable from './components/users-table';
+import UsersTable from './components/data-table';
 
 import { redirect } from 'next/navigation';
 

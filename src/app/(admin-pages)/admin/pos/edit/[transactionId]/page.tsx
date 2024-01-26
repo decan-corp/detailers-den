@@ -1,6 +1,6 @@
 'use client';
 
-import TransactionForm from '../../components/transactions-form';
+import TransactionForm from '../../components/data-form';
 
 const EditTransaction = ({ params }: { params: { transactionId: string } }) => (
   <TransactionForm transactionId={params.transactionId} />

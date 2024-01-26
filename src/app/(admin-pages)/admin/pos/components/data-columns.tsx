@@ -16,7 +16,7 @@ import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
 import { AdminRoute } from 'src/constants/routes';
 import { transactions } from 'src/schema';
 
-import { useTransactionAlertDialogStore } from './transactions-table';
+import { useTransactionAlertDialogStore } from './data-table';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
@@ -37,7 +37,7 @@ export const transactionColumns: ColumnDef<
     | 'note'
     | 'completedAt'
     | 'updatedAt'
-  >
+  > & { services: string[]; crews: string[] }
 >[] = [
   {
     accessorKey: 'customerName',
@@ -81,6 +81,27 @@ export const transactionColumns: ColumnDef<
       );
     },
   },
+  {
+    accessorKey: 'crews',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Crews" />,
+    enableSorting: false,
+    cell: ({ row }) => {
+      const record = row.original;
+      return record.crews.map((crew, index) => <div key={Symbol(index).toString()}>{crew}</div>);
+    },
+  },
+  {
+    accessorKey: 'services',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Services" />,
+    enableSorting: false,
+    cell: ({ row }) => {
+      const record = row.original;
+      return record.services.map((service, index) => (
+        <div key={Symbol(index).toString()}>{service}</div>
+      ));
+    },
+  },
+
   {
     accessorKey: 'createdAt',
     accessorFn: ({ createdAt }) => dayjs(createdAt).format(DATE_TABLE_DATE_FORMAT),

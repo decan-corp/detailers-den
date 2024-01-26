@@ -126,3 +126,39 @@ export const getUserBySession = authAction(z.object({}), async (_, { session }) 
 
   return user || undefined;
 });
+
+export const getUserOptions = authAction(
+  searchSchema.pick({ role: true }).merge(paginationSchema).merge(sortingSchema),
+  async (params) => {
+    let query = db
+      .select({
+        id: users.id,
+        name: users.name,
+        role: users.role,
+      })
+      .from(users)
+      .$dynamic();
+
+    query = query.where(
+      and(isNull(users.deletedAt), params.role ? withRoleFilter(params.role) : undefined)
+    );
+
+    query = query.limit(params.pageSize).offset(params.pageIndex * params.pageSize);
+
+    if (params.sortBy) {
+      const sortBy = castArray(params.sortBy);
+      query = query.orderBy(
+        ...sortBy.map(({ id, desc: isDesc }) => {
+          const field = id as keyof typeof users.$inferSelect;
+          if (isDesc) {
+            return desc(users[field]);
+          }
+          return asc(users[field]);
+        })
+      );
+    }
+
+    const records = await query;
+    return records;
+  }
+);

@@ -14,7 +14,9 @@ import { getServices, getServicesCount } from 'src/actions/services/get-services
 import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
+import useQueryParams from 'src/hooks/use-query-params';
 import { services } from 'src/schema';
+import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { serviceColumns } from './data-columns';
 import { DataTableToolbar } from './data-table-toolbar';
@@ -46,9 +48,15 @@ const emptyArray: (typeof services.$inferSelect)[] = [];
 const ServicesTable = () => {
   const queryClient = useQueryClient();
 
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
+  const [sorting, setSorting] = useQueryParams<SortingState>('sorting', [
+    { id: 'createdAt', desc: true },
+  ]);
+  const [columnFilters, setColumnFilters] = useQueryParams<ColumnFiltersState>('columnFilters', []);
+  const [pagination, setPagination] = useQueryParams<PaginationState>('pagination', {
+    pageSize: 10,
+    pageIndex: 0,
+  });
+  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const isDeleteDialogOpen = useServiceAlertDialogStore((state) => state.isDeleteDialogOpen);
@@ -63,19 +71,8 @@ const ServicesTable = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.validationErrors) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
-        return;
-      }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
         return;
       }
 
@@ -87,25 +84,8 @@ const ServicesTable = () => {
     },
   });
 
-  useDebounce(
-    () => {
-      const search = columnFilters.find((filter) => filter.id === 'serviceName')?.value as
-        | string
-        | undefined;
-      setDebouncedSearch(search || '');
-    },
-    250,
-    [columnFilters]
-  );
-
   const { data: servicesData, isLoading } = useQuery({
-    queryKey: [
-      Entity.Services,
-      debouncedSearch,
-      pagination.pageIndex,
-      pagination.pageSize,
-      sorting,
-    ],
+    queryKey: [Entity.Services, debouncedSearch, pagination, sorting],
     queryFn: async () => {
       const { data = [] } = await getServices({
         ...(debouncedSearch && { serviceName: debouncedSearch }),
@@ -134,16 +114,20 @@ const ServicesTable = () => {
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
+    onGlobalFilterChange: setGlobalFilter,
     manualSorting: true,
     manualFiltering: true,
     manualPagination: true,
-    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
       pagination,
+      globalFilter,
     },
   });
+
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   const onDeleteDialogChange = (open: boolean) => {
     useServiceAlertDialogStore.setState({ isDeleteDialogOpen: open });

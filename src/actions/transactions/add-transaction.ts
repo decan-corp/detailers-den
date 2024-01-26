@@ -17,7 +17,16 @@ import { clamp, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
 
 export const addTransaction = authAction(
-  createInsertSchema(transactions)
+  createInsertSchema(transactions, {
+    discount: z.coerce
+      .number()
+      .optional()
+      .transform((value) => String(value)),
+    tip: z.coerce
+      .number()
+      .optional()
+      .transform((value) => String(value)),
+  })
     .omit({
       createdById: true,
       updatedById: true,

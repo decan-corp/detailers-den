@@ -16,6 +16,7 @@ import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
+import useQueryParams from 'src/hooks/use-query-params';
 import { UserSelect } from 'src/types/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -51,9 +52,15 @@ const emptyArray: UserSelect[] = [];
 const UsersTable = () => {
   const queryClient = useQueryClient();
 
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
+  const [sorting, setSorting] = useQueryParams<SortingState>('sorting', [
+    { id: 'createdAt', desc: true },
+  ]);
+  const [columnFilters, setColumnFilters] = useQueryParams<ColumnFiltersState>('columnFilters', []);
+  const [pagination, setPagination] = useQueryParams<PaginationState>('pagination', {
+    pageSize: 10,
+    pageIndex: 0,
+  });
+  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const { isDeleteDialogOpen, selectedUserId, isResetPasswordDialogOpen } =
@@ -104,37 +111,17 @@ const UsersTable = () => {
     },
   });
 
-  useDebounce(
-    () => {
-      const search = columnFilters.find((filter) => filter.id === 'email')?.value as
-        | string
-        | undefined;
-      setDebouncedSearch(search || '');
-    },
-    250,
-    [columnFilters]
-  );
-
   const filters = useMemo(
     () =>
-      columnFilters
-        .filter(({ id }) => id !== 'email') // searching with email is handled with debounce
-        .reduce(
-          (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
-          {} as Pick<Parameters<typeof getUsers>[0], 'role'>
-        ),
+      columnFilters.reduce(
+        (acc, filter) => ({ ...acc, [filter.id]: filter.value }),
+        {} as Pick<Parameters<typeof getUsers>[0], 'role'>
+      ),
     [columnFilters]
   );
 
   const { data: users, isLoading } = useQuery({
-    queryKey: [
-      Entity.Users,
-      filters,
-      debouncedSearch,
-      pagination.pageIndex,
-      pagination.pageSize,
-      sorting,
-    ],
+    queryKey: [Entity.Users, filters, debouncedSearch, pagination, sorting],
     queryFn: async () => {
       const { data = [] } = await getUsers({
         ...filters,
@@ -165,16 +152,27 @@ const UsersTable = () => {
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
+    onGlobalFilterChange: setGlobalFilter,
     manualSorting: true,
     manualFiltering: true,
     manualPagination: true,
-    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
       pagination,
+      globalFilter,
     },
   });
+
+  // // TODO: create hooks for table specific items here that are repeated elsewhere
+  // useEffect(() => {
+  //   if (debouncedSearch !== (prevDebouncedSearch || '')) {
+  //     table.resetPageIndex();
+  //   }
+  // }, [debouncedSearch, prevDebouncedSearch, table]);
+
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   const selectedUserInfo = useMemo(() => {
     if (!selectedUserId) {

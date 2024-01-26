@@ -3,7 +3,7 @@
 import { Role } from 'src/constants/common';
 import { crewEarnings, services, transactionServices, users } from 'src/schema';
 import { db } from 'src/utils/db';
-import { SafeActionError, authAction } from 'src/utils/safe-action';
+import { authAction } from 'src/utils/safe-action';
 
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
@@ -11,11 +11,7 @@ import { z } from 'zod';
 export const getEarningsPerService = authAction(
   z.string().cuid2(),
   async (transactionId, { session }) => {
-    const { role } = session.user;
-
-    if (![Role.Admin].includes(role)) {
-      throw new SafeActionError('Forbidden Access');
-    }
+    const { role, userId } = session.user;
 
     const transactionServiceRecords = await db
       .select({
@@ -44,7 +40,14 @@ export const getEarningsPerService = authAction(
       .from(crewEarnings)
       .innerJoin(transactionServices, eq(crewEarnings.transactionServiceId, transactionServices.id))
       .innerJoin(users, eq(crewEarnings.crewId, users.id))
-      .where(eq(transactionServices.transactionId, transactionId));
+      .where(
+        and(
+          eq(transactionServices.transactionId, transactionId),
+          [Role.Crew, Role.StayInCrew, Role.Detailer, Role.Cashier].includes(role)
+            ? eq(users.id, userId)
+            : undefined
+        )
+      );
 
     return transactionServiceRecords.map((transactionService) => {
       const earningsByService = crewEarningRecords.filter(

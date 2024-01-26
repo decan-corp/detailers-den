@@ -19,14 +19,14 @@
     "incremental": true,
     "plugins": [
       {
-        "name": "next"
-      }
+        "name": "next",
+      },
     ],
     "baseUrl": ".",
     "paths": {
       "src/*": ["./src/*"],
-      "@/*": ["./@/*"]
-    }
+      "@/*": ["./@/*"],
+    },
   },
   "include": [
     "next-env.d.ts",
@@ -37,8 +37,8 @@
     "scripts/**/*.ts",
     "types/**/*.ts",
     "@/**/*.ts",
-    "@/**/*.tsx"
+    "@/**/*.tsx",
   ],
   "files": ["global.d.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }
