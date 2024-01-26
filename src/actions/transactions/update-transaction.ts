@@ -19,7 +19,16 @@ import { clamp, omit, uniq, uniqBy } from 'lodash';
 import { z } from 'zod';
 
 export const updateTransaction = authAction(
-  createInsertSchema(transactions)
+  createInsertSchema(transactions, {
+    discount: z.coerce
+      .number()
+      .optional()
+      .transform((value) => String(value)),
+    tip: z.coerce
+      .number()
+      .optional()
+      .transform((value) => String(value)),
+  })
     .omit({
       createdAt: true,
       createdById: true,
@@ -40,7 +49,8 @@ export const updateTransaction = authAction(
           .min(
             dayjs().subtract(60, 'days').startOf('day').toDate(),
             'Please enter a date and time within the current year.'
-          ),
+          )
+          .nullish(),
         transactionServices: z
           .array(transactionServicesSchema.extend({ id: z.string().cuid2().optional() }))
           .min(1)
