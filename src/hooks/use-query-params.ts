@@ -56,8 +56,6 @@ const useQueryParams = <T = unknown>(paramKey: string, defaultValue: T) => {
         [paramKey]: !isEmpty(queryParams) ? formatValue(queryParams) : undefined,
       });
 
-      // TODO: fix page index not applying when refreshed
-
       // Using `window.history.replace` instead of Next.js `router.replace` to update search params
       // without triggering redirection. `router.replace` causes redirection, while `window.history.replace`
       // ensures a seamless update to the URL state without disrupting the current page.
