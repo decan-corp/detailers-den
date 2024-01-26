@@ -156,7 +156,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       tip: Number(data.tip || 0),
     };
 
-    if (loggedInUser && [Role.Admin, Role.Accounting].includes(loggedInUser?.role)) {
+    if (isEdit && loggedInUser && [Role.Admin, Role.Accounting].includes(loggedInUser?.role)) {
       payload.createdAt = dayjs(data.createdAt).toDate();
     }
 

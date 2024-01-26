@@ -83,7 +83,7 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
               </div>
               <div className="space-y-1">
                 <Label>Note</Label>
-                <div className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+                <div className="mt-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">
                   {transaction.note}
                 </div>
               </div>
