@@ -16,6 +16,7 @@ import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import { LocalStorageKey } from 'src/constants/storage-keys';
+import useQueryParams from 'src/hooks/use-query-params';
 import LocalStorage from 'src/utils/local-storage';
 
 import { transactionColumns } from './data-columns';
@@ -51,12 +52,17 @@ const emptyArray: NonNullable<Awaited<ReturnType<typeof getTransactions>>['data'
 
 const TransactionsTable = () => {
   const queryClient = useQueryClient();
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [sorting, setSorting] = useQueryParams<SortingState>('sorting', [
+    { id: 'createdAt', desc: true },
+  ]);
+  const [columnFilters, setColumnFilters] = useQueryParams<ColumnFiltersState>('columnFilters', []);
+  const [pagination, setPagination] = useQueryParams<PaginationState>('pagination', {
+    pageSize: 10,
+    pageIndex: 0,
+  });
+  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '', { stringify: false });
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const prevColumnVisibility = usePrevious(columnVisibility);
 

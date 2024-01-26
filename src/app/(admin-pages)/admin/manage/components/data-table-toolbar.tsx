@@ -9,17 +9,20 @@ import { rolesOptions } from './data-table-options';
 
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
+import { useRouter } from 'next/navigation';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
 export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
+  const router = useRouter();
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const reset = () => {
     table.resetColumnFilters();
     table.resetPageIndex();
+    router.replace('?');
   };
 
   return (

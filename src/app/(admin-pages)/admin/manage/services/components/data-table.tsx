@@ -14,6 +14,7 @@ import { getServices, getServicesCount } from 'src/actions/services/get-services
 import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
+import useQueryParams from 'src/hooks/use-query-params';
 import { services } from 'src/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -47,10 +48,15 @@ const emptyArray: (typeof services.$inferSelect)[] = [];
 const ServicesTable = () => {
   const queryClient = useQueryClient();
 
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({ pageSize: 10, pageIndex: 0 });
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [sorting, setSorting] = useQueryParams<SortingState>('sorting', [
+    { id: 'createdAt', desc: true },
+  ]);
+  const [columnFilters, setColumnFilters] = useQueryParams<ColumnFiltersState>('columnFilters', []);
+  const [pagination, setPagination] = useQueryParams<PaginationState>('pagination', {
+    pageSize: 10,
+    pageIndex: 0,
+  });
+  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '', { stringify: false });
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const isDeleteDialogOpen = useServiceAlertDialogStore((state) => state.isDeleteDialogOpen);

@@ -19,14 +19,18 @@ import {
 import cuid2 from '@paralleldrive/cuid2';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
+import { isEmpty } from 'lodash';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { DateRange } from 'react-day-picker';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
 export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
+  const router = useRouter();
   const isFiltered = table.getState().columnFilters.length > 0;
   const [resetKey, setResetKey] = useState(cuid2.createId());
   const { data: services = [] } = useServiceOptions();
@@ -44,6 +48,10 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
     table.resetColumnFilters();
     table.resetPageIndex();
     setResetKey(cuid2.createId());
+
+    // When utilizing search parameters to maintain state during redirection,
+    // it's important to reset query parameters as well to ensure a clean state.
+    router.replace('?');
   };
 
   return (
@@ -60,7 +68,11 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
           <DateRangePickerWithPresets
             key={resetKey}
             buttonSize="sm"
-            initialDateRange={{ from: undefined, to: undefined }}
+            initialDateRange={
+              !isEmpty(table.getColumn('createdAt')?.getFilterValue())
+                ? (table.getColumn('createdAt')?.getFilterValue() as DateRange)
+                : { from: undefined, to: undefined }
+            }
             placeholder="Filter by date"
             options={{
               All: {
