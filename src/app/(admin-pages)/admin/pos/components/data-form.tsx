@@ -16,9 +16,10 @@ import { Separator } from '@/components/ui/separator';
 import { addTransaction } from 'src/actions/transactions/add-transaction';
 import { getTransaction } from 'src/actions/transactions/get-transactions';
 import { updateTransaction } from 'src/actions/transactions/update-transaction';
-import { VehicleSize } from 'src/constants/common';
+import { Role, VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
+import useClientSession from 'src/hooks/use-client-session';
 import { transactionServices, transactions } from 'src/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -71,6 +72,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   }));
 
   const isEdit = Boolean(transactionId);
+  const { data: loggedInUser } = useClientSession();
 
   const {
     data: transaction,
@@ -146,19 +148,27 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     }
 
     const data = payload as typeof transactions.$inferInsert;
+
     if (transactionId) {
       mutateUpdateTransaction({
         ...data,
         id: transactionId,
         plateNumber: data.plateNumber.toUpperCase(),
         transactionServices: formState.transactionServices,
-        createdAt: dayjs(data.createdAt).toDate(),
+        discount: Number(data.discount || 0),
+        tip: Number(data.tip || 0),
+        ...(loggedInUser &&
+          [Role.Admin, Role.Accounting].includes(loggedInUser?.role) && {
+            createdAt: dayjs(data.createdAt).toDate(),
+          }),
       });
     } else {
       mutateAddTransaction({
         ...data,
         plateNumber: data.plateNumber.toUpperCase(),
         transactionServices: formState.transactionServices,
+        discount: Number(data.discount || 0),
+        tip: Number(data.tip || 0),
       });
     }
   };
