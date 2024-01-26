@@ -47,6 +47,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
   const reset = () => {
     table.resetColumnFilters();
     table.resetPageIndex();
+    table.resetGlobalFilter();
     setResetKey(cuid2.createId());
 
     // When utilizing search parameters to maintain state during redirection,

@@ -60,7 +60,7 @@ const UsersTable = () => {
     pageSize: 10,
     pageIndex: 0,
   });
-  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '', { stringify: false });
+  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const { isDeleteDialogOpen, selectedUserId, isResetPasswordDialogOpen } =
@@ -165,14 +165,14 @@ const UsersTable = () => {
     },
   });
 
-  useDebounce(
-    () => {
-      setDebouncedSearch(globalFilter || '');
-      table.resetPageIndex();
-    },
-    250,
-    [globalFilter]
-  );
+  // // TODO: create hooks for table specific items here that are repeated elsewhere
+  // useEffect(() => {
+  //   if (debouncedSearch !== (prevDebouncedSearch || '')) {
+  //     table.resetPageIndex();
+  //   }
+  // }, [debouncedSearch, prevDebouncedSearch, table]);
+
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   const selectedUserInfo = useMemo(() => {
     if (!selectedUserId) {

@@ -56,7 +56,7 @@ const ServicesTable = () => {
     pageSize: 10,
     pageIndex: 0,
   });
-  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '', { stringify: false });
+  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const isDeleteDialogOpen = useServiceAlertDialogStore((state) => state.isDeleteDialogOpen);
@@ -127,14 +127,7 @@ const ServicesTable = () => {
     },
   });
 
-  useDebounce(
-    () => {
-      setDebouncedSearch(globalFilter || '');
-      table.resetPageIndex();
-    },
-    250,
-    [globalFilter]
-  );
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   const onDeleteDialogChange = (open: boolean) => {
     useServiceAlertDialogStore.setState({ isDeleteDialogOpen: open });

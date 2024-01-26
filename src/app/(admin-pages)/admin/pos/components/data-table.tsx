@@ -62,7 +62,7 @@ const TransactionsTable = () => {
     pageSize: 10,
     pageIndex: 0,
   });
-  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '', { stringify: false });
+  const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const prevColumnVisibility = usePrevious(columnVisibility);
 
@@ -214,14 +214,7 @@ const TransactionsTable = () => {
     },
   });
 
-  useDebounce(
-    () => {
-      setDebouncedSearch(globalFilter || '');
-      table.resetPageIndex();
-    },
-    250,
-    [globalFilter]
-  );
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   return (
     <div className="space-y-4">

@@ -22,6 +22,7 @@ export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>
   const reset = () => {
     table.resetColumnFilters();
     table.resetPageIndex();
+    table.resetGlobalFilter();
     router.replace('?');
   };
 

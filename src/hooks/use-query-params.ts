@@ -3,27 +3,28 @@
 import { isEmpty } from 'lodash';
 import { useRouter, useSearchParams } from 'next/navigation';
 import queryString from 'query-string';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useDebounce } from 'react-use';
 import { useImmer } from 'use-immer';
 
-const useQueryParams = <T = unknown>(
-  paramKey: string,
-  defaultValue?: T,
-  options: { stringify: boolean } = { stringify: true }
-) => {
+const useQueryParams = <T = unknown>(paramKey: string, defaultValue: T) => {
   const router = useRouter();
   const isMounted = useRef(false);
   const searchParams = useSearchParams();
 
+  const isStringified = useMemo(
+    () => typeof defaultValue === 'object' || Array.isArray(defaultValue),
+    [defaultValue]
+  );
+
   const parseValue = useCallback(
     (value: unknown) => {
-      if (options.stringify) {
+      if (isStringified) {
         return JSON.parse(value as string) as T;
       }
       return value;
     },
-    [options.stringify]
+    [isStringified]
   );
 
   const [queryParams, setQueryParams] = useImmer<T>(() => {
@@ -33,12 +34,12 @@ const useQueryParams = <T = unknown>(
 
   const formatValue = useCallback(
     (value: unknown) => {
-      if (options.stringify) {
+      if (isStringified) {
         return JSON.stringify(value);
       }
       return value;
     },
-    [options.stringify]
+    [isStringified]
   );
 
   useDebounce(
@@ -54,6 +55,8 @@ const useQueryParams = <T = unknown>(
         ...parsedUrl,
         [paramKey]: !isEmpty(queryParams) ? formatValue(queryParams) : undefined,
       });
+
+      // TODO: fix page index not applying when refreshed
 
       // Using `window.history.replace` instead of Next.js `router.replace` to update search params
       // without triggering redirection. `router.replace` causes redirection, while `window.history.replace`
