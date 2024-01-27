@@ -7,9 +7,10 @@ import { createInsertSchema } from 'drizzle-zod';
 import { uniqBy } from 'lodash';
 import { z } from 'zod';
 
-const transactionSchema = createInsertSchema(transactions)
+export const transactionSchema = createInsertSchema(transactions)
   .merge(
     z.object({
+      plateNumber: z.string().toUpperCase(),
       discount: z.coerce
         .number()
         .transform((value) => String(value))

@@ -21,6 +21,7 @@ import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
 import useClientSession from 'src/hooks/use-client-session';
 import { transactionServices, transactions } from 'src/schema';
+import { transactionSchema, updateTransactionSchema } from 'src/schemas/transactions';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import AvailedServices from './form/availed-services';
@@ -33,6 +34,7 @@ import { notFound, useRouter } from 'next/navigation';
 import { ComponentProps } from 'react';
 import { toast } from 'sonner';
 import { useImmer } from 'use-immer';
+import { z } from 'zod';
 
 type ValidationError = {
   [Field in keyof typeof transactions.$inferSelect]?: string;
@@ -141,21 +143,22 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       formEntries[key] = value;
     }
 
-    const data = formEntries as typeof transactions.$inferInsert;
+    const data = formEntries as z.input<typeof transactionSchema>;
     const payload = {
       ...data,
-      plateNumber: data.plateNumber.toUpperCase(),
       transactionServices: formState.transactionServices,
-      discount: Number(data.discount || 0),
-      tip: Number(data.tip || 0),
     };
 
-    if (isEdit && loggedInUser && [Role.Admin, Role.Accounting].includes(loggedInUser?.role)) {
-      payload.createdAt = dayjs(data.createdAt).toDate();
-    }
-
     if (transactionId) {
-      mutateUpdateTransaction({ ...payload, id: transactionId });
+      const updateData = formEntries as z.input<typeof updateTransactionSchema>;
+      mutateUpdateTransaction({
+        ...payload,
+        id: transactionId,
+        ...(loggedInUser &&
+          [Role.Admin, Role.Accounting].includes(loggedInUser?.role) && {
+            createdAt: dayjs(updateData.createdAt).toDate(),
+          }),
+      });
     } else {
       mutateAddTransaction(payload);
     }
