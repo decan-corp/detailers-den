@@ -11,7 +11,7 @@ const handleReturnedServerError = (e: Error) => {
     return e.message;
   }
 
-  return 'Something went wrong while executing the operation';
+  return 'An error occurred while performing the requested action.';
 };
 
 export const action = createSafeActionClient({
