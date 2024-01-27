@@ -18,8 +18,8 @@ class LocalStorage {
     return JSON.parse(item) as T;
   }
 
-  static set(key: LocalStorageKey, payload: Record<string, unknown> | number | string | string[]) {
-    localStorage.setItem(key, JSON.stringify(payload ?? {}));
+  static set(key: LocalStorageKey, payload: unknown) {
+    localStorage.setItem(key, JSON.stringify(payload ?? null));
   }
 
   static delete(key: LocalStorageKey) {
