@@ -7,18 +7,17 @@ import { createInsertSchema } from 'drizzle-zod';
 import { uniqBy } from 'lodash';
 import { z } from 'zod';
 
-const transactionSchema = createInsertSchema(transactions, {
-  discount: z.coerce
-    .number()
-    .optional()
-    .transform((value) => String(value)),
-  tip: z.coerce
-    .number()
-    .optional()
-    .transform((value) => String(value)),
-})
+const transactionSchema = createInsertSchema(transactions)
   .merge(
     z.object({
+      discount: z.coerce
+        .number()
+        .transform((value) => String(value))
+        .optional(),
+      tip: z.coerce
+        .number()
+        .transform((value) => String(value))
+        .optional(),
       transactionServices: z
         .array(transactionServicesSchema)
         .min(1)
