@@ -4,24 +4,28 @@ import { users } from 'src/schema';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-const usersSchema = createInsertSchema(users, {
-  email: (schema) => schema.email.toLowerCase(),
-  serviceCutPercentage: z.coerce
-    .number()
-    .int({ message: 'Must not contain decimal values' })
-    .min(0)
-    .max(100)
-    .nullish(),
-}).omit({
-  createdById: true,
-  updatedById: true,
-  deletedById: true,
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
-});
+export const userSchema = createInsertSchema(users, {})
+  .merge(
+    z.object({
+      email: z.string().min(1).toLowerCase(),
+      serviceCutPercentage: z.coerce
+        .number()
+        .int({ message: 'Must not contain decimal values' })
+        .min(0)
+        .max(100)
+        .nullish(),
+    })
+  )
+  .omit({
+    createdById: true,
+    updatedById: true,
+    deletedById: true,
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
+  });
 
-export const createUserSchema = usersSchema
+export const createUserSchema = userSchema
   .omit({
     id: true,
   })
@@ -49,7 +53,7 @@ export const createUserSchema = usersSchema
     path: ['confirmPassword'],
   });
 
-export const updateUserSchema = usersSchema
+export const updateUserSchema = userSchema
   .omit({
     isFirstTimeLogin: true,
   })

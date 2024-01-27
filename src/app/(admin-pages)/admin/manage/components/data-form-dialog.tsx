@@ -24,7 +24,7 @@ import { getUser } from 'src/actions/users/get-users';
 import { updateUser } from 'src/actions/users/update-user';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { Entity } from 'src/constants/entities';
-import { users } from 'src/schema';
+import { createUserSchema, userSchema } from 'src/schemas/users';
 import { UserSelect } from 'src/types/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -34,6 +34,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ComponentProps, useState } from 'react';
 import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
+import { z } from 'zod';
 import { create } from 'zustand';
 
 type ValidationError = {
@@ -115,14 +116,14 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
       payload[key] = value;
     }
 
-    const data = payload as typeof users.$inferSelect;
+    const data = payload as z.input<typeof userSchema>;
     if (userIdToEdit) {
       mutateUpdateUser({
         ...data,
         id: userIdToEdit,
       });
     } else {
-      mutateAddUser(data as typeof data & { confirmPassword: string; password: string });
+      mutateAddUser(data as z.input<typeof createUserSchema>);
     }
   };
 

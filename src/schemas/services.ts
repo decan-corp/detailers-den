@@ -5,7 +5,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { uniqBy } from 'lodash';
 import { z } from 'zod';
 
-const priceMatrixSchema = z
+export const priceMatrixSchema = z
   .array(
     z.object({
       price: z.number().int().min(1),
@@ -23,16 +23,21 @@ const priceMatrixSchema = z
     }
   );
 
-const serviceSchema = createInsertSchema(services, {
-  priceMatrix: priceMatrixSchema,
-}).omit({
-  createdById: true,
-  updatedById: true,
-  deletedById: true,
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
-});
+export const serviceSchema = createInsertSchema(services)
+  .merge(
+    z.object({
+      priceMatrix: priceMatrixSchema,
+      serviceCutPercentage: z.coerce.number().int().optional(),
+    })
+  )
+  .omit({
+    createdById: true,
+    updatedById: true,
+    deletedById: true,
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
+  });
 
 export const createServiceSchema = serviceSchema.omit({
   id: true,
