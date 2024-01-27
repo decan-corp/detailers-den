@@ -17,6 +17,7 @@ import { DataTablePagination } from 'src/components/table/data-table-pagination'
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
 import useQueryParams from 'src/hooks/use-query-params';
+import useSetSearchParams from 'src/hooks/use-set-search-params';
 import { UserSelect } from 'src/types/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -66,6 +67,15 @@ const UsersTable = () => {
   const { isDeleteDialogOpen, selectedUserId, isResetPasswordDialogOpen } =
     useUserAlertDialogStore();
 
+  useSetSearchParams({
+    sorting,
+    columnFilters,
+    pagination,
+    globalFilter: debouncedSearch,
+  });
+
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 300, [globalFilter]);
+
   const { mutate: mutateSoftDeleteUser } = useMutation({
     mutationFn: softDeleteUser,
     onMutate: () => {
@@ -79,11 +89,7 @@ const UsersTable = () => {
         handleSafeActionError(result);
         return;
       }
-
-      await queryClient.invalidateQueries({
-        queryKey: [Entity.Users],
-      });
-
+      await queryClient.invalidateQueries({ queryKey: [Entity.Users] });
       toast.success('Success soft deleting user');
     },
   });
@@ -164,15 +170,6 @@ const UsersTable = () => {
       globalFilter,
     },
   });
-
-  // // TODO: create hooks for table specific items here that are repeated elsewhere
-  // useEffect(() => {
-  //   if (debouncedSearch !== (prevDebouncedSearch || '')) {
-  //     table.resetPageIndex();
-  //   }
-  // }, [debouncedSearch, prevDebouncedSearch, table]);
-
-  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   const selectedUserInfo = useMemo(() => {
     if (!selectedUserId) {

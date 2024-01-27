@@ -17,6 +17,9 @@ import { DataTablePagination } from 'src/components/table/data-table-pagination'
 import { Entity } from 'src/constants/entities';
 import { LocalStorageKey } from 'src/constants/storage-keys';
 import useQueryParams from 'src/hooks/use-query-params';
+import useSetLocalStorage from 'src/hooks/use-set-local-storage';
+import useSetSearchParams from 'src/hooks/use-set-search-params';
+import { handleSafeActionError } from 'src/utils/error-handling';
 import LocalStorage from 'src/utils/local-storage';
 
 import { transactionColumns } from './data-columns';
@@ -32,9 +35,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { isEqual, omit } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
-import { useDebounce, useEffectOnce, usePrevious } from 'react-use';
+import { omit } from 'lodash';
+import { useMemo, useState } from 'react';
+import { useDebounce, useEffectOnce } from 'react-use';
 import { toast } from 'sonner';
 import { create } from 'zustand';
 
@@ -64,23 +67,28 @@ const TransactionsTable = () => {
   });
   const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const prevColumnVisibility = usePrevious(columnVisibility);
 
   const { isDeleteDialogOpen, selectedId, isMarkAsPaidDialogOpen } = useTransactionAlertDialogStore(
     (state) => state
   );
 
-  useEffect(() => {
-    if (!isEqual(prevColumnVisibility || {}, columnVisibility)) {
-      LocalStorage.set(LocalStorageKey.ColumnVisibility, columnVisibility);
-    }
-  }, [columnVisibility, prevColumnVisibility]);
+  useSetSearchParams({
+    sorting,
+    columnFilters,
+    pagination,
+    globalFilter: debouncedSearch,
+  });
+
+  useSetLocalStorage(LocalStorageKey.ColumnVisibility, columnVisibility);
 
   useEffectOnce(() => {
+    // we are getting hydration errors if we define the initial value of the column visibility in its useState
     setColumnVisibility(
       (LocalStorage.get(LocalStorageKey.ColumnVisibility) as VisibilityState) || {}
     );
   });
+
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 300, [globalFilter]);
 
   const { mutate: mutateSoftDeleteUser, isPending: isSoftDeletingUser } = useMutation({
     mutationFn: softDeleteTransaction,
@@ -91,27 +99,12 @@ const TransactionsTable = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.validationErrors) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
-
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
         return;
       }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
-        return;
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: [Entity.Transactions],
-      });
+      await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
       await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
-
       toast.success('Success soft deleting transaction.');
     },
   });
@@ -125,26 +118,12 @@ const TransactionsTable = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.validationErrors) {
-        toast.warning('Invalid Input', {
-          description:
-            'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
-        });
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
         return;
       }
-
-      if (result?.serverError) {
-        toast.error('Something went wrong', {
-          description: result.serverError,
-        });
-        return;
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: [Entity.Transactions],
-      });
+      await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
       await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
-
       toast.success('Success marking transaction as paid.');
     },
   });
@@ -213,8 +192,6 @@ const TransactionsTable = () => {
       globalFilter,
     },
   });
-
-  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   return (
     <div className="space-y-4">

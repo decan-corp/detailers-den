@@ -15,6 +15,7 @@ import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
 import { Entity } from 'src/constants/entities';
 import useQueryParams from 'src/hooks/use-query-params';
+import useSetSearchParams from 'src/hooks/use-set-search-params';
 import { services } from 'src/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -61,6 +62,15 @@ const ServicesTable = () => {
 
   const isDeleteDialogOpen = useServiceAlertDialogStore((state) => state.isDeleteDialogOpen);
   const serviceIdToDelete = useServiceAlertDialogStore((state) => state.serviceIdToDelete);
+
+  useSetSearchParams({
+    sorting,
+    columnFilters,
+    pagination,
+    globalFilter: debouncedSearch,
+  });
+
+  useDebounce(() => setDebouncedSearch(globalFilter || ''), 300, [globalFilter]);
 
   const { mutate: mutateSoftDeleteService } = useMutation({
     mutationFn: softDeleteService,
@@ -126,8 +136,6 @@ const ServicesTable = () => {
       globalFilter,
     },
   });
-
-  useDebounce(() => setDebouncedSearch(globalFilter || ''), 250, [globalFilter]);
 
   const onDeleteDialogChange = (open: boolean) => {
     useServiceAlertDialogStore.setState({ isDeleteDialogOpen: open });

@@ -81,12 +81,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   } = useQuery({
     queryKey: [Entity.Transactions, transactionId],
     queryFn: async () => {
-      const { data, serverError, validationErrors } = await getTransaction(transactionId as string);
-
-      if (serverError || validationErrors) {
-        toast.error(validationErrors ? 'Validation error' : 'Server Error');
-      }
-
+      const { data } = await getTransaction(transactionId as string);
       return data;
     },
     enabled: !!transactionId,
@@ -140,7 +135,6 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-
     const formEntries: Record<string, unknown> = {};
 
     for (const [key, value] of formData.entries()) {
@@ -161,10 +155,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     }
 
     if (transactionId) {
-      mutateUpdateTransaction({
-        ...payload,
-        id: transactionId,
-      });
+      mutateUpdateTransaction({ ...payload, id: transactionId });
     } else {
       mutateAddTransaction(payload);
     }
