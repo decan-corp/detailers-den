@@ -49,7 +49,7 @@ const useSetSearchParams = (params: Record<string, unknown>) => {
       // ensures a seamless update to the URL state without disrupting the current page.
       window.history.replaceState(null, '', `?${stringifiedParams}`);
     },
-    500,
+    300,
     [params, searchParams]
   );
 };
