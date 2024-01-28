@@ -23,9 +23,9 @@ const UserNav = async () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full outline-none">
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
             <AvatarImage src={session?.user.image || ''} alt="@shadcn" />
-            <AvatarFallback className="select-none">
+            <AvatarFallback className="select-none text-xs sm:text-sm">
               {getInitials(session?.user.name || 'UN')}
             </AvatarFallback>
           </Avatar>
