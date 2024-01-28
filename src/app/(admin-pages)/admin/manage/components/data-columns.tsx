@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
-import { users } from 'src/schema';
+import { usersTable } from 'src/schema';
 
 import { useUserFormStore } from './data-form-dialog';
 import { useUserAlertDialogStore } from './data-table';
@@ -22,7 +22,7 @@ import { MoreHorizontal } from 'lucide-react';
 
 export const userColumns: ColumnDef<
   Pick<
-    typeof users.$inferSelect,
+    typeof usersTable.$inferSelect,
     'id' | 'name' | 'email' | 'createdAt' | 'updatedAt' | 'role' | 'serviceCutPercentage'
   >
 >[] = [

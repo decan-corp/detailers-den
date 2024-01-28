@@ -1,6 +1,6 @@
-import { users } from 'src/schema';
+import { usersTable } from 'src/schema';
 
-export type UserSelect = typeof users.$inferSelect;
-export type UserInsert = typeof users.$inferInsert;
+export type UserSelect = typeof usersTable.$inferSelect;
+export type UserInsert = typeof usersTable.$inferInsert;
 
 export type UserRole = UserSelect['role'];

@@ -1,5 +1,5 @@
 import { VehicleSize } from 'src/constants/common';
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
 
 import { createInsertSchema } from 'drizzle-zod';
 import { uniqBy } from 'lodash';
@@ -23,7 +23,7 @@ export const priceMatrixSchema = z
     }
   );
 
-export const serviceSchema = createInsertSchema(services)
+export const serviceSchema = createInsertSchema(servicesTable)
   .merge(
     z.object({
       priceMatrix: priceMatrixSchema,

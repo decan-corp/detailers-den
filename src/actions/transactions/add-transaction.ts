@@ -4,7 +4,13 @@
 'use server';
 
 import { TransactionStatus } from 'src/constants/common';
-import { crewEarnings, services, transactionServices, transactions, users } from 'src/schema';
+import {
+  crewEarningsTable,
+  servicesTable,
+  transactionServicesTable,
+  transactionsTable,
+  usersTable,
+} from 'src/schema';
 import { createTransactionSchema } from 'src/schemas/transactions';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -22,15 +28,18 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
     const serviceIds = transactionServicesList.map(({ serviceId }) => serviceId);
     const crewIds = uniq(transactionServicesList.flatMap(({ serviceBy }) => serviceBy));
 
-    const servicesRef = await tx.select().from(services).where(inArray(services.id, serviceIds));
-    const usersRef = await tx.select().from(users).where(inArray(users.id, crewIds));
+    const servicesRef = await tx
+      .select()
+      .from(servicesTable)
+      .where(inArray(servicesTable.id, serviceIds));
+    const usersRef = await tx.select().from(usersTable).where(inArray(usersTable.id, crewIds));
 
     if (serviceIds.length !== servicesRef.length) {
       throw new SafeActionError('Invalid service id');
     }
 
-    const insertTransactionServicesData: (typeof transactionServices.$inferInsert)[] = [];
-    const insertCrewEarnings: (typeof crewEarnings.$inferInsert)[] = [];
+    const insertTransactionServicesData: (typeof transactionServicesTable.$inferInsert)[] = [];
+    const insertCrewEarnings: (typeof crewEarningsTable.$inferInsert)[] = [];
 
     for (const transactionService of transactionServicesList) {
       const service = servicesRef.find(({ id }) => id === transactionService.serviceId);
@@ -86,7 +95,7 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
 
     const discountedPrice = totalPrice - (Number(transactionData.discount) || 0);
 
-    await tx.insert(transactions).values({
+    await tx.insert(transactionsTable).values({
       ...transactionData,
       id: transactionId,
       createdById: userId,
@@ -97,7 +106,7 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
         completedBy: userId,
       }),
     });
-    await tx.insert(transactionServices).values(insertTransactionServicesData);
-    await tx.insert(crewEarnings).values(insertCrewEarnings);
+    await tx.insert(transactionServicesTable).values(insertTransactionServicesData);
+    await tx.insert(crewEarningsTable).values(insertCrewEarnings);
   });
 });

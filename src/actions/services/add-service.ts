@@ -1,7 +1,7 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
 import { createServiceSchema } from 'src/schemas/services';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -13,7 +13,7 @@ export const addService = authAction(createServiceSchema, async (data, { session
     throw new SafeActionError('Forbidden access');
   }
 
-  await db.insert(services).values({
+  await db.insert(servicesTable).values({
     ...data,
     createdById: userId,
   });

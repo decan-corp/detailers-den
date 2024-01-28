@@ -27,7 +27,7 @@ const commonSchema = {
   deletedById: varchar('deleted_by_id', { length: 255 }),
 };
 
-export const transactions = mysqlTable(
+export const transactionsTable = mysqlTable(
   'transactions',
   {
     id: varchar('id', { length: 255 })
@@ -75,7 +75,7 @@ export const transactions = mysqlTable(
   })
 );
 
-export const users = mysqlTable('users', {
+export const usersTable = mysqlTable('users', {
   id: varchar('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),
@@ -91,7 +91,7 @@ export const users = mysqlTable('users', {
   ...commonSchema,
 });
 
-export const services = mysqlTable('services', {
+export const servicesTable = mysqlTable('services', {
   id: varchar('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),
@@ -109,7 +109,7 @@ export const services = mysqlTable('services', {
   ...commonSchema,
 });
 
-export const transactionServices = mysqlTable(
+export const transactionServicesTable = mysqlTable(
   'transaction_services',
   {
     id: varchar('id', { length: 255 })
@@ -132,7 +132,7 @@ export const transactionServices = mysqlTable(
   })
 );
 
-export const crewEarnings = mysqlTable(
+export const crewEarningsTable = mysqlTable(
   'crew_earnings',
   {
     id: varchar('id', { length: 255 })
@@ -155,7 +155,7 @@ export const crewEarnings = mysqlTable(
   })
 );
 
-export const userKeys = mysqlTable('user_keys', {
+export const userKeysTable = mysqlTable('user_keys', {
   id: varchar('id', {
     length: 255,
   }).primaryKey(),
@@ -169,7 +169,7 @@ export const userKeys = mysqlTable('user_keys', {
   ...dateSchema,
 });
 
-export const userSessions = mysqlTable('user_sessions', {
+export const userSessionsTable = mysqlTable('user_sessions', {
   id: varchar('id', {
     length: 128,
   }).primaryKey(),
@@ -186,7 +186,7 @@ export const userSessions = mysqlTable('user_sessions', {
   ...dateSchema,
 });
 
-export const resetPasswordTokens = mysqlTable('reset_password_tokens', {
+export const resetPasswordTokensTable = mysqlTable('reset_password_tokens', {
   id: varchar('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),

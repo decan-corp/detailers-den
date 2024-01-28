@@ -1,7 +1,7 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
 import { updateServiceSchema } from 'src/schemas/services';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -17,7 +17,7 @@ export const updateService = authAction(updateServiceSchema, async (params, { se
   }
 
   await db
-    .update(services)
+    .update(servicesTable)
     .set({ ...serviceData, updatedById: userId })
-    .where(eq(services.id, id));
+    .where(eq(servicesTable.id, id));
 });

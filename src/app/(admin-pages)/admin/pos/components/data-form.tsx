@@ -20,7 +20,7 @@ import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
 import useClientSession from 'src/hooks/use-client-session';
-import { transactionServices, transactions } from 'src/schema';
+import { transactionServicesTable, transactionsTable } from 'src/schema';
 import { transactionSchema, updateTransactionSchema } from 'src/schemas/transactions';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -36,11 +36,11 @@ import { useImmer } from 'use-immer';
 import { z } from 'zod';
 
 type ValidationError = {
-  [Field in keyof typeof transactions.$inferSelect]?: string;
+  [Field in keyof typeof transactionsTable.$inferSelect]?: string;
 };
 
 type ServiceEntry = Pick<
-  typeof transactionServices.$inferSelect,
+  typeof transactionServicesTable.$inferSelect,
   'price' | 'serviceBy' | 'serviceId' | 'id'
 >;
 

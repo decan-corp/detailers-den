@@ -25,7 +25,7 @@ import { updateService } from 'src/actions/services/update-service';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
 import { serviceSchema } from 'src/schemas/services';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -43,7 +43,7 @@ import { z } from 'zod';
 import { create } from 'zustand';
 
 type ValidationError = {
-  [Field in keyof typeof services.$inferSelect]?: string;
+  [Field in keyof typeof servicesTable.$inferSelect]?: string;
 };
 
 export const useServiceFormStore = create<{
@@ -147,7 +147,7 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
     const data = formEntries as z.input<typeof serviceSchema>;
     const payload = {
       ...data,
-      priceMatrix: priceMatrix as typeof services.$inferInsert.priceMatrix,
+      priceMatrix: priceMatrix as typeof servicesTable.$inferInsert.priceMatrix,
     };
 
     if (serviceIdToEdit) {

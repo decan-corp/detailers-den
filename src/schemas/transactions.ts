@@ -1,4 +1,4 @@
-import { transactions } from 'src/schema';
+import { transactionsTable } from 'src/schema';
 
 import { transactionServicesSchema } from './transaction-services';
 
@@ -7,7 +7,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { uniqBy } from 'lodash';
 import { z } from 'zod';
 
-export const transactionSchema = createInsertSchema(transactions)
+export const transactionSchema = createInsertSchema(transactionsTable)
   .merge(
     z.object({
       plateNumber: z.string().toUpperCase(),

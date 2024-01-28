@@ -1,10 +1,10 @@
 import { Role } from 'src/constants/common';
-import { users } from 'src/schema';
+import { usersTable } from 'src/schema';
 
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const userSchema = createInsertSchema(users, {})
+export const userSchema = createInsertSchema(usersTable, {})
   .merge(
     z.object({
       email: z.string().min(1).toLowerCase(),

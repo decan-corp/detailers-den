@@ -1,7 +1,7 @@
 'use server';
 
 import { Role, TransactionStatus } from 'src/constants/common';
-import { transactions } from 'src/schema';
+import { transactionsTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { getIncreaseInPercentage } from 'src/utils/formula';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -31,12 +31,12 @@ export const getTotalTransactionCount = authAction(
 
     const [{ currentCount }] = await db
       .select({ currentCount: count() })
-      .from(transactions)
+      .from(transactionsTable)
       .where(
         and(
-          between(transactions.createdAt, current.startDate, current.endDate),
-          eq(transactions.status, TransactionStatus.Paid),
-          isNull(transactions.deletedAt)
+          between(transactionsTable.createdAt, current.startDate, current.endDate),
+          eq(transactionsTable.status, TransactionStatus.Paid),
+          isNull(transactionsTable.deletedAt)
         )
       );
 
@@ -44,12 +44,12 @@ export const getTotalTransactionCount = authAction(
     if (previous) {
       const [record] = await db
         .select({ previousCount: count() })
-        .from(transactions)
+        .from(transactionsTable)
         .where(
           and(
-            between(transactions.createdAt, previous.startDate, previous.endDate),
-            eq(transactions.status, TransactionStatus.Paid),
-            isNull(transactions.deletedAt)
+            between(transactionsTable.createdAt, previous.startDate, previous.endDate),
+            eq(transactionsTable.status, TransactionStatus.Paid),
+            isNull(transactionsTable.deletedAt)
           )
         );
       previousCount = record.previousCount;

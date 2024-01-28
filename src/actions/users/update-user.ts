@@ -1,7 +1,7 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { userKeys, users } from 'src/schema';
+import { userKeysTable, usersTable } from 'src/schema';
 import { updateUserSchema } from 'src/schemas/users';
 import { db } from 'src/utils/db';
 import { ProviderId } from 'src/utils/lucia';
@@ -19,17 +19,17 @@ export const updateUser = authAction(updateUserSchema, (params, { session }) => 
 
   return db.transaction(async (tx) => {
     await tx
-      .update(users)
+      .update(usersTable)
       .set({ ...userData, updatedById: userId })
-      .where(eq(users.id, id));
+      .where(eq(usersTable.id, id));
 
     if (userData.email) {
       await tx
-        .update(userKeys)
+        .update(userKeysTable)
         .set({
           id: createKeyId(ProviderId.email, userData.email),
         })
-        .where(and(like(userKeys.id, `${ProviderId.email}%`), eq(userKeys.userId, id)));
+        .where(and(like(userKeysTable.id, `${ProviderId.email}%`), eq(userKeysTable.userId, id)));
     }
   });
 });

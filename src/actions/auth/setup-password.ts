@@ -1,6 +1,6 @@
 'use server';
 
-import { users } from 'src/schema';
+import { usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { ProviderId, auth } from 'src/utils/lucia';
 import { authAction } from 'src/utils/safe-action';
@@ -25,11 +25,11 @@ export const setupPassword = authAction(
 
     await db.transaction(async (tx) => {
       await tx
-        .update(users)
+        .update(usersTable)
         .set({
           isFirstTimeLogin: false,
         })
-        .where(eq(users.id, userId));
+        .where(eq(usersTable.id, userId));
       await auth.updateKeyPassword(ProviderId.email, email, data.password);
       await auth.invalidateAllUserSessions(userId);
     });

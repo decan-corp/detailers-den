@@ -1,7 +1,7 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { transactions } from 'src/schema';
+import { transactionsTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
@@ -16,12 +16,12 @@ export const softDeleteTransaction = authAction(z.string().cuid2(), async (id, {
   }
 
   await db
-    .update(transactions)
+    .update(transactionsTable)
     .set({
       deletedById: userId,
       deletedAt: sql`CURRENT_TIMESTAMP`,
     })
-    .where(eq(transactions.id, id));
+    .where(eq(transactionsTable.id, id));
 });
 
 export const recoverTransaction = authAction(z.string().cuid2(), async (id, { session }) => {
@@ -32,10 +32,10 @@ export const recoverTransaction = authAction(z.string().cuid2(), async (id, { se
   }
 
   await db
-    .update(transactions)
+    .update(transactionsTable)
     .set({
       deletedById: null,
       deletedAt: null,
     })
-    .where(eq(transactions.id, id));
+    .where(eq(transactionsTable.id, id));
 });

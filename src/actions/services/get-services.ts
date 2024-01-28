@@ -1,6 +1,6 @@
 'use server';
 
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
@@ -19,21 +19,21 @@ export const getServices = authAction(
   async (params) => {
     let query = db
       .select({
-        id: services.id,
-        serviceName: services.serviceName,
-        serviceCutPercentage: services.serviceCutPercentage,
-        description: services.description,
-        createdAt: services.createdAt,
-        updatedAt: services.updatedAt,
-        priceMatrix: services.priceMatrix,
+        id: servicesTable.id,
+        serviceName: servicesTable.serviceName,
+        serviceCutPercentage: servicesTable.serviceCutPercentage,
+        description: servicesTable.description,
+        createdAt: servicesTable.createdAt,
+        updatedAt: servicesTable.updatedAt,
+        priceMatrix: servicesTable.priceMatrix,
       })
-      .from(services)
+      .from(servicesTable)
       .$dynamic();
 
     query = query.where(
       and(
-        isNull(services.deletedAt),
-        params.serviceName ? like(services.serviceName, `%${params.serviceName}%`) : undefined
+        isNull(servicesTable.deletedAt),
+        params.serviceName ? like(servicesTable.serviceName, `%${params.serviceName}%`) : undefined
       )
     );
 
@@ -43,11 +43,11 @@ export const getServices = authAction(
       const sortBy = castArray(params.sortBy);
       query = query.orderBy(
         ...sortBy.map(({ id, desc: isDesc }) => {
-          const field = id as keyof typeof services.$inferSelect;
+          const field = id as keyof typeof servicesTable.$inferSelect;
           if (isDesc) {
-            return desc(services[field]);
+            return desc(servicesTable[field]);
           }
-          return asc(services[field]);
+          return asc(servicesTable[field]);
         })
       );
     }
@@ -62,13 +62,13 @@ export const getServicesCount = authAction(searchSchema, async (params) => {
     .select({
       value: count(),
     })
-    .from(services)
+    .from(servicesTable)
     .$dynamic();
 
   query = query.where(
     and(
-      isNull(services.deletedAt),
-      params.serviceName ? like(services.serviceName, `%${params.serviceName}%`) : undefined
+      isNull(servicesTable.deletedAt),
+      params.serviceName ? like(servicesTable.serviceName, `%${params.serviceName}%`) : undefined
     )
   );
 
@@ -78,7 +78,7 @@ export const getServicesCount = authAction(searchSchema, async (params) => {
 });
 
 export const getService = authAction(z.string().cuid2(), async (id) => {
-  const [service] = await db.select().from(services).where(eq(services.id, id)).limit(1);
+  const [service] = await db.select().from(servicesTable).where(eq(servicesTable.id, id)).limit(1);
 
   return service || undefined;
 });
@@ -88,15 +88,15 @@ export const getServiceOptions = authAction(
   async (params) => {
     let query = db
       .select({
-        id: services.id,
-        serviceName: services.serviceName,
-        priceMatrix: services.priceMatrix,
-        description: services.description,
+        id: servicesTable.id,
+        serviceName: servicesTable.serviceName,
+        priceMatrix: servicesTable.priceMatrix,
+        description: servicesTable.description,
       })
-      .from(services)
+      .from(servicesTable)
       .$dynamic();
 
-    query = query.where(isNull(services.deletedAt));
+    query = query.where(isNull(servicesTable.deletedAt));
 
     query = query.limit(params.pageSize).offset(params.pageIndex * params.pageSize);
 
@@ -104,11 +104,11 @@ export const getServiceOptions = authAction(
       const sortBy = castArray(params.sortBy);
       query = query.orderBy(
         ...sortBy.map(({ id, desc: isDesc }) => {
-          const field = id as keyof typeof services.$inferSelect;
+          const field = id as keyof typeof servicesTable.$inferSelect;
           if (isDesc) {
-            return desc(services[field]);
+            return desc(servicesTable[field]);
           }
-          return asc(services[field]);
+          return asc(servicesTable[field]);
         })
       );
     }

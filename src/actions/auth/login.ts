@@ -2,7 +2,7 @@
 
 import { Role } from 'src/constants/common';
 import { AdminRoute } from 'src/constants/routes';
-import { users } from 'src/schema';
+import { usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
 import { SafeActionError, action } from 'src/utils/safe-action';
@@ -24,8 +24,8 @@ export const login = action(
 
       const [user] = await db
         .select()
-        .from(users)
-        .where(and(eq(users.id, key.userId), isNull(users.deletedAt)))
+        .from(usersTable)
+        .where(and(eq(usersTable.id, key.userId), isNull(usersTable.deletedAt)))
         .limit(1);
 
       if (!user) {

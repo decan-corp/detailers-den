@@ -1,7 +1,7 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
@@ -16,10 +16,10 @@ export const softDeleteService = authAction(z.string().cuid2(), async (id, { ses
   }
 
   await db
-    .update(services)
+    .update(servicesTable)
     .set({
       deletedById: userId,
       deletedAt: sql`CURRENT_TIMESTAMP`,
     })
-    .where(eq(services.id, id));
+    .where(eq(servicesTable.id, id));
 });

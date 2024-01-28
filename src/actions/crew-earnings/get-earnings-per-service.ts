@@ -1,7 +1,7 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { crewEarnings, services, transactionServices, users } from 'src/schema';
+import { crewEarningsTable, servicesTable, transactionServicesTable, usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 
@@ -15,36 +15,39 @@ export const getEarningsPerService = authAction(
 
     const transactionServiceRecords = await db
       .select({
-        id: transactionServices.id,
-        transactionId: transactionServices.transactionId,
-        price: transactionServices.price,
-        serviceName: services.serviceName,
-        serviceCutPercentage: services.serviceCutPercentage,
+        id: transactionServicesTable.id,
+        transactionId: transactionServicesTable.transactionId,
+        price: transactionServicesTable.price,
+        serviceName: servicesTable.serviceName,
+        serviceCutPercentage: servicesTable.serviceCutPercentage,
       })
-      .from(transactionServices)
-      .innerJoin(services, eq(transactionServices.serviceId, services.id))
-      .where(and(eq(transactionServices.transactionId, transactionId)));
+      .from(transactionServicesTable)
+      .innerJoin(servicesTable, eq(transactionServicesTable.serviceId, servicesTable.id))
+      .where(and(eq(transactionServicesTable.transactionId, transactionId)));
 
     const crewEarningRecords = await db
       .select({
-        id: crewEarnings.id,
-        transactionId: transactionServices.transactionId,
-        transactionServiceId: transactionServices.id,
-        crewId: crewEarnings.crewId,
-        computedServiceCutPercentage: crewEarnings.computedServiceCutPercentage,
-        crewServiceCutPercentage: users.serviceCutPercentage,
-        amountEarned: crewEarnings.amount,
-        crewName: users.name,
-        role: users.role,
+        id: crewEarningsTable.id,
+        transactionId: transactionServicesTable.transactionId,
+        transactionServiceId: transactionServicesTable.id,
+        crewId: crewEarningsTable.crewId,
+        computedServiceCutPercentage: crewEarningsTable.computedServiceCutPercentage,
+        crewServiceCutPercentage: usersTable.serviceCutPercentage,
+        amountEarned: crewEarningsTable.amount,
+        crewName: usersTable.name,
+        role: usersTable.role,
       })
-      .from(crewEarnings)
-      .innerJoin(transactionServices, eq(crewEarnings.transactionServiceId, transactionServices.id))
-      .innerJoin(users, eq(crewEarnings.crewId, users.id))
+      .from(crewEarningsTable)
+      .innerJoin(
+        transactionServicesTable,
+        eq(crewEarningsTable.transactionServiceId, transactionServicesTable.id)
+      )
+      .innerJoin(usersTable, eq(crewEarningsTable.crewId, usersTable.id))
       .where(
         and(
-          eq(transactionServices.transactionId, transactionId),
+          eq(transactionServicesTable.transactionId, transactionId),
           [Role.Crew, Role.StayInCrew, Role.Detailer, Role.Cashier].includes(role)
-            ? eq(users.id, userId)
+            ? eq(usersTable.id, userId)
             : undefined
         )
       );

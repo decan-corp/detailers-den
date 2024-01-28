@@ -4,7 +4,13 @@
 'use server';
 
 import { Role, TransactionStatus } from 'src/constants/common';
-import { crewEarnings, services, transactionServices, transactions, users } from 'src/schema';
+import {
+  crewEarningsTable,
+  servicesTable,
+  transactionServicesTable,
+  transactionsTable,
+  usersTable,
+} from 'src/schema';
 import { updateTransactionSchema } from 'src/schemas/transactions';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
@@ -21,7 +27,10 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
     delete data.createdAt;
   }
 
-  const [transaction] = await db.select().from(transactions).where(eq(transactions.id, data.id));
+  const [transaction] = await db
+    .select()
+    .from(transactionsTable)
+    .where(eq(transactionsTable.id, data.id));
 
   if (!transaction) {
     throw new SafeActionError("Transaction doesn't exist.");
@@ -62,12 +71,15 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       transactionServicesList.map(({ id }) => id || '').filter(Boolean)
     );
 
-    const servicesRef = await tx.select().from(services).where(inArray(services.id, serviceIds));
-    const usersRef = await tx.select().from(users).where(inArray(users.id, crewIds));
+    const servicesRef = await tx
+      .select()
+      .from(servicesTable)
+      .where(inArray(servicesTable.id, serviceIds));
+    const usersRef = await tx.select().from(usersTable).where(inArray(usersTable.id, crewIds));
     const crewEarningsRef = await tx
       .select()
-      .from(crewEarnings)
-      .where(inArray(crewEarnings.transactionServiceId, transactionServiceIds));
+      .from(crewEarningsTable)
+      .where(inArray(crewEarningsTable.transactionServiceId, transactionServiceIds));
 
     if (serviceIds.length !== servicesRef.length) {
       throw new SafeActionError('Invalid service id');
@@ -101,7 +113,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       totalPrice += Number(priceMatrix.price);
 
       await tx
-        .insert(transactionServices)
+        .insert(transactionServicesTable)
         .values(updateTransactionService)
         .onDuplicateKeyUpdate({
           set: {
@@ -137,7 +149,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         };
 
         await tx
-          .insert(crewEarnings)
+          .insert(crewEarningsTable)
           .values(updateCrewEarning)
           .onDuplicateKeyUpdate({
             set: {
@@ -149,32 +161,34 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
 
       if (transactionService.id) {
         await tx
-          .delete(crewEarnings)
+          .delete(crewEarningsTable)
           .where(
             and(
-              eq(crewEarnings.transactionServiceId, transactionService.id),
-              notInArray(crewEarnings.crewId, transactionService.serviceBy)
+              eq(crewEarningsTable.transactionServiceId, transactionService.id),
+              notInArray(crewEarningsTable.crewId, transactionService.serviceBy)
             )
           );
       }
     }
 
     const deleteServiceList = await tx
-      .select({ id: transactionServices.id })
-      .from(transactionServices)
+      .select({ id: transactionServicesTable.id })
+      .from(transactionServicesTable)
       .where(
         and(
-          eq(transactionServices.transactionId, transactionData.id),
-          notInArray(transactionServices.id, transactionServiceIds)
+          eq(transactionServicesTable.transactionId, transactionData.id),
+          notInArray(transactionServicesTable.id, transactionServiceIds)
         )
       );
 
     if (deleteServiceList.length) {
       const deleteServiceIds = deleteServiceList.map(({ id }) => id);
-      await tx.delete(transactionServices).where(inArray(transactionServices.id, deleteServiceIds));
       await tx
-        .delete(crewEarnings)
-        .where(inArray(crewEarnings.transactionServiceId, deleteServiceIds));
+        .delete(transactionServicesTable)
+        .where(inArray(transactionServicesTable.id, deleteServiceIds));
+      await tx
+        .delete(crewEarningsTable)
+        .where(inArray(crewEarningsTable.transactionServiceId, deleteServiceIds));
     }
 
     if (totalPrice < Number(transactionData.discount)) {
@@ -184,7 +198,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
     const discountedPrice = totalPrice - (Number(transactionData.discount) || 0);
 
     await tx
-      .update(transactions)
+      .update(transactionsTable)
       .set({
         ...transactionData,
         updatedById: userId,
@@ -196,6 +210,6 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
             completedBy: userId,
           }),
       })
-      .where(eq(transactions.id, transactionData.id));
+      .where(eq(transactionsTable.id, transactionData.id));
   });
 });

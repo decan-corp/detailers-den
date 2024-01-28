@@ -1,7 +1,7 @@
 'use server';
 
 import { Role, TransactionStatus } from 'src/constants/common';
-import { transactions } from 'src/schema';
+import { transactionsTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
@@ -22,15 +22,17 @@ export const getPerDayTransactionsCount = authAction(
 
     const records = await db
       .select({
-        day: sql`DATE(CONVERT_TZ(${transactions.createdAt}, 'UTC', 'Asia/Manila'))`.mapWith(String),
+        day: sql`DATE(CONVERT_TZ(${transactionsTable.createdAt}, 'UTC', 'Asia/Manila'))`.mapWith(
+          String
+        ),
         count: count(),
       })
-      .from(transactions)
+      .from(transactionsTable)
       .where(
         and(
-          between(transactions.createdAt, startDate, endDate),
-          eq(transactions.status, TransactionStatus.Paid),
-          isNull(transactions.deletedAt)
+          between(transactionsTable.createdAt, startDate, endDate),
+          eq(transactionsTable.status, TransactionStatus.Paid),
+          isNull(transactionsTable.deletedAt)
         )
       )
       .groupBy(({ day }) => day)

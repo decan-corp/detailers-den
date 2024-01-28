@@ -1,5 +1,5 @@
 type LuciaAuth = import('src/utils/lucia').Auth;
-type User = typeof import('src/schema').users.$inferInsert;
+type User = typeof import('src/schema').usersTable.$inferInsert;
 /// <reference types="lucia" />
 declare namespace Lucia {
   type Auth = LuciaAuth;
