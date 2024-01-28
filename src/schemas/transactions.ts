@@ -59,7 +59,11 @@ export const updateTransactionSchema = transactionSchema.merge(
       )
       .nullish(),
     transactionServices: z
-      .array(transactionServicesSchema.extend({ id: z.string().cuid2().optional() }))
+      .array(
+        transactionServicesSchema.extend({
+          id: z.string().cuid2().optional(),
+        })
+      )
       .min(1)
       .refine(
         (value) => {

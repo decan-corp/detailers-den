@@ -62,6 +62,7 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
         createdById: userId,
         price: String(priceMatrix.price),
         transactionId,
+        serviceCutPercentage: service.serviceCutPercentage,
       });
 
       transactionService.serviceBy.forEach((crewId) => {

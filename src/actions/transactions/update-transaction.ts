@@ -80,6 +80,10 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       .select()
       .from(crewEarningsTable)
       .where(inArray(crewEarningsTable.transactionServiceId, transactionServiceIds));
+    const transactionServicesRef = await tx
+      .select()
+      .from(transactionServicesTable)
+      .where(inArray(transactionServicesTable.id, transactionServiceIds));
 
     if (serviceIds.length !== servicesRef.length) {
       throw new SafeActionError('Invalid service id');
@@ -92,6 +96,11 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       const priceMatrix = service?.priceMatrix.find(
         ({ vehicleSize }) => vehicleSize === transactionData.vehicleSize
       );
+      const savedTransactionServiceRef = transactionServicesRef.find(
+        ({ id }) => id === transactionService.id
+      );
+      const serviceCutModifier =
+        (savedTransactionServiceRef?.serviceCutPercentage ?? service?.serviceCutPercentage) || 0;
 
       if (!priceMatrix) {
         throw new SafeActionError('Invalid price matrix');
@@ -101,23 +110,24 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         throw new SafeActionError('Invalid transaction service id');
       }
 
-      const updateTransactionService = {
+      const createTransactionService = {
         ...transactionService,
         id: transactionService.id || cuid2.createId(),
         createdById: userId,
         price: String(priceMatrix.price),
         transactionId: transactionData.id,
         createdAt: data.createdAt,
-      };
+        serviceCutPercentage: service.serviceCutPercentage,
+      } satisfies typeof transactionServicesTable.$inferInsert;
 
       totalPrice += Number(priceMatrix.price);
 
       await tx
         .insert(transactionServicesTable)
-        .values(updateTransactionService)
+        .values(createTransactionService)
         .onDuplicateKeyUpdate({
           set: {
-            ...omit(updateTransactionService, ['createdById']),
+            ...omit(createTransactionService, ['createdById', 'serviceCutPercentage']),
             updatedById: userId,
           },
         });
@@ -126,12 +136,12 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         const crewEarning = crewEarningsRef.find(
           (earning) =>
             earning.crewId === crewId &&
-            earning.transactionServiceId === updateTransactionService.id
+            earning.transactionServiceId === createTransactionService.id
         );
         const crew = usersRef.find(({ id }) => crewId === id);
 
         const computedServiceCutPercentage = clamp(
-          ((crew?.serviceCutPercentage || 0) + (service?.serviceCutPercentage || 0)) /
+          ((crew?.serviceCutPercentage || 0) + serviceCutModifier) /
             transactionService.serviceBy.length,
           0,
           100
@@ -140,7 +150,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
 
         const updateCrewEarning = {
           id: crewEarning?.id || cuid2.createId(),
-          transactionServiceId: updateTransactionService.id,
+          transactionServiceId: createTransactionService.id,
           computedServiceCutPercentage,
           crewId,
           amount: String(amount),
