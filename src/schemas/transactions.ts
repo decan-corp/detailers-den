@@ -50,7 +50,7 @@ export const createTransactionSchema = transactionSchema.omit({
 export const updateTransactionSchema = transactionSchema.merge(
   z.object({
     id: z.string().cuid2(),
-    createdAt: z
+    createdAt: z.coerce
       .date({ invalid_type_error: 'Invalid date and time format.' })
       .max(dayjs().toDate(), 'Please select a date and time on or before today.')
       .min(

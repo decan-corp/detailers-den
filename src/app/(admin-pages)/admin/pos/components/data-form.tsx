@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { addTransaction } from 'src/actions/transactions/add-transaction';
 import { getTransaction } from 'src/actions/transactions/get-transactions';
 import { updateTransaction } from 'src/actions/transactions/update-transaction';
-import { Role, VehicleSize } from 'src/constants/common';
+import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
 import useClientSession from 'src/hooks/use-client-session';
@@ -29,7 +29,6 @@ import TransactionBaseInfo from './form/transaction-base-info';
 
 import cuid2 from '@paralleldrive/cuid2';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
 import { notFound, useRouter } from 'next/navigation';
 import { ComponentProps } from 'react';
 import { toast } from 'sonner';
@@ -74,7 +73,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   }));
 
   const isEdit = Boolean(transactionId);
-  const { data: loggedInUser, isLoading: isFetchingSession } = useClientSession();
+  const { isLoading: isFetchingSession } = useClientSession(); // prefetch session and block UI to render createdAt field
 
   const {
     data: transaction,
@@ -150,14 +149,11 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     };
 
     if (transactionId) {
-      const updateData = formEntries as z.input<typeof updateTransactionSchema>;
+      const updateData = payload as z.input<typeof updateTransactionSchema>;
+
       mutateUpdateTransaction({
-        ...payload,
+        ...updateData,
         id: transactionId,
-        ...(loggedInUser &&
-          [Role.Admin, Role.Accounting].includes(loggedInUser?.role) && {
-            createdAt: dayjs(updateData.createdAt).toDate(),
-          }),
       });
     } else {
       mutateAddTransaction(payload);

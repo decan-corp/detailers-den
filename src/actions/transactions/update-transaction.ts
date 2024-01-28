@@ -17,6 +17,10 @@ import { clamp, omit, uniq } from 'lodash';
 export const updateTransaction = authAction(updateTransactionSchema, async (data, { session }) => {
   const { role, userId } = session.user;
 
+  if (![Role.Admin, Role.Accounting].includes(role)) {
+    delete data.createdAt;
+  }
+
   const [transaction] = await db.select().from(transactions).where(eq(transactions.id, data.id));
 
   if (!transaction) {
