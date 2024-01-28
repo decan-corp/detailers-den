@@ -79,6 +79,7 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
         insertCrewEarnings.push({
           transactionServiceId,
           computedServiceCutPercentage,
+          crewCutPercentage: crew?.serviceCutPercentage || 0,
           crewId,
           amount: String(amount),
           createdById: userId,

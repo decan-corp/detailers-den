@@ -147,6 +147,7 @@ export const crewEarningsTable = mysqlTable(
       .notNull(),
     computedServiceCutPercentage: int('computed_service_cut_percentage'),
     amount: decimal('amount', { scale: 2, precision: 8 }).notNull(),
+    crewCutPercentage: int('crew_cut_percentage').default(0).notNull(),
     ...commonSchema,
   },
   (table) => ({

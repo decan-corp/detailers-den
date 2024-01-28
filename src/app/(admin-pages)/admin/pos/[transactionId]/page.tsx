@@ -180,7 +180,7 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
                         <TableRow key={crewEarning.id}>
                           <TableCell className="font-medium">{crewEarning.crewName}</TableCell>
                           <TableCell>{crewEarning.role}</TableCell>
-                          <TableCell>{crewEarning.crewServiceCutPercentage}%</TableCell>
+                          <TableCell>{crewEarning.crewCutPercentage}%</TableCell>
                           <TableCell>{crewEarning.computedServiceCutPercentage}%</TableCell>
                           <TableCell className="text-right">
                             PHP {crewEarning.amountEarned}

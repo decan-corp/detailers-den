@@ -32,7 +32,7 @@ export const getEarningsPerService = authAction(
         transactionServiceId: transactionServicesTable.id,
         crewId: crewEarningsTable.crewId,
         computedServiceCutPercentage: crewEarningsTable.computedServiceCutPercentage,
-        crewServiceCutPercentage: usersTable.serviceCutPercentage,
+        crewCutPercentage: crewEarningsTable.crewCutPercentage,
         amountEarned: crewEarningsTable.amount,
         crewName: usersTable.name,
         role: usersTable.role,

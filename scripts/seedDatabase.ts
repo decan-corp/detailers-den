@@ -23,12 +23,14 @@ const seedDatabase = async () => {
     },
     userId: cuid2.createId(),
   });
-
-  console.log('Success seeding database');
-  process.exit(0);
 };
 
-seedDatabase().catch((err) => {
-  console.error('Failed to seed database', err);
-  process.exit(1);
-});
+seedDatabase()
+  .then(() => {
+    console.log('Success seeding database');
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('Failed to seed database', err);
+    process.exit(1);
+  });

@@ -117,7 +117,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         price: String(priceMatrix.price),
         transactionId: transactionData.id,
         createdAt: data.createdAt,
-        serviceCutPercentage: service.serviceCutPercentage,
+        serviceCutPercentage: serviceCutModifier,
       } satisfies typeof transactionServicesTable.$inferInsert;
 
       totalPrice += Number(priceMatrix.price);
@@ -139,19 +139,21 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
             earning.transactionServiceId === createTransactionService.id
         );
         const crew = usersRef.find(({ id }) => crewId === id);
+        const crewCutPercentage =
+          (crewEarning?.crewCutPercentage ?? crew?.serviceCutPercentage) || 0;
 
         const computedServiceCutPercentage = clamp(
-          ((crew?.serviceCutPercentage || 0) + serviceCutModifier) /
-            transactionService.serviceBy.length,
+          (crewCutPercentage + serviceCutModifier) / transactionService.serviceBy.length,
           0,
           100
         );
         const amount = (computedServiceCutPercentage / 100) * Number(priceMatrix.price);
 
-        const updateCrewEarning = {
+        const createCrewEarning = {
           id: crewEarning?.id || cuid2.createId(),
           transactionServiceId: createTransactionService.id,
           computedServiceCutPercentage,
+          crewCutPercentage,
           crewId,
           amount: String(amount),
           createdById: userId,
@@ -160,10 +162,10 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
 
         await tx
           .insert(crewEarningsTable)
-          .values(updateCrewEarning)
+          .values(createCrewEarning)
           .onDuplicateKeyUpdate({
             set: {
-              ...omit(updateCrewEarning, ['createdById']),
+              ...omit(createCrewEarning, ['createdById', 'crewCutPercentage']),
               updatedById: userId,
             },
           });
