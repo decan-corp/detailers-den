@@ -123,6 +123,7 @@ export const transactionServicesTable = mysqlTable(
       .notNull(),
     price: decimal('price', { scale: 2, precision: 8 }).notNull(),
     serviceBy: json('service_by').$type<string[]>().notNull(),
+    serviceCutPercentage: int('service_cut_percentage').default(0).notNull(),
     ...commonSchema,
   },
   (table) => ({

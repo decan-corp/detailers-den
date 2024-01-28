@@ -18,8 +18,8 @@ export const getEarningsPerService = authAction(
         id: transactionServicesTable.id,
         transactionId: transactionServicesTable.transactionId,
         price: transactionServicesTable.price,
+        serviceCutPercentage: transactionServicesTable.serviceCutPercentage,
         serviceName: servicesTable.serviceName,
-        serviceCutPercentage: servicesTable.serviceCutPercentage,
       })
       .from(transactionServicesTable)
       .innerJoin(servicesTable, eq(transactionServicesTable.serviceId, servicesTable.id))
