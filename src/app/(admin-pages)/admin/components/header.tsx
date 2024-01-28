@@ -21,7 +21,7 @@ const Header = async () => {
       <div className="flex h-12 items-center justify-between gap-12 bg-background/30 px-6 backdrop-blur sm:h-16 md:justify-normal md:px-12">
         <Drawer>
           <DrawerTrigger asChild className="block sm:hidden">
-            <AlignJustifyIcon className="h-5" />
+            <AlignJustifyIcon />
           </DrawerTrigger>
           <DrawerContent className="space-y-6 pb-6 text-center">
             {[Role.Admin].includes(session?.user.role) && (
