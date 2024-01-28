@@ -58,7 +58,7 @@ const ServicesTable = () => {
     pageIndex: 0,
   });
   const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(globalFilter || '');
 
   const isDeleteDialogOpen = useServiceAlertDialogStore((state) => state.isDeleteDialogOpen);
   const serviceIdToDelete = useServiceAlertDialogStore((state) => state.serviceIdToDelete);

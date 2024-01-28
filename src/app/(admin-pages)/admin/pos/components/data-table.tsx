@@ -66,7 +66,7 @@ const TransactionsTable = () => {
     pageIndex: 0,
   });
   const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(globalFilter || '');
 
   const { isDeleteDialogOpen, selectedId, isMarkAsPaidDialogOpen } = useTransactionAlertDialogStore(
     (state) => state
