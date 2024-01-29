@@ -20,7 +20,7 @@ import { inArray, sql } from 'drizzle-orm';
 import { clamp, uniq } from 'lodash';
 
 export const addTransaction = authAction(createTransactionSchema, (data, { session }) => {
-  const { userId } = session.user;
+  const { userId } = session;
 
   const { transactionServices: transactionServicesList, ...transactionData } = data;
   return db.transaction(async (tx) => {

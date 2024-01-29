@@ -107,24 +107,27 @@ export const getUsersCount = authAction(searchSchema, async (params) => {
   return value;
 });
 
-export const getUser = authAction(z.string().cuid2(), async (id, { session }) => {
-  const { role, userId } = session.user;
+export const getUser = authAction(z.string().cuid2(), async (id, ctx) => {
+  const { userId } = ctx.session;
+  const { role } = ctx.user;
 
   if (role !== Role.Admin && userId !== id) {
     throw new SafeActionError('Forbidden access');
   }
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, id));
+  const { hashedPassword, ...data } = user || {};
 
-  return user || undefined;
+  return data || undefined;
 });
 
 export const getUserBySession = authAction(z.object({}), async (_, { session }) => {
-  const { userId } = session.user;
+  const { userId } = session;
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  const { hashedPassword, ...data } = user || {};
 
-  return user || undefined;
+  return data || undefined;
 });
 
 export const getUserOptions = authAction(

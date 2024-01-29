@@ -25,7 +25,8 @@
     "formkit",
     "availment",
     "sonner",
-    "ddthh"
+    "ddthh",
+    "datetime"
   ],
   "ignorePaths": [
     "node_modules/",

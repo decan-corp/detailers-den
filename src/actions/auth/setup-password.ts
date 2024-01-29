@@ -2,10 +2,11 @@
 
 import { usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
-import { ProviderId, auth } from 'src/utils/lucia';
+import { auth } from 'src/utils/lucia';
 import { authAction } from 'src/utils/safe-action';
 
 import { eq } from 'drizzle-orm';
+import { Scrypt } from 'oslo/password';
 import { z } from 'zod';
 
 export const setupPassword = authAction(
@@ -21,17 +22,17 @@ export const setupPassword = authAction(
     }),
 
   async (data, { session }) => {
-    const { email, userId } = session.user;
+    const { userId } = session;
+    const hashedPassword = await new Scrypt().hash(data.password);
 
-    await db.transaction(async (tx) => {
-      await tx
-        .update(usersTable)
-        .set({
-          isFirstTimeLogin: false,
-        })
-        .where(eq(usersTable.id, userId));
-      await auth.updateKeyPassword(ProviderId.email, email, data.password);
-      await auth.invalidateAllUserSessions(userId);
-    });
+    await db
+      .update(usersTable)
+      .set({
+        isFirstTimeLogin: false,
+        hashedPassword,
+      })
+      .where(eq(usersTable.id, userId));
+
+    await auth.invalidateUserSessions(userId);
   }
 );

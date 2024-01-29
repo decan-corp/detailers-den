@@ -8,10 +8,10 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
-export const softDeleteService = authAction(z.string().cuid2(), async (id, { session }) => {
-  const { role, userId } = session.user;
+export const softDeleteService = authAction(z.string().cuid2(), async (id, ctx) => {
+  const { userId } = ctx.session;
 
-  if (role !== Role.Admin) {
+  if (ctx.user.role !== Role.Admin) {
     throw new SafeActionError('Forbidden access');
   }
 

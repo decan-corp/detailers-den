@@ -2,18 +2,18 @@
 import { Role } from 'src/constants/common';
 import { AdminRoute } from 'src/constants/routes';
 
-import { getPageSession } from './get-page-session';
+import { validateRequest } from './validate-request';
 
 import { redirect } from 'next/navigation';
 
 const PublicRoute = async ({ children }: { children: React.ReactNode }) => {
-  const session = await getPageSession();
+  const { user } = await validateRequest();
 
-  if (session && [Role.Crew, Role.StayInCrew, Role.Cashier].includes(session?.user.role)) {
+  if (user && [Role.Crew, Role.StayInCrew, Role.Cashier].includes(user.role)) {
     redirect(AdminRoute.POS);
   }
 
-  if (session) {
+  if (user) {
     redirect(AdminRoute.Dashboard);
   }
 

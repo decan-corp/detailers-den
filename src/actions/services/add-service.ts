@@ -6,10 +6,10 @@ import { createServiceSchema } from 'src/schemas/services';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-export const addService = authAction(createServiceSchema, async (data, { session }) => {
-  const { role, userId } = session.user;
+export const addService = authAction(createServiceSchema, async (data, ctx) => {
+  const { userId } = ctx.session;
 
-  if (role !== Role.Admin) {
+  if (ctx.user.role !== Role.Admin) {
     throw new SafeActionError('Forbidden access');
   }
 

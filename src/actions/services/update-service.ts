@@ -8,11 +8,11 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import { eq } from 'drizzle-orm';
 
-export const updateService = authAction(updateServiceSchema, async (params, { session }) => {
+export const updateService = authAction(updateServiceSchema, async (params, ctx) => {
   const { id, ...serviceData } = params;
-  const { role, userId } = session.user;
+  const { userId } = ctx.session;
 
-  if (role !== Role.Admin) {
+  if (ctx.user.role !== Role.Admin) {
     throw new SafeActionError('Forbidden access');
   }
 

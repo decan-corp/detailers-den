@@ -8,8 +8,8 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-export const recoverUser = authAction(z.string().cuid2(), async (id, { session }) => {
-  const { role } = session.user;
+export const recoverUser = authAction(z.string().cuid2(), async (id, { user }) => {
+  const { role } = user;
 
   if (role !== Role.Admin) {
     throw new SafeActionError('Forbidden access');

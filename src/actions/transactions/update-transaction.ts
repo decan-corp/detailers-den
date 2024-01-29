@@ -20,8 +20,9 @@ import dayjs from 'dayjs';
 import { and, eq, inArray, notInArray, sql } from 'drizzle-orm';
 import { clamp, omit, uniq } from 'lodash';
 
-export const updateTransaction = authAction(updateTransactionSchema, async (data, { session }) => {
-  const { role, userId } = session.user;
+export const updateTransaction = authAction(updateTransactionSchema, async (data, ctx) => {
+  const { userId } = ctx.session;
+  const { role } = ctx.user;
 
   if (![Role.Admin, Role.Accounting].includes(role)) {
     delete data.createdAt;

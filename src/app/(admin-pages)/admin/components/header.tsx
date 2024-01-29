@@ -1,5 +1,5 @@
 import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { getPageSession } from 'src/components/auth/get-page-session';
+import { validateRequest } from 'src/components/auth/validate-request';
 import { Role } from 'src/constants/common';
 import { AdminRoute } from 'src/constants/routes';
 
@@ -10,7 +10,7 @@ import { AlignJustifyIcon } from 'lucide-react';
 import Link from 'next/link';
 
 const Header = async () => {
-  const session = await getPageSession();
+  const { session, user } = await validateRequest();
 
   if (!session) {
     return null;
@@ -24,12 +24,12 @@ const Header = async () => {
             <AlignJustifyIcon />
           </DrawerTrigger>
           <DrawerContent className="space-y-6 pb-6 text-center">
-            {[Role.Admin].includes(session?.user.role) && (
+            {[Role.Admin].includes(user.role) && (
               <HeaderLink className="text-2xl" route={AdminRoute.Dashboard}>
                 <DrawerClose>Dashboard</DrawerClose>
               </HeaderLink>
             )}
-            {[Role.Admin].includes(session.user.role) && (
+            {[Role.Admin].includes(user.role) && (
               <HeaderLink className="text-2xl" route={AdminRoute.ManageUsers}>
                 <DrawerClose>Manage</DrawerClose>
               </HeaderLink>
@@ -43,10 +43,10 @@ const Header = async () => {
           <Link href={AdminRoute.Dashboard}>185 Detailers Den</Link>
         </div>
         <nav className="hidden items-center space-x-4 sm:flex lg:space-x-6">
-          {[Role.Admin].includes(session?.user.role) && (
+          {[Role.Admin].includes(user.role) && (
             <HeaderLink route={AdminRoute.Dashboard}>Dashboard</HeaderLink>
           )}
-          {[Role.Admin].includes(session.user.role) && (
+          {[Role.Admin].includes(user.role) && (
             <HeaderLink route={AdminRoute.ManageUsers}>Manage</HeaderLink>
           )}
           <HeaderLink route={AdminRoute.POS}>POS</HeaderLink>

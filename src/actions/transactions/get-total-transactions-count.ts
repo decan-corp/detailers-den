@@ -22,8 +22,8 @@ export const getTotalTransactionCount = authAction(
       })
       .optional(),
   }),
-  async ({ current, previous }, { session }) => {
-    const { role } = session.user;
+  async ({ current, previous }, { user }) => {
+    const { role } = user;
 
     if (role !== Role.Admin) {
       throw new SafeActionError('Forbidden Access');

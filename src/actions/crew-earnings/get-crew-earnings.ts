@@ -18,10 +18,8 @@ export const getCrewEarnings = authAction(
     startDate: z.date(),
     endDate: z.date(),
   }),
-  async ({ startDate, endDate }, { session }) => {
-    const { role } = session.user;
-
-    if (role !== Role.Admin) {
+  async ({ startDate, endDate }, { user }) => {
+    if (user.role !== Role.Admin) {
       throw new SafeActionError('Forbidden Access');
     }
 

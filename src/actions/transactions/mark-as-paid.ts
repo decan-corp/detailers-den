@@ -9,7 +9,7 @@ import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const markAsPaidTransaction = authAction(z.string().cuid2(), async (id, { session }) => {
-  const { userId } = session.user;
+  const { userId } = session;
 
   await db
     .update(transactionsTable)

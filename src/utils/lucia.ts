@@ -1,53 +1,55 @@
-import 'lucia/polyfill/node';
+import { sessionsTable, usersTable } from 'src/schema';
 
-import { pool } from './db';
+import { db } from './db';
 
-import { mysql2 } from '@lucia-auth/adapter-mysql';
+import { DrizzleMySQLAdapter } from '@lucia-auth/adapter-drizzle';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { camelCase } from 'lodash';
-import { lucia } from 'lucia';
-import { nextjs_future } from 'lucia/middleware';
+import { Lucia, TimeSpan } from 'lucia';
+
+import { webcrypto } from 'node:crypto';
 
 dayjs.extend(duration);
 
-const transformDbColumns = <T extends Record<string, unknown>>(data: T): T =>
-  Object.entries(data).reduce(
-    (acc, [key, value]) => ({
-      ...acc,
-      [camelCase(key)]: value,
-    }),
-    {}
-  ) as T;
+globalThis.crypto = webcrypto as Crypto;
 
-export const auth = lucia({
-  adapter: mysql2(pool, {
-    user: 'users',
-    key: 'user_keys',
-    session: 'user_sessions',
-  }),
-  env: process.env.NODE_ENV === 'production' ? 'PROD' : 'DEV',
-  middleware: nextjs_future(),
+const adapter = new DrizzleMySQLAdapter(db, sessionsTable, usersTable);
+
+export const auth = new Lucia(adapter, {
   sessionCookie: {
+    // this sets cookies with super long expiration
+    // since Next.js doesn't allow Lucia to extend cookie expiration when rendering pages
+    name: 'session',
     expires: false,
+    attributes: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    },
   },
-  sessionExpiresIn: {
-    activePeriod: dayjs.duration(1, 'days').as('milliseconds'),
-    idlePeriod: dayjs.duration(3, 'days').as('milliseconds'),
-  },
-  getUserAttributes: (data) => {
-    const userData = transformDbColumns(data);
-    return {
-      email: userData.email,
-      role: userData.role,
-      name: userData.name,
-      image: userData.image,
-      isFirstTimeLogin: Boolean(userData.isFirstTimeLogin),
-    };
-  },
+  sessionExpiresIn: new TimeSpan(3, 'd'),
+  // getSessionAttributes: (attributes) => ({}),
+  getUserAttributes: (attributes) =>
+    ({
+      email: attributes.email,
+      role: attributes.role,
+      name: attributes.name,
+      image: attributes.image,
+      isFirstTimeLogin: attributes.isFirstTimeLogin,
+    }) satisfies DatabaseUserAttributes,
 });
 
-export type Auth = typeof auth;
-export enum ProviderId {
-  email = 'email',
+// IMPORTANT!
+interface DatabaseSessionAttributes {}
+
+type DatabaseUserAttributes = Pick<
+  typeof usersTable.$inferSelect,
+  'email' | 'role' | 'name' | 'image' | 'isFirstTimeLogin'
+>;
+
+declare module 'lucia' {
+  interface Register {
+    Lucia: typeof auth;
+    DatabaseSessionAttributes: DatabaseSessionAttributes;
+    DatabaseUserAttributes: DatabaseUserAttributes;
+  }
 }

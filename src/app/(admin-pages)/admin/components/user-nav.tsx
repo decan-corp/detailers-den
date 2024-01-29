@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getPageSession } from 'src/components/auth/get-page-session';
+import { validateRequest } from 'src/components/auth/validate-request';
 import LogoutButton from 'src/components/button/logout';
 import ThemeModeToggle from 'src/components/toggle/theme-mode-toggle';
 import { AdminRoute } from 'src/constants/routes';
@@ -18,15 +18,16 @@ import { getInitials } from 'src/utils/formatters';
 import Link from 'next/link';
 
 const UserNav = async () => {
-  const session = await getPageSession();
+  const { user } = await validateRequest();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full outline-none">
           <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
-            <AvatarImage src={session?.user.image || ''} alt="@shadcn" />
+            <AvatarImage src={user?.image || ''} alt="@shadcn" />
             <AvatarFallback className="select-none text-xs sm:text-sm">
-              {getInitials(session?.user.name || 'UN')}
+              {getInitials(user?.name || 'UN')}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -34,9 +35,9 @@ const UserNav = async () => {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{session?.user.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">{session?.user.email}</p>
-            <p className="text-xs leading-none text-muted-foreground">{session?.user.role}</p>
+            <p className="text-sm font-medium leading-none">{user?.name}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user?.role}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

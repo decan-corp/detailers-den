@@ -1,9 +1,12 @@
 'use server';
 
-import { ProviderId, auth } from 'src/utils/lucia';
+import { usersTable } from 'src/schema';
+import { db } from 'src/utils/db';
+import { auth } from 'src/utils/lucia';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { LuciaError } from 'lucia';
+import { eq } from 'drizzle-orm';
+import { Scrypt } from 'oslo/password';
 import { z } from 'zod';
 
 export const changePassword = authAction(
@@ -23,22 +26,28 @@ export const changePassword = authAction(
       path: ['newPassword'],
     }),
 
-  async (data, { session }) => {
-    const { email, userId } = session.user;
+  async (data, ctx) => {
+    const { userId } = ctx.session;
 
-    try {
-      await auth.useKey(ProviderId.email, email, data.currentPassword);
-    } catch (error) {
-      if (
-        error instanceof LuciaError &&
-        (error.message === 'AUTH_INVALID_KEY_ID' || error.message === 'AUTH_INVALID_PASSWORD')
-      ) {
-        throw new SafeActionError('Incorrect current password');
-      }
-      throw error;
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+
+    if (!user) {
+      throw new SafeActionError("User doesn't exist");
     }
 
-    await auth.updateKeyPassword(ProviderId.email, email, data.newPassword);
-    await auth.invalidateAllUserSessions(userId);
+    // TODO: remove default empty string once hashedPassword is set to notNull in drizzle-orm
+    const isCurrentPasswordValid = await new Scrypt().verify(
+      user.hashedPassword || '',
+      data.currentPassword
+    );
+
+    if (!isCurrentPasswordValid) {
+      throw new SafeActionError('Incorrect current password');
+    }
+
+    const hashedPassword = await new Scrypt().hash(data.newPassword);
+    await db.update(usersTable).set({ hashedPassword }).where(eq(usersTable.id, userId));
+
+    await auth.invalidateUserSessions(userId);
   }
 );

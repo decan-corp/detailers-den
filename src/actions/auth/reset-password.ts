@@ -3,21 +3,22 @@
 import { Role } from 'src/constants/common';
 import { resetPasswordTokensTable, usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
-import { ProviderId, auth } from 'src/utils/lucia';
+import { auth } from 'src/utils/lucia';
 import { SafeActionError, action, authAction } from 'src/utils/safe-action';
 
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { and, eq, gt, isNull } from 'drizzle-orm';
+import { Scrypt } from 'oslo/password';
 import { z } from 'zod';
 
 export const generateResetPasswordToken = authAction(
   z.string().cuid2(),
 
-  async (generateForUserId, { session }) => {
-    const { role, userId } = session.user;
+  async (generateForUserId, ctx) => {
+    const { userId } = ctx.session;
 
-    if (role !== Role.Admin) {
+    if (ctx.user.role !== Role.Admin) {
       throw new SafeActionError('Forbidden Access');
     }
 
@@ -112,6 +113,8 @@ export const resetPassword = action(
         throw new SafeActionError('User may have been deleted or does not exist.');
       }
 
+      const hashedPassword = await new Scrypt().hash(data.password);
+
       await tx
         .update(resetPasswordTokensTable)
         .set({
@@ -124,11 +127,11 @@ export const resetPassword = action(
         .update(usersTable)
         .set({
           isFirstTimeLogin: false,
+          hashedPassword,
         })
-        .where(eq(usersTable.id, user.id));
+        .where(eq(usersTable.id, resetPasswordToken.id));
 
-      await auth.updateKeyPassword(ProviderId.email, user.email, data.password);
-      await auth.invalidateAllUserSessions(resetPasswordToken.userId);
+      await auth.invalidateUserSessions(resetPasswordToken.userId);
     });
   }
 );

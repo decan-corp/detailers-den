@@ -22,10 +22,8 @@ export const getTotalRevenue = authAction(
       })
       .optional(),
   }),
-  async ({ current, previous }, { session }) => {
-    const { role } = session.user;
-
-    if (role !== Role.Admin) {
+  async ({ current, previous }, { user }) => {
+    if (user.role !== Role.Admin) {
       throw new SafeActionError('Forbidden Access');
     }
 

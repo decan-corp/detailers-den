@@ -9,6 +9,7 @@ const nextConfig = {
       test: /\.svg$/,
       loader: require.resolve('@svgr/webpack'),
     });
+    config.externals.push('@node-rs/argon2', '@node-rs/bcrypt');
     return config;
   },
 };

@@ -2,8 +2,8 @@ import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from './constants
 
 import { createId } from '@paralleldrive/cuid2';
 import {
-  bigint,
   boolean,
+  datetime,
   decimal,
   index,
   int,
@@ -88,6 +88,10 @@ export const usersTable = mysqlTable('users', {
   serviceCutPercentage: int('service_cut_percentage').default(0),
   image: varchar('image', { length: 255 }),
   isFirstTimeLogin: boolean('is_first_time_login').default(true),
+  // TODO: make hashedPassword not null after prod deployment
+  hashedPassword: varchar('hashed_password', {
+    length: 255,
+  }),
   ...commonSchema,
 });
 
@@ -157,6 +161,7 @@ export const crewEarningsTable = mysqlTable(
   })
 );
 
+// TODO: drop and delete after prod deployment
 export const userKeysTable = mysqlTable('user_keys', {
   id: varchar('id', {
     length: 255,
@@ -171,21 +176,15 @@ export const userKeysTable = mysqlTable('user_keys', {
   ...dateSchema,
 });
 
-export const userSessionsTable = mysqlTable('user_sessions', {
+export const sessionsTable = mysqlTable('sessions', {
   id: varchar('id', {
-    length: 128,
+    length: 255,
   }).primaryKey(),
   userId: varchar('user_id', {
     length: 255,
   }).notNull(),
-  // .references(() => users.id),
-  activeExpires: bigint('active_expires', {
-    mode: 'number',
-  }).notNull(),
-  idleExpires: bigint('idle_expires', {
-    mode: 'number',
-  }).notNull(),
-  ...dateSchema,
+  // .references(() => userTable.id),
+  expiresAt: datetime('expires_at').notNull(),
 });
 
 export const resetPasswordTokensTable = mysqlTable('reset_password_tokens', {

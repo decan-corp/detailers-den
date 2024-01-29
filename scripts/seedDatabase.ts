@@ -3,25 +3,27 @@
 /* eslint-disable no-console */
 
 import { Role } from 'src/constants/common';
-import { ProviderId, auth } from 'src/utils/lucia';
+import { usersTable } from 'src/schema';
+import { db } from 'src/utils/db';
 
 import cuid2 from '@paralleldrive/cuid2';
+import { Scrypt } from 'oslo/password';
 
 const seedDatabase = async () => {
   // Create default user
   const email = 'emnnipal@gmail.com'.toLowerCase();
-  await auth.createUser({
-    key: {
-      password: 'P@ssw0rd!23',
-      providerId: ProviderId.email,
-      providerUserId: email,
-    },
-    attributes: {
-      email,
-      name: 'Emman',
-      role: Role.Admin,
-    },
-    userId: cuid2.createId(),
+  const name = 'Emman';
+
+  const id = cuid2.createId();
+  const hashedPassword = await new Scrypt().hash('P@ssw0rd!23');
+
+  await db.insert(usersTable).values({
+    id,
+    createdById: id,
+    role: Role.Admin,
+    email,
+    name,
+    hashedPassword,
   });
 };
 
