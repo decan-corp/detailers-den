@@ -32,9 +32,14 @@ export const login = action(
     // TODO: remove default empty string after prod deployment and after making hashed password not null
     let isPasswordValid = await new Scrypt().verify(user.hashedPassword || '', password);
 
+    // eslint-disable-next-line no-console
+    console.log('isPasswordValid', isPasswordValid);
+
     // TODO: remove this once migrated to prod and all users has password reset
     if (!isPasswordValid) {
       isPasswordValid = await new LegacyScrypt().verify(user.hashedPassword || '', password);
+      // eslint-disable-next-line no-console
+      console.log('2isPasswordValid', isPasswordValid);
     }
 
     if (!isPasswordValid) {
