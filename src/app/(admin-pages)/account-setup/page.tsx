@@ -26,11 +26,7 @@ type ValidationError = Partial<Parameters<typeof setupPassword>[number]>;
 const AccountSetup = () => {
   const router = useRouter();
   const [error, setError] = useState<ValidationError>({});
-  const {
-    mutate: mutateSetupPassword,
-    isPending,
-    isSuccess,
-  } = useMutation({
+  const { mutate: mutateSetupPassword, isPending } = useMutation({
     mutationFn: setupPassword,
     onSuccess: (result) => {
       if (result.validationErrors) {
@@ -54,7 +50,7 @@ const AccountSetup = () => {
 
       setTimeout(() => {
         router.replace(AdminRoute.Login);
-      }, 2000);
+      }, 1000);
     },
   });
 
@@ -82,18 +78,26 @@ const AccountSetup = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label className="flex" htmlFor="password">
-                Password <RequiredIndicator />
-              </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={6}
-                disabled={isSuccess}
-              />
+            <div>
+              <div className="grid gap-2">
+                <Label className="flex" htmlFor="password">
+                  Password <RequiredIndicator />
+                </Label>
+                <Input
+                  className={twJoin(error.password && 'border-destructive-200')}
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={8}
+                  disabled={isPending}
+                />
+              </div>
+              {error.password && (
+                <div className="text-sm text-destructive dark:text-destructive-200">
+                  {error.password}
+                </div>
+              )}
             </div>
             <div>
               <div className="grid gap-2">
@@ -106,8 +110,8 @@ const AccountSetup = () => {
                   name="confirmPassword"
                   type="password"
                   required
-                  minLength={6}
-                  disabled={isSuccess}
+                  minLength={8}
+                  disabled={isPending}
                 />
               </div>
               {error.confirmPassword && (
@@ -118,7 +122,7 @@ const AccountSetup = () => {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full" disabled={isPending || isSuccess}>
+            <Button type="submit" className="w-full" disabled={isPending}>
               Submit
             </Button>
           </CardFooter>

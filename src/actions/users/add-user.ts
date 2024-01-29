@@ -20,7 +20,7 @@ export const addUser = authAction(createUserSchema, async (data, ctx) => {
 
   const hashedPassword = await new Argon2id().hash(password);
 
-  return db.insert(usersTable).values({
+  await db.insert(usersTable).values({
     ...userData,
     createdById: userId,
     hashedPassword,

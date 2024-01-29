@@ -59,7 +59,7 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
 
       setTimeout(() => {
         router.replace(AdminRoute.Login);
-      }, 2000);
+      }, 1000);
     },
   });
 
@@ -111,11 +111,25 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label className="flex" htmlFor="password">
-                Password <RequiredIndicator />
-              </Label>
-              <Input id="password" name="password" type="password" required minLength={6} />
+            <div>
+              <div className="grid gap-2">
+                <Label className="flex" htmlFor="password">
+                  Password <RequiredIndicator />
+                </Label>
+                <Input
+                  className={twJoin(error.password && 'border-destructive-200')}
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={8}
+                />
+              </div>
+              {error.password && (
+                <div className="text-sm text-destructive dark:text-destructive-200">
+                  {error.password}
+                </div>
+              )}
             </div>
             <div>
               <div className="grid gap-2">
@@ -128,7 +142,7 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
                   name="confirmPassword"
                   type="password"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
               {error.confirmPassword && (

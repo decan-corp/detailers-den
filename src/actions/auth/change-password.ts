@@ -1,5 +1,6 @@
 'use server';
 
+import { INVALID_PASSWORD_FORMAT, passwordRegex } from 'src/constants/passwords';
 import { usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
@@ -12,9 +13,9 @@ import { z } from 'zod';
 export const changePassword = authAction(
   z
     .object({
-      currentPassword: z.string().min(6, { message: 'Must contain at least 6 characters' }),
-      newPassword: z.string().min(6, { message: 'Must contain at least 6 characters' }),
-      confirmPassword: z.string().min(6, { message: 'Must contain at least 6 characters' }),
+      currentPassword: z.string().min(1, { message: 'Must contain at least 1 characters' }),
+      newPassword: z.string().min(8, { message: 'Must contain at least 8 characters' }),
+      confirmPassword: z.string().min(8, { message: 'Must contain at least 8 characters' }),
     })
     .refine((value) => value.confirmPassword === value.newPassword, {
       message:
@@ -23,6 +24,10 @@ export const changePassword = authAction(
     })
     .refine((value) => value.currentPassword !== value.newPassword, {
       message: 'New password must be different from the current password.',
+      path: ['newPassword'],
+    })
+    .refine((value) => passwordRegex.test(value.newPassword), {
+      message: INVALID_PASSWORD_FORMAT,
       path: ['newPassword'],
     }),
 

@@ -1,6 +1,7 @@
 'use server';
 
 import { Role } from 'src/constants/common';
+import { INVALID_PASSWORD_FORMAT, passwordRegex } from 'src/constants/passwords';
 import { resetPasswordTokensTable, usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
@@ -78,13 +79,17 @@ export const resetPassword = action(
   z
     .object({
       resetPasswordTokenId: z.string().cuid2(),
-      password: z.string().min(6, { message: 'Must contain at least 6 characters' }),
-      confirmPassword: z.string().min(6, { message: 'Must contain at least 6 characters' }),
+      password: z.string().min(8, { message: 'Must contain at least 8 characters' }),
+      confirmPassword: z.string().min(8, { message: 'Must contain at least 8 characters' }),
     })
     .refine((value) => value.confirmPassword === value.password, {
       message:
         'The passwords you entered do not match. Please ensure that both passwords are identical before proceeding.',
       path: ['confirmPassword'],
+    })
+    .refine((value) => passwordRegex.test(value.password), {
+      message: INVALID_PASSWORD_FORMAT,
+      path: ['password'],
     }),
 
   async (data) => {
