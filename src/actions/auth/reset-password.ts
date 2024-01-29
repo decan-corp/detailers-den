@@ -9,7 +9,7 @@ import { SafeActionError, action, authAction } from 'src/utils/safe-action';
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { and, eq, gt, isNull } from 'drizzle-orm';
-import { Scrypt } from 'oslo/password';
+import { Argon2id } from 'oslo/password';
 import { z } from 'zod';
 
 export const generateResetPasswordToken = authAction(
@@ -113,7 +113,7 @@ export const resetPassword = action(
         throw new SafeActionError('User may have been deleted or does not exist.');
       }
 
-      const hashedPassword = await new Scrypt().hash(data.password);
+      const hashedPassword = await new Argon2id().hash(data.password);
 
       await tx
         .update(resetPasswordTokensTable)
