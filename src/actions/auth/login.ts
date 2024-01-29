@@ -34,8 +34,7 @@ export const login = action(
       // TODO: remove default empty string after prod deployment and after making hashed password not null
       isPasswordValid = await new Argon2id().verify(user.hashedPassword || '', password);
     } catch (err) {
-      isPasswordValid = false; // TODO: remove once the LegacyScrypt is removed
-      // throw new SafeActionError('Incorrect email or password'); // TODO: uncomment once the LegacyScrypt is removed
+      isPasswordValid = false;
     }
 
     // TODO: remove this once migrated to prod and all users has password reset
