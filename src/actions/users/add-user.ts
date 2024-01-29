@@ -6,7 +6,7 @@ import { createUserSchema } from 'src/schemas/users';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { Argon2id } from 'oslo/password';
+import { Scrypt } from 'oslo/password';
 
 export const addUser = authAction(createUserSchema, async (data, ctx) => {
   const { userId } = ctx.session;
@@ -18,7 +18,7 @@ export const addUser = authAction(createUserSchema, async (data, ctx) => {
 
   const { password, ...userData } = data;
 
-  const hashedPassword = await new Argon2id().hash(password);
+  const hashedPassword = await new Scrypt().hash(password);
 
   return db.insert(usersTable).values({
     ...userData,

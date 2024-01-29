@@ -38,7 +38,7 @@ const ChangePasswordForm = () => {
 
       setTimeout(() => {
         router.replace(AdminRoute.Login);
-      }, 1500);
+      }, 2000);
     },
   });
 
