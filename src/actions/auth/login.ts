@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 'use server';
 
 import { Role } from 'src/constants/common';
@@ -13,7 +11,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { LegacyScrypt } from 'lucia';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Argon2id } from 'oslo/password';
+import { Scrypt } from 'oslo/password';
 import { z } from 'zod';
 
 export const login = action(
@@ -31,15 +29,12 @@ export const login = action(
       throw new SafeActionError('Incorrect email or password');
     }
 
-    console.log('checking');
     // TODO: remove default empty string after prod deployment and after making hashed password not null
-    let isPasswordValid = await new Argon2id().verify(user.hashedPassword || '', password);
-    console.log('isPasswordValid', isPasswordValid);
+    let isPasswordValid = await new Scrypt().verify(user.hashedPassword || '', password);
 
     // TODO: remove this once migrated to prod and all users has password reset
     if (!isPasswordValid) {
       isPasswordValid = await new LegacyScrypt().verify(user.hashedPassword || '', password);
-      console.log('2isPasswordValid', isPasswordValid);
     }
 
     if (!isPasswordValid) {

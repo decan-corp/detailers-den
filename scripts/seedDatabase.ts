@@ -7,7 +7,7 @@ import { usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
 
 import cuid2 from '@paralleldrive/cuid2';
-import { Argon2id } from 'oslo/password';
+import { Scrypt } from 'oslo/password';
 
 const seedDatabase = async () => {
   // Create default user
@@ -15,7 +15,7 @@ const seedDatabase = async () => {
   const name = 'Emman';
 
   const id = cuid2.createId();
-  const hashedPassword = await new Argon2id().hash('P@ssw0rd!23');
+  const hashedPassword = await new Scrypt().hash('P@ssw0rd!23');
 
   await db.insert(usersTable).values({
     id,
