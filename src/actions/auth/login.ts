@@ -31,7 +31,7 @@ export const login = action(
       throw new SafeActionError('Incorrect email or password');
     }
 
-    console.log('checking');
+    console.log('checking2');
     // TODO: remove default empty string after prod deployment and after making hashed password not null
     let isPasswordValid: boolean;
     try {
