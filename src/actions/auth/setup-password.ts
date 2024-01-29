@@ -6,7 +6,7 @@ import { auth } from 'src/utils/lucia';
 import { authAction } from 'src/utils/safe-action';
 
 import { eq } from 'drizzle-orm';
-import { Scrypt } from 'oslo/password';
+import { Argon2id } from 'oslo/password';
 import { z } from 'zod';
 
 export const setupPassword = authAction(
@@ -23,7 +23,7 @@ export const setupPassword = authAction(
 
   async (data, { session }) => {
     const { userId } = session;
-    const hashedPassword = await new Scrypt().hash(data.password);
+    const hashedPassword = await new Argon2id().hash(data.password);
 
     await db
       .update(usersTable)

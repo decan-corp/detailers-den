@@ -6,7 +6,7 @@ import { auth } from 'src/utils/lucia';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import { eq } from 'drizzle-orm';
-import { Scrypt } from 'oslo/password';
+import { Argon2id } from 'oslo/password';
 import { z } from 'zod';
 
 export const changePassword = authAction(
@@ -36,7 +36,7 @@ export const changePassword = authAction(
     }
 
     // TODO: remove default empty string once hashedPassword is set to notNull in drizzle-orm
-    const isCurrentPasswordValid = await new Scrypt().verify(
+    const isCurrentPasswordValid = await new Argon2id().verify(
       user.hashedPassword || '',
       data.currentPassword
     );
@@ -45,7 +45,7 @@ export const changePassword = authAction(
       throw new SafeActionError('Incorrect current password');
     }
 
-    const hashedPassword = await new Scrypt().hash(data.newPassword);
+    const hashedPassword = await new Argon2id().hash(data.newPassword);
     await db.update(usersTable).set({ hashedPassword }).where(eq(usersTable.id, userId));
 
     await auth.invalidateUserSessions(userId);

@@ -11,7 +11,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { LegacyScrypt } from 'lucia';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Scrypt } from 'oslo/password';
+import { Argon2id } from 'oslo/password';
 import { z } from 'zod';
 
 export const login = action(
@@ -30,7 +30,7 @@ export const login = action(
     }
 
     // TODO: remove default empty string after prod deployment and after making hashed password not null
-    let isPasswordValid = await new Scrypt().verify(user.hashedPassword || '', password);
+    let isPasswordValid = await new Argon2id().verify(user.hashedPassword || '', password);
 
     // TODO: remove this once migrated to prod and all users has password reset
     if (!isPasswordValid) {
