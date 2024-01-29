@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 'use server';
 
 import { Role } from 'src/constants/common';
@@ -31,22 +29,18 @@ export const login = action(
       throw new SafeActionError('Incorrect email or password');
     }
 
-    console.log('checking2');
-    // TODO: remove default empty string after prod deployment and after making hashed password not null
     let isPasswordValid: boolean;
     try {
+      // TODO: remove default empty string after prod deployment and after making hashed password not null
       isPasswordValid = await new Argon2id().verify(user.hashedPassword || '', password);
     } catch (err) {
-      console.log('argon2id error', err);
-      isPasswordValid = false; // TODO: uncomment once the LegacyScrypt is removed
+      isPasswordValid = false; // TODO: remove once the LegacyScrypt is removed
       // throw new SafeActionError('Incorrect email or password'); // TODO: uncomment once the LegacyScrypt is removed
     }
-    console.log('isPasswordValid', isPasswordValid);
 
     // TODO: remove this once migrated to prod and all users has password reset
     if (!isPasswordValid) {
       isPasswordValid = await new LegacyScrypt().verify(user.hashedPassword || '', password);
-      console.log('2isPasswordValid', isPasswordValid);
     }
 
     if (!isPasswordValid) {
