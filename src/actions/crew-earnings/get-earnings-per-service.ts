@@ -45,7 +45,7 @@ export const getEarningsPerService = authAction(z.string().cuid2(), async (trans
     .where(
       and(
         eq(transactionServicesTable.transactionId, transactionId),
-        [Role.Crew, Role.StayInCrew, Role.Detailer, Role.Cashier].includes(role)
+        [Role.Crew, Role.StayInCrew, Role.Detailer].includes(role)
           ? eq(usersTable.id, userId)
           : undefined
       )
