@@ -30,6 +30,7 @@ export const transactionColumns: ColumnDef<
     | 'customerName'
     | 'plateNumber'
     | 'status'
+    | 'discount'
     | 'totalPrice'
     | 'vehicleSize'
     | 'modeOfPayment'
@@ -50,6 +51,10 @@ export const transactionColumns: ColumnDef<
   {
     accessorKey: 'totalPrice',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Total Price" />,
+  },
+  {
+    accessorKey: 'discount',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Discount" />,
   },
   {
     accessorKey: 'vehicleSize',
