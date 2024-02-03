@@ -40,9 +40,8 @@ export const changePassword = authAction(
       throw new SafeActionError("User doesn't exist");
     }
 
-    // TODO: remove default empty string once hashedPassword is set to notNull in drizzle-orm
     const isCurrentPasswordValid = await new Argon2id().verify(
-      user.hashedPassword || '',
+      user.hashedPassword,
       data.currentPassword
     );
 

@@ -88,10 +88,9 @@ export const usersTable = mysqlTable('users', {
   serviceCutPercentage: int('service_cut_percentage').default(0),
   image: varchar('image', { length: 255 }),
   isFirstTimeLogin: boolean('is_first_time_login').default(true),
-  // TODO: make hashedPassword not null after prod deployment
   hashedPassword: varchar('hashed_password', {
     length: 255,
-  }),
+  }).notNull(),
   ...commonSchema,
 });
 
@@ -144,10 +143,10 @@ export const crewEarningsTable = mysqlTable(
       .$defaultFn(() => createId())
       .primaryKey(),
     transactionServiceId: varchar('transaction_service_id', { length: 255 })
-      // .references(() => transactionServices.id)
+      // .references(() => transactionServices.id) // TODO: foreign key constraint is not yet supported in planetscale
       .notNull(),
     crewId: varchar('crew_id', { length: 255 })
-      // .references(() => users.id)
+      // .references(() => users.id) // TODO: foreign key constraint is not yet supported in planetscale
       .notNull(),
     computedServiceCutPercentage: int('computed_service_cut_percentage'),
     amount: decimal('amount', { scale: 2, precision: 8 }).notNull(),
@@ -160,21 +159,6 @@ export const crewEarningsTable = mysqlTable(
     crewIdIdx: index('crew_id_idx').on(table.crewId),
   })
 );
-
-// TODO: drop and delete after prod deployment
-export const userKeysTable = mysqlTable('user_keys', {
-  id: varchar('id', {
-    length: 255,
-  }).primaryKey(),
-  userId: varchar('user_id', {
-    length: 255,
-  }).notNull(),
-  // .references(() => users.id),
-  hashedPassword: varchar('hashed_password', {
-    length: 255,
-  }),
-  ...dateSchema,
-});
 
 export const sessionsTable = mysqlTable('sessions', {
   id: varchar('id', {

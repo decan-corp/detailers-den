@@ -31,15 +31,14 @@ export const login = action(
 
     let isPasswordValid: boolean;
     try {
-      // TODO: remove default empty string after prod deployment and after making hashed password not null
-      isPasswordValid = await new Argon2id().verify(user.hashedPassword || '', password);
+      isPasswordValid = await new Argon2id().verify(user.hashedPassword, password);
     } catch (err) {
       isPasswordValid = false;
     }
 
     // TODO: remove this once migrated to prod and all users has password reset
     if (!isPasswordValid) {
-      isPasswordValid = await new LegacyScrypt().verify(user.hashedPassword || '', password);
+      isPasswordValid = await new LegacyScrypt().verify(user.hashedPassword, password);
     }
 
     if (!isPasswordValid) {

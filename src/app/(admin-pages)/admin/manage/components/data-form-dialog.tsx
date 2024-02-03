@@ -123,7 +123,7 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
         id: userIdToEdit,
       });
     } else {
-      mutateAddUser(data as z.input<typeof createUserSchema>);
+      mutateAddUser(data as unknown as z.input<typeof createUserSchema>);
     }
   };
 
