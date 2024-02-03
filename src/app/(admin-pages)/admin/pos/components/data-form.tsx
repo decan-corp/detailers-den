@@ -151,14 +151,6 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
 
     if (transactionId) {
       const updateData = payload as z.input<typeof updateTransactionSchema>;
-
-      // eslint-disable-next-line no-console
-      console.log('payload', {
-        ...updateData,
-        ...(updateData.createdAt && { createdAt: dayjs(updateData.createdAt).toDate() }),
-        id: transactionId,
-      });
-
       mutateUpdateTransaction({
         ...updateData,
         ...(updateData.createdAt && { createdAt: dayjs(updateData.createdAt).toDate() }),
