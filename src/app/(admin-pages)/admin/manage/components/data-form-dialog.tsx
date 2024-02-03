@@ -24,7 +24,7 @@ import { getUser } from 'src/actions/users/get-users';
 import { updateUser } from 'src/actions/users/update-user';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { Entity } from 'src/constants/entities';
-import { users } from 'src/schema';
+import { createUserSchema, userSchema } from 'src/schemas/users';
 import { UserSelect } from 'src/types/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -34,10 +34,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ComponentProps, useState } from 'react';
 import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
+import { z } from 'zod';
 import { create } from 'zustand';
 
 type ValidationError = {
-  [Field in keyof (UserSelect & { confirmPassword: string })]?: string;
+  [Field in keyof (UserSelect & { confirmPassword: string; password: string })]?: string;
 };
 
 export const useUserFormStore = create<{
@@ -115,14 +116,14 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
       payload[key] = value;
     }
 
-    const data = payload as typeof users.$inferSelect;
+    const data = payload as z.input<typeof userSchema>;
     if (userIdToEdit) {
       mutateUpdateUser({
         ...data,
         id: userIdToEdit,
       });
     } else {
-      mutateAddUser(data as typeof data & { confirmPassword: string; password: string });
+      mutateAddUser(data as z.input<typeof createUserSchema>);
     }
   };
 
@@ -216,19 +217,29 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
         </div>
         {!isEdit && (
           <>
-            <div className="grid grid-cols-6 items-center gap-4">
-              <Label htmlFor="password" className="col-span-2 flex justify-end">
-                Password <RequiredIndicator />
-              </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="col-span-4"
-                minLength={6}
-              />
+            <div>
+              <div className="grid grid-cols-6 items-center gap-4">
+                <Label htmlFor="password" className="col-span-2 flex justify-end">
+                  Password <RequiredIndicator />
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  className={twJoin('col-span-4', error.password && 'border-destructive-200')}
+                  minLength={8}
+                />
+              </div>
+              {error.password && (
+                <div className="grid grid-cols-6">
+                  <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
+                    {error.password}
+                  </div>
+                </div>
+              )}
             </div>
+
             <div>
               <div className="grid grid-cols-6 items-center gap-4">
                 <Label htmlFor="confirmPassword" className="col-span-2 flex justify-end">
@@ -243,7 +254,7 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
                     'col-span-4',
                     error.confirmPassword && 'border-destructive-200'
                   )}
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
               {error.confirmPassword && (

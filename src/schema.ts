@@ -2,8 +2,8 @@ import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from './constants
 
 import { createId } from '@paralleldrive/cuid2';
 import {
-  bigint,
   boolean,
+  datetime,
   decimal,
   index,
   int,
@@ -27,7 +27,7 @@ const commonSchema = {
   deletedById: varchar('deleted_by_id', { length: 255 }),
 };
 
-export const transactions = mysqlTable(
+export const transactionsTable = mysqlTable(
   'transactions',
   {
     id: varchar('id', { length: 255 })
@@ -75,7 +75,7 @@ export const transactions = mysqlTable(
   })
 );
 
-export const users = mysqlTable('users', {
+export const usersTable = mysqlTable('users', {
   id: varchar('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),
@@ -88,10 +88,14 @@ export const users = mysqlTable('users', {
   serviceCutPercentage: int('service_cut_percentage').default(0),
   image: varchar('image', { length: 255 }),
   isFirstTimeLogin: boolean('is_first_time_login').default(true),
+  // TODO: make hashedPassword not null after prod deployment
+  hashedPassword: varchar('hashed_password', {
+    length: 255,
+  }),
   ...commonSchema,
 });
 
-export const services = mysqlTable('services', {
+export const servicesTable = mysqlTable('services', {
   id: varchar('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),
@@ -109,7 +113,7 @@ export const services = mysqlTable('services', {
   ...commonSchema,
 });
 
-export const transactionServices = mysqlTable(
+export const transactionServicesTable = mysqlTable(
   'transaction_services',
   {
     id: varchar('id', { length: 255 })
@@ -123,6 +127,7 @@ export const transactionServices = mysqlTable(
       .notNull(),
     price: decimal('price', { scale: 2, precision: 8 }).notNull(),
     serviceBy: json('service_by').$type<string[]>().notNull(),
+    serviceCutPercentage: int('service_cut_percentage').default(0).notNull(),
     ...commonSchema,
   },
   (table) => ({
@@ -132,7 +137,7 @@ export const transactionServices = mysqlTable(
   })
 );
 
-export const crewEarnings = mysqlTable(
+export const crewEarningsTable = mysqlTable(
   'crew_earnings',
   {
     id: varchar('id', { length: 255 })
@@ -146,6 +151,7 @@ export const crewEarnings = mysqlTable(
       .notNull(),
     computedServiceCutPercentage: int('computed_service_cut_percentage'),
     amount: decimal('amount', { scale: 2, precision: 8 }).notNull(),
+    crewCutPercentage: int('crew_cut_percentage').default(0).notNull(),
     ...commonSchema,
   },
   (table) => ({
@@ -155,7 +161,8 @@ export const crewEarnings = mysqlTable(
   })
 );
 
-export const userKeys = mysqlTable('user_keys', {
+// TODO: drop and delete after prod deployment
+export const userKeysTable = mysqlTable('user_keys', {
   id: varchar('id', {
     length: 255,
   }).primaryKey(),
@@ -169,24 +176,18 @@ export const userKeys = mysqlTable('user_keys', {
   ...dateSchema,
 });
 
-export const userSessions = mysqlTable('user_sessions', {
+export const sessionsTable = mysqlTable('sessions', {
   id: varchar('id', {
-    length: 128,
+    length: 255,
   }).primaryKey(),
   userId: varchar('user_id', {
     length: 255,
   }).notNull(),
-  // .references(() => users.id),
-  activeExpires: bigint('active_expires', {
-    mode: 'number',
-  }).notNull(),
-  idleExpires: bigint('idle_expires', {
-    mode: 'number',
-  }).notNull(),
-  ...dateSchema,
+  // .references(() => userTable.id),
+  expiresAt: datetime('expires_at').notNull(),
 });
 
-export const resetPasswordTokens = mysqlTable('reset_password_tokens', {
+export const resetPasswordTokensTable = mysqlTable('reset_password_tokens', {
   id: varchar('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),

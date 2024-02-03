@@ -2,7 +2,7 @@
 
 import { AdminRoute } from 'src/constants/routes';
 
-import { getPageSession } from './get-page-session';
+import { validateRequest } from './validate-request';
 
 import { redirect } from 'next/navigation';
 
@@ -13,14 +13,14 @@ const ProtectedRoute = async ({
   children: React.ReactNode;
   redirectTo?: AdminRoute;
 }) => {
-  const session = await getPageSession();
+  const { user } = await validateRequest();
 
-  if (session?.user.isFirstTimeLogin) {
-    redirect(AdminRoute.AccountSetup);
+  if (!user) {
+    redirect(redirectTo || AdminRoute.Login);
   }
 
-  if (!session) {
-    redirect(redirectTo || AdminRoute.Login);
+  if (user?.isFirstTimeLogin) {
+    redirect(AdminRoute.AccountSetup);
   }
 
   return <>{children}</>;

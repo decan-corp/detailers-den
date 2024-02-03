@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
 
 import { useServiceFormStore } from './data-form-dialog';
 import { useServiceAlertDialogStore } from './data-table';
@@ -22,7 +22,7 @@ import { MoreHorizontal } from 'lucide-react';
 
 export const serviceColumns: ColumnDef<
   Pick<
-    typeof services.$inferSelect,
+    typeof servicesTable.$inferSelect,
     | 'id'
     | 'serviceName'
     | 'description'

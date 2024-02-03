@@ -16,7 +16,7 @@ import { DataTablePagination } from 'src/components/table/data-table-pagination'
 import { Entity } from 'src/constants/entities';
 import useQueryParams from 'src/hooks/use-query-params';
 import useSetSearchParams from 'src/hooks/use-set-search-params';
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { serviceColumns } from './data-columns';
@@ -44,7 +44,7 @@ export const useServiceAlertDialogStore = create<{
   serviceIdToDelete: null,
 }));
 
-const emptyArray: (typeof services.$inferSelect)[] = [];
+const emptyArray: (typeof servicesTable.$inferSelect)[] = [];
 
 const ServicesTable = () => {
   const queryClient = useQueryClient();
@@ -58,7 +58,7 @@ const ServicesTable = () => {
     pageIndex: 0,
   });
   const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(globalFilter || '');
 
   const isDeleteDialogOpen = useServiceAlertDialogStore((state) => state.isDeleteDialogOpen);
   const serviceIdToDelete = useServiceAlertDialogStore((state) => state.serviceIdToDelete);

@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
-import { auth } from './lucia';
+import { validateRequest } from 'src/components/auth/validate-request';
 
-import * as context from 'next/headers';
 import { createSafeActionClient } from 'next-safe-action';
 
 export class SafeActionError extends Error {}
@@ -11,7 +10,7 @@ const handleReturnedServerError = (e: Error) => {
     return e.message;
   }
 
-  return 'Something went wrong while executing the operation';
+  return 'An error occurred while performing the requested action.';
 };
 
 export const action = createSafeActionClient({
@@ -23,14 +22,13 @@ export const action = createSafeActionClient({
 
 export const authAction = createSafeActionClient({
   async middleware() {
-    const authRequest = auth.handleRequest('GET', context);
-    const session = await authRequest.validate();
+    const { session, user } = await validateRequest();
 
     if (!session) {
       throw new Error('Session not found!');
     }
 
-    return { session };
+    return { session, user };
   },
   handleServerErrorLog: (error) => {
     console.error('Auth action error', error);

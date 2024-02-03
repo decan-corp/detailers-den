@@ -1,11 +1,11 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import { getPageSession } from 'src/components/auth/get-page-session';
+import { validateRequest } from 'src/components/auth/validate-request';
 import { AdminRoute } from 'src/constants/routes';
 
 import { redirect } from 'next/navigation';
 
 const AccountSetupLayout = async ({ children }: { children: React.ReactNode }) => {
-  const session = await getPageSession();
+  const { session } = await validateRequest();
 
   if (!session) {
     return redirect(AdminRoute.Login);

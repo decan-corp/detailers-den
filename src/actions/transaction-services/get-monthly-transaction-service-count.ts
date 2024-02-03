@@ -1,7 +1,7 @@
 'use server';
 
 import { Role, TransactionStatus } from 'src/constants/common';
-import { services, transactionServices, transactions } from 'src/schema';
+import { servicesTable, transactionServicesTable, transactionsTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
@@ -13,27 +13,28 @@ export const getAvailedServiceCount = authAction(
     startDate: z.date(),
     endDate: z.date(),
   }),
-  async ({ startDate, endDate }, { session }) => {
-    const { role } = session.user;
-
-    if (role !== Role.Admin) {
+  async ({ startDate, endDate }, { user }) => {
+    if (user.role !== Role.Admin) {
       throw new SafeActionError('Forbidden Access');
     }
 
     const records = await db
       .select({
-        serviceId: transactionServices.serviceId,
-        serviceName: services.serviceName,
+        serviceId: transactionServicesTable.serviceId,
+        serviceName: servicesTable.serviceName,
         serviceCount: count(),
       })
-      .from(transactionServices)
-      .innerJoin(services, eq(transactionServices.serviceId, services.id))
-      .innerJoin(transactions, eq(transactionServices.transactionId, transactions.id))
+      .from(transactionServicesTable)
+      .innerJoin(servicesTable, eq(transactionServicesTable.serviceId, servicesTable.id))
+      .innerJoin(
+        transactionsTable,
+        eq(transactionServicesTable.transactionId, transactionsTable.id)
+      )
       .where(
         and(
-          between(transactionServices.createdAt, startDate, endDate),
-          eq(transactions.status, TransactionStatus.Paid),
-          isNull(transactions.deletedAt)
+          between(transactionServicesTable.createdAt, startDate, endDate),
+          eq(transactionsTable.status, TransactionStatus.Paid),
+          isNull(transactionsTable.deletedAt)
         )
       )
       .groupBy(({ serviceId }) => serviceId)

@@ -1,7 +1,13 @@
 'use server';
 
 import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
-import { crewEarnings, services, transactionServices, transactions, users } from 'src/schema';
+import {
+  crewEarningsTable,
+  servicesTable,
+  transactionServicesTable,
+  transactionsTable,
+  usersTable,
+} from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
@@ -12,32 +18,32 @@ import { z } from 'zod';
 
 const withStatusFilter = (status: TransactionStatus | TransactionStatus[]) => {
   if (Array.isArray(status)) {
-    return inArray(transactions.status, status);
+    return inArray(transactionsTable.status, status);
   }
-  return eq(transactions.status, status);
+  return eq(transactionsTable.status, status);
 };
 
 const withModeOfPaymentFilter = (status: ModeOfPayment | ModeOfPayment[]) => {
   if (Array.isArray(status)) {
-    return inArray(transactions.modeOfPayment, status);
+    return inArray(transactionsTable.modeOfPayment, status);
   }
-  return eq(transactions.modeOfPayment, status);
+  return eq(transactionsTable.modeOfPayment, status);
 };
 
 const withVehicleSizeFilter = (type: VehicleSize | VehicleSize[]) => {
   if (Array.isArray(type)) {
-    return inArray(transactions.vehicleSize, type);
+    return inArray(transactionsTable.vehicleSize, type);
   }
-  return eq(transactions.vehicleSize, type);
+  return eq(transactionsTable.vehicleSize, type);
 };
 
 const withSearchFilter = (searchParams: { plateNumber?: string; customerName?: string }) =>
   or(
     searchParams.plateNumber
-      ? like(transactions.plateNumber, `%${searchParams.plateNumber}%`)
+      ? like(transactionsTable.plateNumber, `%${searchParams.plateNumber}%`)
       : undefined,
     searchParams.customerName
-      ? like(transactions.customerName, `%${searchParams.customerName}%`)
+      ? like(transactionsTable.customerName, `%${searchParams.customerName}%`)
       : undefined
   );
 
@@ -71,39 +77,46 @@ export const getTransactions = authAction(
   async (params) => {
     let query = db
       .select({
-        id: transactions.id,
-        customerName: transactions.customerName,
-        plateNumber: transactions.plateNumber,
-        status: transactions.status,
-        vehicleSize: transactions.vehicleSize,
-        totalPrice: transactions.totalPrice,
-        modeOfPayment: transactions.modeOfPayment,
-        createdAt: transactions.createdAt,
-        completedAt: transactions.completedAt,
-        updatedAt: transactions.updatedAt,
-        note: transactions.note,
-        services: sql`GROUP_CONCAT(DISTINCT ${services.serviceName})`.mapWith({
+        id: transactionsTable.id,
+        customerName: transactionsTable.customerName,
+        plateNumber: transactionsTable.plateNumber,
+        status: transactionsTable.status,
+        vehicleSize: transactionsTable.vehicleSize,
+        totalPrice: transactionsTable.totalPrice,
+        discount: transactionsTable.discount,
+        modeOfPayment: transactionsTable.modeOfPayment,
+        createdAt: transactionsTable.createdAt,
+        completedAt: transactionsTable.completedAt,
+        updatedAt: transactionsTable.updatedAt,
+        note: transactionsTable.note,
+        services: sql`GROUP_CONCAT(DISTINCT ${servicesTable.serviceName})`.mapWith({
           mapFromDriverValue(value: unknown) {
             return String(value).split(',');
           },
         }),
-        crews: sql`GROUP_CONCAT(DISTINCT ${users.name})`.mapWith({
+        crews: sql`GROUP_CONCAT(DISTINCT ${usersTable.name})`.mapWith({
           mapFromDriverValue(value: unknown) {
             return String(value).split(',');
           },
         }),
       })
-      .from(transactions)
-      .innerJoin(transactionServices, eq(transactionServices.transactionId, transactions.id))
-      .innerJoin(services, eq(services.id, transactionServices.serviceId))
-      .innerJoin(crewEarnings, eq(crewEarnings.transactionServiceId, transactionServices.id))
-      .innerJoin(users, eq(users.id, crewEarnings.crewId))
-      .groupBy(transactions.id)
+      .from(transactionsTable)
+      .innerJoin(
+        transactionServicesTable,
+        eq(transactionServicesTable.transactionId, transactionsTable.id)
+      )
+      .innerJoin(servicesTable, eq(servicesTable.id, transactionServicesTable.serviceId))
+      .innerJoin(
+        crewEarningsTable,
+        eq(crewEarningsTable.transactionServiceId, transactionServicesTable.id)
+      )
+      .innerJoin(usersTable, eq(usersTable.id, crewEarningsTable.crewId))
+      .groupBy(transactionsTable.id)
       .$dynamic();
 
     query = query.where(
       and(
-        isNull(transactions.deletedAt),
+        isNull(transactionsTable.deletedAt),
         params.status ? withStatusFilter(params.status) : undefined,
         params.vehicleSize ? withVehicleSizeFilter(params.vehicleSize) : undefined,
         params.modeOfPayment ? withModeOfPaymentFilter(params.modeOfPayment) : undefined,
@@ -114,10 +127,10 @@ export const getTransactions = authAction(
             })
           : undefined,
         params.createdAt
-          ? between(transactions.createdAt, params.createdAt.from, params.createdAt.to)
+          ? between(transactionsTable.createdAt, params.createdAt.from, params.createdAt.to)
           : undefined,
-        params.services ? inArray(services.id, params.services) : undefined,
-        params.crews ? inArray(users.id, params.crews) : undefined
+        params.services ? inArray(servicesTable.id, params.services) : undefined,
+        params.crews ? inArray(usersTable.id, params.crews) : undefined
       )
     );
 
@@ -127,11 +140,11 @@ export const getTransactions = authAction(
       const sortBy = castArray(params.sortBy);
       query = query.orderBy(
         ...sortBy.map(({ id, desc: isDesc }) => {
-          const field = id as keyof typeof transactions.$inferSelect;
+          const field = id as keyof typeof transactionsTable.$inferSelect;
           if (isDesc) {
-            return desc(transactions[field]);
+            return desc(transactionsTable[field]);
           }
-          return asc(transactions[field]);
+          return asc(transactionsTable[field]);
         })
       );
     }
@@ -144,19 +157,25 @@ export const getTransactions = authAction(
 export const getTransactionsCount = authAction(searchSchema, async (params) => {
   let query = db
     .select({
-      id: transactions.id,
+      id: transactionsTable.id,
     })
-    .from(transactions)
-    .innerJoin(transactionServices, eq(transactionServices.transactionId, transactions.id))
-    .innerJoin(services, eq(services.id, transactionServices.serviceId))
-    .innerJoin(crewEarnings, eq(crewEarnings.transactionServiceId, transactionServices.id))
-    .innerJoin(users, eq(users.id, crewEarnings.crewId))
-    .groupBy(transactions.id)
+    .from(transactionsTable)
+    .innerJoin(
+      transactionServicesTable,
+      eq(transactionServicesTable.transactionId, transactionsTable.id)
+    )
+    .innerJoin(servicesTable, eq(servicesTable.id, transactionServicesTable.serviceId))
+    .innerJoin(
+      crewEarningsTable,
+      eq(crewEarningsTable.transactionServiceId, transactionServicesTable.id)
+    )
+    .innerJoin(usersTable, eq(usersTable.id, crewEarningsTable.crewId))
+    .groupBy(transactionsTable.id)
     .$dynamic();
 
   query = query.where(
     and(
-      isNull(transactions.deletedAt),
+      isNull(transactionsTable.deletedAt),
       params.status ? withStatusFilter(params.status) : undefined,
       params.vehicleSize ? withVehicleSizeFilter(params.vehicleSize) : undefined,
       params.modeOfPayment ? withModeOfPaymentFilter(params.modeOfPayment) : undefined,
@@ -167,10 +186,10 @@ export const getTransactionsCount = authAction(searchSchema, async (params) => {
           })
         : undefined,
       params.createdAt
-        ? between(transactions.createdAt, params.createdAt.from, params.createdAt.to)
+        ? between(transactionsTable.createdAt, params.createdAt.from, params.createdAt.to)
         : undefined,
-      params.services ? inArray(services.id, params.services) : undefined,
-      params.crews ? inArray(users.id, params.crews) : undefined
+      params.services ? inArray(servicesTable.id, params.services) : undefined,
+      params.crews ? inArray(usersTable.id, params.crews) : undefined
     )
   );
 
@@ -182,8 +201,8 @@ export const getTransactionsCount = authAction(searchSchema, async (params) => {
 export const getTransaction = authAction(z.string().cuid2(), async (id) => {
   const [transaction] = await db
     .select()
-    .from(transactions)
-    .where(and(eq(transactions.id, id), isNull(transactions.deletedAt)))
+    .from(transactionsTable)
+    .where(and(eq(transactionsTable.id, id), isNull(transactionsTable.deletedAt)))
     .limit(1);
 
   if (!transaction) {
@@ -192,9 +211,9 @@ export const getTransaction = authAction(z.string().cuid2(), async (id) => {
 
   const transactionServicesList = await db
     .select()
-    .from(transactionServices)
-    .where(eq(transactionServices.transactionId, id))
-    .orderBy(asc(transactionServices.createdAt));
+    .from(transactionServicesTable)
+    .where(eq(transactionServicesTable.transactionId, id))
+    .orderBy(asc(transactionServicesTable.createdAt));
 
   return {
     ...transaction,

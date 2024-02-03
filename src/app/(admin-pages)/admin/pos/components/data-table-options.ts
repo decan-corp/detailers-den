@@ -1,5 +1,5 @@
 import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
-import { transactions } from 'src/schema';
+import { transactionsTable } from 'src/schema';
 
 import {
   BikeIcon,
@@ -27,7 +27,7 @@ export const transactionStatusOptions = [
     label: 'Void',
   },
 ] satisfies {
-  value: (typeof transactions.$inferSelect)['status'];
+  value: (typeof transactionsTable.$inferSelect)['status'];
   label: string;
   icon?: unknown;
 }[];
@@ -59,7 +59,7 @@ export const vehicleSizeOptions = [
     icon: TruckIcon,
   },
 ] satisfies {
-  value: (typeof transactions.$inferSelect)['vehicleSize'];
+  value: (typeof transactionsTable.$inferSelect)['vehicleSize'];
   label: string;
   icon?: unknown;
 }[];
@@ -86,7 +86,7 @@ export const modeOfPaymentOptions = [
     icon: BirdIcon,
   },
 ] satisfies {
-  value: (typeof transactions.$inferSelect)['modeOfPayment'];
+  value: (typeof transactionsTable.$inferSelect)['modeOfPayment'];
   label: string;
   icon?: unknown;
 }[];

@@ -38,7 +38,7 @@ const ChangePasswordForm = () => {
 
       setTimeout(() => {
         router.replace(AdminRoute.Login);
-      }, 2000);
+      }, 1000);
     },
   });
 
@@ -58,11 +58,25 @@ const ChangePasswordForm = () => {
 
   return (
     <form id="change-password-form" className="space-y-6" onSubmit={onSubmit}>
-      <div className="space-y-4">
-        <Label htmlFor="currentPassword" className="flex">
-          Current Password <RequiredIndicator />
-        </Label>
-        <Input type="password" id="currentPassword" name="currentPassword" required minLength={6} />
+      <div>
+        <div className="space-y-4">
+          <Label htmlFor="currentPassword" className="flex">
+            Current Password <RequiredIndicator />
+          </Label>
+          <Input
+            className={twJoin(error.currentPassword && 'border-destructive-200')}
+            type="password"
+            id="currentPassword"
+            name="currentPassword"
+            required
+            minLength={1}
+          />
+        </div>
+        {error.currentPassword && (
+          <div className="text-sm text-destructive dark:text-destructive-200">
+            {error.currentPassword}
+          </div>
+        )}
       </div>
       <div>
         <div className="space-y-4">
@@ -75,7 +89,7 @@ const ChangePasswordForm = () => {
             id="newPassword"
             name="newPassword"
             required
-            minLength={6}
+            minLength={8}
           />
         </div>
         {error.newPassword && (
@@ -95,7 +109,7 @@ const ChangePasswordForm = () => {
             id="confirmPassword"
             name="confirmPassword"
             required
-            minLength={6}
+            minLength={8}
           />
         </div>
         {error.confirmPassword && (

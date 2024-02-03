@@ -62,7 +62,7 @@ const UsersTable = () => {
     pageIndex: 0,
   });
   const [globalFilter, setGlobalFilter] = useQueryParams('globalFilter', '');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState(globalFilter || '');
 
   const { isDeleteDialogOpen, selectedUserId, isResetPasswordDialogOpen } =
     useUserAlertDialogStore();

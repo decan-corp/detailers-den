@@ -1,41 +1,43 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { resetPasswordTokens, users } from 'src/schema';
+import { INVALID_PASSWORD_FORMAT, passwordRegex } from 'src/constants/passwords';
+import { resetPasswordTokensTable, usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
-import { ProviderId, auth } from 'src/utils/lucia';
+import { auth } from 'src/utils/lucia';
 import { SafeActionError, action, authAction } from 'src/utils/safe-action';
 
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { and, eq, gt, isNull } from 'drizzle-orm';
+import { Argon2id } from 'oslo/password';
 import { z } from 'zod';
 
 export const generateResetPasswordToken = authAction(
   z.string().cuid2(),
 
-  async (generateForUserId, { session }) => {
-    const { role, userId } = session.user;
+  async (generateForUserId, ctx) => {
+    const { userId } = ctx.session;
 
-    if (role !== Role.Admin) {
+    if (ctx.user.role !== Role.Admin) {
       throw new SafeActionError('Forbidden Access');
     }
 
     const [existingResetPasswordToken] = await db
       .select()
-      .from(resetPasswordTokens)
+      .from(resetPasswordTokensTable)
       .where(
         and(
-          eq(resetPasswordTokens.userId, generateForUserId),
-          gt(resetPasswordTokens.expiresAt, new Date()),
-          eq(resetPasswordTokens.isValid, true)
+          eq(resetPasswordTokensTable.userId, generateForUserId),
+          gt(resetPasswordTokensTable.expiresAt, new Date()),
+          eq(resetPasswordTokensTable.isValid, true)
         )
       );
 
     if (existingResetPasswordToken) return existingResetPasswordToken.id;
 
     const resetPasswordTokenId = cuid2.createId();
-    await db.insert(resetPasswordTokens).values({
+    await db.insert(resetPasswordTokensTable).values({
       id: resetPasswordTokenId,
       userId: generateForUserId,
       expiresAt: dayjs().add(2, 'hour').toDate(),
@@ -53,11 +55,11 @@ export const verifyResetPasswordToken = action(
   async (data) => {
     const [record] = await db
       .select()
-      .from(resetPasswordTokens)
+      .from(resetPasswordTokensTable)
       .where(
         and(
-          eq(resetPasswordTokens.id, data.resetPasswordTokenId),
-          eq(resetPasswordTokens.isValid, true)
+          eq(resetPasswordTokensTable.id, data.resetPasswordTokenId),
+          eq(resetPasswordTokensTable.isValid, true)
         )
       );
 
@@ -77,25 +79,29 @@ export const resetPassword = action(
   z
     .object({
       resetPasswordTokenId: z.string().cuid2(),
-      password: z.string().min(6, { message: 'Must contain at least 6 characters' }),
-      confirmPassword: z.string().min(6, { message: 'Must contain at least 6 characters' }),
+      password: z.string().min(8, { message: 'Must contain at least 8 characters' }),
+      confirmPassword: z.string().min(8, { message: 'Must contain at least 8 characters' }),
     })
     .refine((value) => value.confirmPassword === value.password, {
       message:
         'The passwords you entered do not match. Please ensure that both passwords are identical before proceeding.',
       path: ['confirmPassword'],
+    })
+    .refine((value) => passwordRegex.test(value.password), {
+      message: INVALID_PASSWORD_FORMAT,
+      path: ['password'],
     }),
 
   async (data) => {
     await db.transaction(async (tx) => {
       const [resetPasswordToken] = await tx
         .select()
-        .from(resetPasswordTokens)
+        .from(resetPasswordTokensTable)
         .where(
           and(
-            eq(resetPasswordTokens.id, data.resetPasswordTokenId),
-            gt(resetPasswordTokens.expiresAt, new Date()),
-            eq(resetPasswordTokens.isValid, true)
+            eq(resetPasswordTokensTable.id, data.resetPasswordTokenId),
+            gt(resetPasswordTokensTable.expiresAt, new Date()),
+            eq(resetPasswordTokensTable.isValid, true)
           )
         );
 
@@ -104,31 +110,33 @@ export const resetPassword = action(
       }
 
       const [user] = await tx
-        .select({ id: users.id, email: users.email })
-        .from(users)
-        .where(and(isNull(users.deletedAt), eq(users.id, resetPasswordToken.userId)));
+        .select({ id: usersTable.id, email: usersTable.email })
+        .from(usersTable)
+        .where(and(isNull(usersTable.deletedAt), eq(usersTable.id, resetPasswordToken.userId)));
 
       if (!user) {
         throw new SafeActionError('User may have been deleted or does not exist.');
       }
 
+      const hashedPassword = await new Argon2id().hash(data.password);
+
       await tx
-        .update(resetPasswordTokens)
+        .update(resetPasswordTokensTable)
         .set({
           isValid: false,
           updatedById: resetPasswordToken.userId,
         })
-        .where(eq(resetPasswordTokens.id, data.resetPasswordTokenId));
+        .where(eq(resetPasswordTokensTable.id, data.resetPasswordTokenId));
 
       await tx
-        .update(users)
+        .update(usersTable)
         .set({
           isFirstTimeLogin: false,
+          hashedPassword,
         })
-        .where(eq(users.id, user.id));
+        .where(eq(usersTable.id, resetPasswordToken.id));
 
-      await auth.updateKeyPassword(ProviderId.email, user.email, data.password);
-      await auth.invalidateAllUserSessions(resetPasswordToken.userId);
+      await auth.invalidateUserSessions(resetPasswordToken.userId);
     });
   }
 );

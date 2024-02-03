@@ -25,7 +25,8 @@ import { updateService } from 'src/actions/services/update-service';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
-import { services } from 'src/schema';
+import { servicesTable } from 'src/schema';
+import { serviceSchema } from 'src/schemas/services';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { vehicleSizeOptions } from '../../../pos/components/data-table-options';
@@ -38,10 +39,11 @@ import { ComponentProps, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { twJoin } from 'tailwind-merge';
 import { useImmer } from 'use-immer';
+import { z } from 'zod';
 import { create } from 'zustand';
 
 type ValidationError = {
-  [Field in keyof typeof services.$inferSelect]?: string;
+  [Field in keyof typeof servicesTable.$inferSelect]?: string;
 };
 
 export const useServiceFormStore = create<{
@@ -142,11 +144,10 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
       formEntries[key] = value;
     }
 
-    const data = formEntries as typeof services.$inferInsert;
+    const data = formEntries as z.input<typeof serviceSchema>;
     const payload = {
       ...data,
-      serviceCutPercentage: Number(data.serviceCutPercentage),
-      priceMatrix: priceMatrix as typeof services.$inferInsert.priceMatrix,
+      priceMatrix: priceMatrix as typeof servicesTable.$inferInsert.priceMatrix,
     };
 
     if (serviceIdToEdit) {

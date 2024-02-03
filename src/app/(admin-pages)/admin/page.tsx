@@ -1,4 +1,4 @@
-import { getPageSession } from 'src/components/auth/get-page-session';
+import { validateRequest } from 'src/components/auth/validate-request';
 import { Role } from 'src/constants/common';
 import { AdminRoute } from 'src/constants/routes';
 
@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 };
 
 const Dashboard = async () => {
-  const session = await getPageSession();
+  const { user } = await validateRequest();
 
-  if (session && ![Role.Admin].includes(session.user.role)) {
+  if (user && ![Role.Admin].includes(user.role)) {
     redirect(AdminRoute.POS);
   }
 

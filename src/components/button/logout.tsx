@@ -17,7 +17,7 @@ const LogoutButton = ({ className }: { className?: string }) => {
   const onClickLogout = async () => {
     setIsLoading(true);
 
-    await queryClient.resetQueries();
+    queryClient.clear();
     const result = await logout({});
 
     if (result?.serverError) {

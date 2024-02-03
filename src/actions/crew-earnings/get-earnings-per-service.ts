@@ -1,62 +1,63 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { crewEarnings, services, transactionServices, users } from 'src/schema';
+import { crewEarningsTable, servicesTable, transactionServicesTable, usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-export const getEarningsPerService = authAction(
-  z.string().cuid2(),
-  async (transactionId, { session }) => {
-    const { role, userId } = session.user;
+export const getEarningsPerService = authAction(z.string().cuid2(), async (transactionId, ctx) => {
+  const { userId } = ctx.session;
+  const { role } = ctx.user;
 
-    const transactionServiceRecords = await db
-      .select({
-        id: transactionServices.id,
-        transactionId: transactionServices.transactionId,
-        price: transactionServices.price,
-        serviceName: services.serviceName,
-        serviceCutPercentage: services.serviceCutPercentage,
-      })
-      .from(transactionServices)
-      .innerJoin(services, eq(transactionServices.serviceId, services.id))
-      .where(and(eq(transactionServices.transactionId, transactionId)));
+  const transactionServiceRecords = await db
+    .select({
+      id: transactionServicesTable.id,
+      transactionId: transactionServicesTable.transactionId,
+      price: transactionServicesTable.price,
+      serviceCutPercentage: transactionServicesTable.serviceCutPercentage,
+      serviceName: servicesTable.serviceName,
+    })
+    .from(transactionServicesTable)
+    .innerJoin(servicesTable, eq(transactionServicesTable.serviceId, servicesTable.id))
+    .where(and(eq(transactionServicesTable.transactionId, transactionId)));
 
-    const crewEarningRecords = await db
-      .select({
-        id: crewEarnings.id,
-        transactionId: transactionServices.transactionId,
-        transactionServiceId: transactionServices.id,
-        crewId: crewEarnings.crewId,
-        computedServiceCutPercentage: crewEarnings.computedServiceCutPercentage,
-        crewServiceCutPercentage: users.serviceCutPercentage,
-        amountEarned: crewEarnings.amount,
-        crewName: users.name,
-        role: users.role,
-      })
-      .from(crewEarnings)
-      .innerJoin(transactionServices, eq(crewEarnings.transactionServiceId, transactionServices.id))
-      .innerJoin(users, eq(crewEarnings.crewId, users.id))
-      .where(
-        and(
-          eq(transactionServices.transactionId, transactionId),
-          [Role.Crew, Role.StayInCrew, Role.Detailer, Role.Cashier].includes(role)
-            ? eq(users.id, userId)
-            : undefined
-        )
-      );
+  const crewEarningRecords = await db
+    .select({
+      id: crewEarningsTable.id,
+      transactionId: transactionServicesTable.transactionId,
+      transactionServiceId: transactionServicesTable.id,
+      crewId: crewEarningsTable.crewId,
+      computedServiceCutPercentage: crewEarningsTable.computedServiceCutPercentage,
+      crewCutPercentage: crewEarningsTable.crewCutPercentage,
+      amountEarned: crewEarningsTable.amount,
+      crewName: usersTable.name,
+      role: usersTable.role,
+    })
+    .from(crewEarningsTable)
+    .innerJoin(
+      transactionServicesTable,
+      eq(crewEarningsTable.transactionServiceId, transactionServicesTable.id)
+    )
+    .innerJoin(usersTable, eq(crewEarningsTable.crewId, usersTable.id))
+    .where(
+      and(
+        eq(transactionServicesTable.transactionId, transactionId),
+        [Role.Crew, Role.StayInCrew, Role.Detailer].includes(role)
+          ? eq(usersTable.id, userId)
+          : undefined
+      )
+    );
 
-    return transactionServiceRecords.map((transactionService) => {
-      const earningsByService = crewEarningRecords.filter(
-        ({ transactionServiceId }) => transactionService.id === transactionServiceId
-      );
-      return {
-        ...transactionService,
-        crewEarnings: earningsByService,
-      };
-    });
-  }
-);
+  return transactionServiceRecords.map((transactionService) => {
+    const earningsByService = crewEarningRecords.filter(
+      ({ transactionServiceId }) => transactionService.id === transactionServiceId
+    );
+    return {
+      ...transactionService,
+      crewEarnings: earningsByService,
+    };
+  });
+});

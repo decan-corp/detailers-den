@@ -16,11 +16,12 @@ import { Separator } from '@/components/ui/separator';
 import { addTransaction } from 'src/actions/transactions/add-transaction';
 import { getTransaction } from 'src/actions/transactions/get-transactions';
 import { updateTransaction } from 'src/actions/transactions/update-transaction';
-import { Role, VehicleSize } from 'src/constants/common';
+import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
 import useClientSession from 'src/hooks/use-client-session';
-import { transactionServices, transactions } from 'src/schema';
+import { transactionServicesTable, transactionsTable } from 'src/schema';
+import { transactionSchema, updateTransactionSchema } from 'src/schemas/transactions';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import AvailedServices from './form/availed-services';
@@ -28,18 +29,18 @@ import TransactionBaseInfo from './form/transaction-base-info';
 
 import cuid2 from '@paralleldrive/cuid2';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
 import { notFound, useRouter } from 'next/navigation';
 import { ComponentProps } from 'react';
 import { toast } from 'sonner';
 import { useImmer } from 'use-immer';
+import { z } from 'zod';
 
 type ValidationError = {
-  [Field in keyof typeof transactions.$inferSelect]?: string;
+  [Field in keyof typeof transactionsTable.$inferSelect]?: string;
 };
 
 type ServiceEntry = Pick<
-  typeof transactionServices.$inferSelect,
+  typeof transactionServicesTable.$inferSelect,
   'price' | 'serviceBy' | 'serviceId' | 'id'
 >;
 
@@ -72,7 +73,7 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
   }));
 
   const isEdit = Boolean(transactionId);
-  const { data: loggedInUser, isLoading: isFetchingSession } = useClientSession();
+  const { isLoading: isFetchingSession } = useClientSession(); // prefetch session and block UI to render createdAt field
 
   const {
     data: transaction,
@@ -141,21 +142,19 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
       formEntries[key] = value;
     }
 
-    const data = formEntries as typeof transactions.$inferInsert;
+    const data = formEntries as z.input<typeof transactionSchema>;
     const payload = {
       ...data,
-      plateNumber: data.plateNumber.toUpperCase(),
       transactionServices: formState.transactionServices,
-      discount: Number(data.discount || 0),
-      tip: Number(data.tip || 0),
     };
 
-    if (isEdit && loggedInUser && [Role.Admin, Role.Accounting].includes(loggedInUser?.role)) {
-      payload.createdAt = dayjs(data.createdAt).toDate();
-    }
-
     if (transactionId) {
-      mutateUpdateTransaction({ ...payload, id: transactionId });
+      const updateData = payload as z.input<typeof updateTransactionSchema>;
+
+      mutateUpdateTransaction({
+        ...updateData,
+        id: transactionId,
+      });
     } else {
       mutateAddTransaction(payload);
     }

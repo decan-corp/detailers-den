@@ -1,5 +1,5 @@
 import { Separator } from '@/components/ui/separator';
-import { getPageSession } from 'src/components/auth/get-page-session';
+import { validateRequest } from 'src/components/auth/validate-request';
 import { Role } from 'src/constants/common';
 import { AdminRoute } from 'src/constants/routes';
 
@@ -8,9 +8,9 @@ import UsersTable from './components/data-table';
 import { redirect } from 'next/navigation';
 
 const Management = async () => {
-  const session = await getPageSession();
+  const { user } = await validateRequest();
 
-  if (session && ![Role.Admin].includes(session.user.role)) {
+  if (user && ![Role.Admin].includes(user.role)) {
     redirect(AdminRoute.POS);
   }
 

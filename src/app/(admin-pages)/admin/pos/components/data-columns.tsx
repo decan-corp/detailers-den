@@ -14,7 +14,7 @@ import { DataTableColumnHeader } from 'src/components/table/data-table-column-he
 import { TransactionStatus } from 'src/constants/common';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
 import { AdminRoute } from 'src/constants/routes';
-import { transactions } from 'src/schema';
+import { transactionsTable } from 'src/schema';
 
 import { useTransactionAlertDialogStore } from './data-table';
 
@@ -25,11 +25,12 @@ import Link from 'next/link';
 
 export const transactionColumns: ColumnDef<
   Pick<
-    typeof transactions.$inferSelect,
+    typeof transactionsTable.$inferSelect,
     | 'id'
     | 'customerName'
     | 'plateNumber'
     | 'status'
+    | 'discount'
     | 'totalPrice'
     | 'vehicleSize'
     | 'modeOfPayment'
@@ -50,6 +51,10 @@ export const transactionColumns: ColumnDef<
   {
     accessorKey: 'totalPrice',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Total Price" />,
+  },
+  {
+    accessorKey: 'discount',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Discount" />,
   },
   {
     accessorKey: 'vehicleSize',
