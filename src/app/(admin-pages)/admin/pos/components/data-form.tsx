@@ -29,6 +29,7 @@ import TransactionBaseInfo from './form/transaction-base-info';
 
 import cuid2 from '@paralleldrive/cuid2';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 import { notFound, useRouter } from 'next/navigation';
 import { ComponentProps } from 'react';
 import { toast } from 'sonner';
@@ -143,8 +144,6 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     }
 
     const data = formEntries as z.input<typeof transactionSchema>;
-    // eslint-disable-next-line no-console
-    console.log('data', data);
     const payload = {
       ...data,
       transactionServices: formState.transactionServices,
@@ -153,8 +152,16 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     if (transactionId) {
       const updateData = payload as z.input<typeof updateTransactionSchema>;
 
+      // eslint-disable-next-line no-console
+      console.log('payload', {
+        ...updateData,
+        ...(updateData.createdAt && { createdAt: dayjs(updateData.createdAt).toDate() }),
+        id: transactionId,
+      });
+
       mutateUpdateTransaction({
         ...updateData,
+        ...(updateData.createdAt && { createdAt: dayjs(updateData.createdAt).toDate() }),
         id: transactionId,
       });
     } else {
