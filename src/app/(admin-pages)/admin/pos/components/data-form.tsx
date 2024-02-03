@@ -143,6 +143,8 @@ const TransactionForm = ({ transactionId }: { transactionId?: string }) => {
     }
 
     const data = formEntries as z.input<typeof transactionSchema>;
+    // eslint-disable-next-line no-console
+    console.log('data', data);
     const payload = {
       ...data,
       transactionServices: formState.transactionServices,
