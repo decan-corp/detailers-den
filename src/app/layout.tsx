@@ -3,7 +3,9 @@
 'use client';
 
 import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
 import updateLocale from 'dayjs/plugin/updateLocale';
+import utc from 'dayjs/plugin/utc';
 
 /**
  * We use 'use client' here since we need to load the dayjs plugins on the client side.
@@ -11,6 +13,11 @@ import updateLocale from 'dayjs/plugin/updateLocale';
  * work if rendered from the server.
  */
 dayjs.extend(updateLocale);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+dayjs.tz.setDefault('Asia/Manila');
+
 dayjs.updateLocale('en', {
   weekStart: 1,
 });
