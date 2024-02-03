@@ -52,12 +52,13 @@ export const updateTransactionSchema = transactionSchema.merge(
     id: z.string().cuid2(),
     createdAt: z.coerce
       .date({ invalid_type_error: 'Invalid date and time format.' })
-      .max(dayjs().toDate(), 'Please select a date and time on or before today.')
-      .min(
-        dayjs().subtract(60, 'days').startOf('day').toDate(),
-        'Please enter a date and time within the current year.'
-      )
-      .nullish(),
+      .nullish()
+      .refine((value) => dayjs(value).isAfter(dayjs().subtract(60, 'days').startOf('day')), {
+        message: 'Please enter a date and time within the past 60 days.',
+      })
+      .refine((value) => dayjs(value).isBefore(dayjs()), {
+        message: 'Please select a date and time on or before today.',
+      }),
     transactionServices: z
       .array(
         transactionServicesSchema.extend({
