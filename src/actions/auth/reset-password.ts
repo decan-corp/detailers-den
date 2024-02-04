@@ -133,7 +133,7 @@ export const resetPassword = action(
           isFirstTimeLogin: false,
           hashedPassword,
         })
-        .where(eq(usersTable.id, resetPasswordToken.id));
+        .where(eq(usersTable.id, resetPasswordToken.userId));
 
       await auth.invalidateUserSessions(resetPasswordToken.userId);
     });
