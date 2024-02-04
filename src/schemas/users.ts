@@ -8,7 +8,7 @@ import { z } from 'zod';
 export const userSchema = createInsertSchema(usersTable, {})
   .merge(
     z.object({
-      email: z.string().min(1).toLowerCase(),
+      email: z.string().email().min(1).toLowerCase(),
       serviceCutPercentage: z.coerce
         .number()
         .int({ message: 'Must not contain decimal values' })
@@ -62,6 +62,7 @@ export const createUserSchema = userSchema
 export const updateUserSchema = userSchema
   .omit({
     isFirstTimeLogin: true,
+    hashedPassword: true,
   })
   .extend({
     id: z.string().cuid2(),

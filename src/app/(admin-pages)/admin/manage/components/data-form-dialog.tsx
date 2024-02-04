@@ -1,45 +1,21 @@
-/* eslint-disable no-restricted-syntax */
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Icons } from '@/components/ui/icons';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { addUser } from 'src/actions/users/add-user';
 import { getUser } from 'src/actions/users/get-users';
-import { updateUser } from 'src/actions/users/update-user';
-import RequiredIndicator from 'src/components/form/required-indicator';
 import { Entity } from 'src/constants/entities';
-import { createUserSchema, userSchema } from 'src/schemas/users';
-import { UserSelect } from 'src/types/schema';
-import { handleSafeActionError } from 'src/utils/error-handling';
 
-import { rolesOptions } from './data-table-options';
+import AddUserForm from './add-user-form';
+import EditUserForm from './edit-user-form';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ComponentProps, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { twJoin } from 'tailwind-merge';
-import { z } from 'zod';
 import { create } from 'zustand';
-
-type ValidationError = {
-  [Field in keyof (UserSelect & { confirmPassword: string; password: string })]?: string;
-};
 
 export const useUserFormStore = create<{
   isDialogOpen: boolean;
@@ -49,18 +25,14 @@ export const useUserFormStore = create<{
   userIdToEdit: null,
 }));
 
-// TODO: rewrite with react-hook-form
-const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
-  const queryClient = useQueryClient();
+export const UserFormDialog = () => {
+  const isDialogOpen = useUserFormStore((state) => state.isDialogOpen);
+  const userId = useUserFormStore((state) => state.userIdToEdit);
 
-  const [error, setError] = useState<ValidationError>({});
-
-  const isEdit = Boolean(userIdToEdit);
-
-  const { data: user, isLoading: isFetchingUserToEdit } = useQuery({
-    queryKey: [Entity.Users, userIdToEdit],
+  const { data: user, isLoading: isFetching } = useQuery({
+    queryKey: [Entity.Users, userId],
     queryFn: async () => {
-      const { data, serverError, validationErrors } = await getUser(userIdToEdit as string);
+      const { data, serverError, validationErrors } = await getUser(userId as string);
 
       if (serverError || validationErrors) {
         toast.error(validationErrors ? 'Validation error' : 'Server Error', {
@@ -70,222 +42,8 @@ const UserForm = ({ userIdToEdit }: { userIdToEdit?: string | null }) => {
 
       return data;
     },
-    enabled: !!userIdToEdit,
+    enabled: !!userId,
   });
-
-  const { mutate: mutateAddUser, isPending: isAddingUser } = useMutation({
-    mutationFn: addUser,
-    mutationKey: [Entity.Users],
-    onSuccess: async (result) => {
-      if (result.validationErrors || result.serverError) {
-        handleSafeActionError(result);
-        setError((result.validationErrors as ValidationError) || {});
-        return;
-      }
-
-      await queryClient.invalidateQueries({ queryKey: [Entity.Users] });
-      toast.success('User created successfully.');
-      useUserFormStore.setState({ isDialogOpen: false });
-    },
-  });
-
-  const { mutate: mutateUpdateUser, isPending: isUpdatingUser } = useMutation({
-    mutationFn: updateUser,
-    mutationKey: [Entity.Users, userIdToEdit],
-    onSuccess: async (result) => {
-      if (result.validationErrors || result.serverError) {
-        handleSafeActionError(result);
-        setError((result.validationErrors as ValidationError) || {});
-        return;
-      }
-
-      await queryClient.invalidateQueries({ queryKey: [Entity.Users] });
-      toast.success('User updated successfully.');
-      useUserFormStore.setState({ isDialogOpen: false, userIdToEdit: null });
-    },
-  });
-
-  const onSubmit: ComponentProps<'form'>['onSubmit'] = (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-
-    const payload: Record<string, unknown> = {};
-
-    for (const [key, value] of formData.entries()) {
-      payload[key] = value;
-    }
-
-    const data = payload as z.input<typeof userSchema>;
-    if (userIdToEdit) {
-      mutateUpdateUser({
-        ...data,
-        id: userIdToEdit,
-      });
-    } else {
-      mutateAddUser(data as unknown as z.input<typeof createUserSchema>);
-    }
-  };
-
-  if (isEdit && isFetchingUserToEdit) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <span className="loading loading-ring loading-lg text-foreground" />
-      </div>
-    );
-  }
-
-  return (
-    <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-      <DialogHeader>
-        <DialogTitle>{isEdit ? 'Edit' : 'Add'} User</DialogTitle>
-        <DialogDescription>
-          {isEdit ? 'Edit' : 'Add new'} user here. Click save when you&apos;re done.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="grid gap-4 py-4">
-        <div className="grid grid-cols-6 items-center gap-4">
-          <Label htmlFor="name" className="col-span-2 flex justify-end">
-            Name
-            <RequiredIndicator />
-          </Label>
-          <Input
-            id="name"
-            name="name"
-            required
-            className="col-span-4"
-            defaultValue={user?.name || ''}
-          />
-        </div>
-        <div className="grid grid-cols-6 items-center gap-4">
-          <Label htmlFor="email" className="col-span-2 flex justify-end">
-            Email <RequiredIndicator />
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            name="email"
-            required
-            className="col-span-4"
-            defaultValue={user?.email || ''}
-          />
-        </div>
-        <div className="grid grid-cols-6 items-center gap-4">
-          <Label htmlFor="role" className="col-span-2 flex justify-end">
-            Role <RequiredIndicator />
-          </Label>
-          <Select required name="role" defaultValue={user?.role}>
-            <SelectTrigger id="role" className="col-span-4">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {rolesOptions.map(({ value, label, icon: Icon }) => (
-                <SelectItem key={value} value={value}>
-                  <div className="flex flex-row items-center gap-3">
-                    <Icon className="h-4 w-4 text-muted-foreground" /> {label}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <div className="grid grid-cols-6 items-center gap-4">
-            <Label htmlFor="serviceCutPercentage" className="col-span-2 text-right">
-              Service Cut %
-            </Label>
-            <Input
-              id="serviceCutPercentage"
-              name="serviceCutPercentage"
-              defaultValue={user?.serviceCutPercentage || 0}
-              type="number"
-              min={0}
-              max={99}
-              className={twJoin(
-                'col-span-4',
-                error.serviceCutPercentage && 'border-destructive-200'
-              )}
-            />
-          </div>
-          {error.serviceCutPercentage && (
-            <div className="grid grid-cols-6">
-              <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
-                {error.serviceCutPercentage}
-              </div>
-            </div>
-          )}
-        </div>
-        {!isEdit && (
-          <>
-            <div>
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="password" className="col-span-2 flex justify-end">
-                  Password <RequiredIndicator />
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className={twJoin('col-span-4', error.password && 'border-destructive-200')}
-                  minLength={8}
-                />
-              </div>
-              {error.password && (
-                <div className="grid grid-cols-6">
-                  <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
-                    {error.password}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <div className="grid grid-cols-6 items-center gap-4">
-                <Label htmlFor="confirmPassword" className="col-span-2 flex justify-end">
-                  Confirm Password <RequiredIndicator />
-                </Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  className={twJoin(
-                    'col-span-4',
-                    error.confirmPassword && 'border-destructive-200'
-                  )}
-                  minLength={8}
-                />
-              </div>
-              {error.confirmPassword && (
-                <div className="grid grid-cols-6">
-                  <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
-                    {error.confirmPassword}
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-      <DialogFooter>
-        <Button
-          type="submit"
-          disabled={isAddingUser || isUpdatingUser || (!!userIdToEdit && isFetchingUserToEdit)}
-        >
-          {(isAddingUser || isUpdatingUser) && (
-            <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
-          )}
-          Save
-        </Button>
-      </DialogFooter>
-    </form>
-  );
-};
-
-export const UserFormDialog = () => {
-  const isDialogOpen = useUserFormStore((state) => state.isDialogOpen);
-  const userId = useUserFormStore((state) => state.userIdToEdit);
 
   const onOpenChange = (dialogOpen: boolean) => {
     useUserFormStore.setState({ isDialogOpen: dialogOpen });
@@ -294,6 +52,8 @@ export const UserFormDialog = () => {
       useUserFormStore.setState({ userIdToEdit: null });
     }
   };
+
+  const isEdit = Boolean(userId);
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
@@ -308,7 +68,21 @@ export const UserFormDialog = () => {
           e.preventDefault();
         }}
       >
-        <UserForm userIdToEdit={userId} />
+        <DialogHeader>
+          <DialogTitle>{isEdit ? 'Edit' : 'Add'} User</DialogTitle>
+          <DialogDescription>
+            {isEdit ? 'Edit' : 'Add new'} user here. Click save when you&apos;re done.
+          </DialogDescription>
+        </DialogHeader>
+        {!isEdit && <AddUserForm />}
+        {isEdit &&
+          (isFetching ? (
+            <div className="flex h-96 items-center justify-center">
+              <span className="loading loading-ring loading-lg text-foreground" />
+            </div>
+          ) : (
+            <EditUserForm user={user} />
+          ))}
       </DialogContent>
     </Dialog>
   );

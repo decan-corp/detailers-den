@@ -91,7 +91,6 @@ export const resetPassword = action(
       message: INVALID_PASSWORD_FORMAT,
       path: ['password'],
     }),
-
   async (data) => {
     await db.transaction(async (tx) => {
       const [resetPasswordToken] = await tx
