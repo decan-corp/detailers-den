@@ -117,13 +117,7 @@ export const resetPassword = action(
         throw new SafeActionError('User may have been deleted or does not exist.');
       }
 
-      // eslint-disable-next-line no-console
-      console.log('ARGON START');
-
       const hashedPassword = await new Argon2id().hash(data.password);
-
-      // eslint-disable-next-line no-console
-      console.log('ARGON SUCCESS');
 
       await tx
         .update(resetPasswordTokensTable)
@@ -133,8 +127,6 @@ export const resetPassword = action(
         })
         .where(eq(resetPasswordTokensTable.id, data.resetPasswordTokenId));
 
-      // eslint-disable-next-line no-console
-      console.log('reset password token', resetPasswordToken);
       await tx
         .update(usersTable)
         .set({
