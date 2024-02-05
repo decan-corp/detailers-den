@@ -14,15 +14,15 @@ export const DATE_RANGE_OPTIONS = {
     to: dayjs().endOf('week').toDate(),
   },
   'Last Week': {
-    from: dayjs().startOf('week').subtract(1, 'week').toDate(),
-    to: dayjs().endOf('week').subtract(1, 'week').toDate(),
+    from: dayjs().subtract(1, 'week').startOf('week').toDate(),
+    to: dayjs().subtract(1, 'week').endOf('week').toDate(),
   },
   'Current Month': {
     from: dayjs().startOf('month').toDate(),
     to: dayjs().endOf('month').toDate(),
   },
   'Last Month': {
-    from: dayjs().startOf('month').subtract(1, 'month').toDate(),
-    to: dayjs().endOf('month').subtract(1, 'month').toDate(),
+    from: dayjs().subtract(1, 'month').startOf('month').toDate(),
+    to: dayjs().subtract(1, 'month').endOf('month').toDate(),
   },
 } as const;
