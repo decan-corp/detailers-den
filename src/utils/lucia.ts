@@ -3,13 +3,9 @@ import { sessionsTable, usersTable } from 'src/schema';
 import { db } from './db';
 
 import { DrizzleMySQLAdapter } from '@lucia-auth/adapter-drizzle';
-import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
 import { Lucia, TimeSpan } from 'lucia';
 
 import { webcrypto } from 'node:crypto';
-
-dayjs.extend(duration);
 
 globalThis.crypto = webcrypto as Crypto;
 
