@@ -96,29 +96,34 @@ const TransactionBaseInfo = ({
 
   return (
     <div className="space-y-4">
-      {isEdit && loggedInUser && [Role.Admin, Role.Accounting].includes(loggedInUser.role) && (
-        <div>
-          <div className="grid grid-cols-6 items-center gap-4">
-            <Label htmlFor="createdAt" className="col-span-2 flex justify-end">
-              Created At
-            </Label>
-            <Input
-              id="createdAt"
-              name="createdAt"
-              className={twJoin('col-span-4', formState.error.discount && 'border-destructive-200')}
-              defaultValue={dayjs(transaction?.createdAt).format('YYYY-MM-DDTHH:mm')}
-              type="datetime-local"
-            />
-          </div>
-          {formState.error.createdAt && (
-            <div className="grid grid-cols-6">
-              <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
-                {formState.error.createdAt}
-              </div>
+      {isEdit &&
+        loggedInUser &&
+        [Role.Admin, Role.Accounting, Role.Cashier].includes(loggedInUser.role) && (
+          <div>
+            <div className="grid grid-cols-6 items-center gap-4">
+              <Label htmlFor="createdAt" className="col-span-2 flex justify-end">
+                Created At
+              </Label>
+              <Input
+                id="createdAt"
+                name="createdAt"
+                className={twJoin(
+                  'col-span-4',
+                  formState.error.discount && 'border-destructive-200'
+                )}
+                defaultValue={dayjs(transaction?.createdAt).format('YYYY-MM-DDTHH:mm')}
+                type="datetime-local"
+              />
             </div>
-          )}
-        </div>
-      )}
+            {formState.error.createdAt && (
+              <div className="grid grid-cols-6">
+                <div className="col-span-4 col-start-3 ml-2 text-sm text-destructive dark:text-destructive-200">
+                  {formState.error.createdAt}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       <div className="grid grid-cols-6 items-center gap-4">
         <Label htmlFor="customerName" className="col-span-2 flex justify-end">
           Customer Name

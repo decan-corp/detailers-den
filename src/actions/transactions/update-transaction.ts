@@ -24,7 +24,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
   const { userId } = ctx.session;
   const { role } = ctx.user;
 
-  if (![Role.Admin, Role.Accounting].includes(role)) {
+  if (![Role.Admin, Role.Accounting, Role.Cashier].includes(role)) {
     delete data.createdAt;
   }
 
@@ -54,13 +54,13 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
     );
   }
 
-  const cashierUpdateThreshold = 120;
+  const cashierUpdateThreshold = 7;
   if (
     role === Role.Cashier &&
-    dayjs().diff(dayjs(transaction.createdAt), 'minutes') > cashierUpdateThreshold
+    dayjs().diff(dayjs(transaction.createdAt), 'days') > cashierUpdateThreshold
   ) {
     throw new SafeActionError(
-      `You may only update a transaction within ${cashierUpdateThreshold / 60} hours`
+      `You may only update a transaction within ${cashierUpdateThreshold} days`
     );
   }
 
