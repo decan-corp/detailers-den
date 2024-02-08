@@ -1,15 +1,15 @@
 import { Separator } from '@/components/ui/separator';
 
-import ServicesTable from './components/data-table';
+import ServiceTable from './components/data-table';
 
-const Services = () => (
+const ServicePage = () => (
   <main className="space-y-6 bg-background">
     <div>
       <h3 className="text-lg font-medium">Services</h3>
     </div>
     <Separator />
-    <ServicesTable />
+    <ServiceTable />
   </main>
 );
 
-export default Services;
+export default ServicePage;

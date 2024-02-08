@@ -23,7 +23,7 @@ import { handleSafeActionError } from 'src/utils/error-handling';
 import LocalStorage from 'src/utils/local-storage';
 
 import { transactionColumns } from './data-columns';
-import { DataTableToolbar } from './data-table-toolbar';
+import { TransactionToolbar } from './data-table-toolbar';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -53,7 +53,7 @@ export const useTransactionAlertDialogStore = create<{
 
 const emptyArray: NonNullable<Awaited<ReturnType<typeof getTransactions>>['data']> = [];
 
-const TransactionsTable = () => {
+const TransactionTable = () => {
   const queryClient = useQueryClient();
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -221,7 +221,7 @@ This action helps maintain historical records and allows for data recovery if ne
         disableCancel={isMarkingAsPaid}
       />
 
-      <DataTableToolbar table={table} />
+      <TransactionToolbar table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -280,4 +280,4 @@ This action helps maintain historical records and allows for data recovery if ne
   );
 };
 
-export default TransactionsTable;
+export default TransactionTable;

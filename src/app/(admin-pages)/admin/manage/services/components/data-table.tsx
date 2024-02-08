@@ -20,7 +20,7 @@ import { servicesTable } from 'src/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { serviceColumns } from './data-columns';
-import { DataTableToolbar } from './data-table-toolbar';
+import { ServiceToolbar } from './data-table-toolbar';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -46,7 +46,7 @@ export const useServiceAlertDialogStore = create<{
 
 const emptyArray: (typeof servicesTable.$inferSelect)[] = [];
 
-const ServicesTable = () => {
+const ServiceTable = () => {
   const queryClient = useQueryClient();
 
   const [sorting, setSorting] = useQueryParams<SortingState>('sorting', [
@@ -159,7 +159,7 @@ const ServicesTable = () => {
 This action helps maintain historical records and allows for data recovery if needed.`}
         onClickConfirm={() => mutateSoftDeleteService(serviceIdToDelete as string)}
       />
-      <DataTableToolbar table={table} />
+      <ServiceToolbar table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -218,4 +218,4 @@ This action helps maintain historical records and allows for data recovery if ne
   );
 };
 
-export default ServicesTable;
+export default ServiceTable;

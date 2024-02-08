@@ -12,7 +12,7 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
+export const ServiceToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const reset = () => {

@@ -4,7 +4,7 @@ import { UserSelect } from 'src/types/schema';
 import { BackpackIcon, MoonIcon, SunIcon } from '@radix-ui/react-icons';
 import { BrushIcon, HardHatIcon, PiggyBankIcon } from 'lucide-react';
 
-export const rolesOptions = [
+export const roleOptions = [
   {
     value: Role.Crew,
     label: 'Crew',
