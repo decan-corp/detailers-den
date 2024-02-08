@@ -5,26 +5,23 @@ import { usersTable } from 'src/schema';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const userSchema = createInsertSchema(usersTable, {})
-  .merge(
-    z.object({
-      email: z.string().email().min(1).toLowerCase(),
-      serviceCutPercentage: z.coerce
-        .number()
-        .int({ message: 'Must not contain decimal values' })
-        .min(0)
-        .max(100)
-        .nullish(),
-    })
-  )
-  .omit({
-    createdById: true,
-    updatedById: true,
-    deletedById: true,
-    createdAt: true,
-    updatedAt: true,
-    deletedAt: true,
-  });
+export const userSchema = createInsertSchema(usersTable, {
+  name: (schema) => schema.name.min(1),
+  email: (schema) => schema.email.email().min(1).toLowerCase(),
+  serviceCutPercentage: z.coerce
+    .number()
+    .int({ message: 'Must not contain decimal values' })
+    .min(0)
+    .max(100)
+    .nullish(),
+}).omit({
+  createdById: true,
+  updatedById: true,
+  deletedById: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+});
 
 export const createUserSchema = userSchema
   .omit({

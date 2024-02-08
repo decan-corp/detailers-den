@@ -56,7 +56,7 @@ const BaseUserForm = ({ form }: { form: UseFormReturn<z.input<typeof userSchema>
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select availability..." />
+                  <SelectValue placeholder="Select role" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
