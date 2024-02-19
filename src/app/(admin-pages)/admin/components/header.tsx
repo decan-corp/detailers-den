@@ -29,11 +29,9 @@ const Header = async () => {
                 <DrawerClose>Dashboard</DrawerClose>
               </HeaderLink>
             )}
-            {[Role.Admin].includes(user.role) && (
-              <HeaderLink className="text-2xl" route={AdminRoute.ManageUsers}>
-                <DrawerClose>Manage</DrawerClose>
-              </HeaderLink>
-            )}
+            <HeaderLink className="text-2xl" route={AdminRoute.ManageUsers}>
+              <DrawerClose>Manage</DrawerClose>
+            </HeaderLink>
             <HeaderLink className="text-2xl" route={AdminRoute.POS}>
               <DrawerClose>POS</DrawerClose>
             </HeaderLink>
@@ -46,9 +44,7 @@ const Header = async () => {
           {[Role.Admin].includes(user.role) && (
             <HeaderLink route={AdminRoute.Dashboard}>Dashboard</HeaderLink>
           )}
-          {[Role.Admin].includes(user.role) && (
-            <HeaderLink route={AdminRoute.ManageUsers}>Manage</HeaderLink>
-          )}
+          <HeaderLink route={AdminRoute.ManageUsers}>Manage</HeaderLink>
           <HeaderLink route={AdminRoute.POS}>POS</HeaderLink>
         </nav>
         <div className="md:ml-auto">

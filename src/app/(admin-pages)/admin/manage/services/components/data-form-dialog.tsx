@@ -23,8 +23,9 @@ import { addService } from 'src/actions/services/add-service';
 import { getService } from 'src/actions/services/get-services';
 import { updateService } from 'src/actions/services/update-service';
 import RequiredIndicator from 'src/components/form/required-indicator';
-import { VehicleSize } from 'src/constants/common';
+import { Role, VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
+import useClientSession from 'src/hooks/use-client-session';
 import { servicesTable } from 'src/schema';
 import { serviceSchema } from 'src/schemas/services';
 import { handleSafeActionError } from 'src/utils/error-handling';
@@ -331,6 +332,7 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
 export const ServiceFormDialog = () => {
   const isDialogOpen = useServiceFormStore((state) => state.isDialogOpen);
   const serviceId = useServiceFormStore((state) => state.serviceIdToEdit);
+  const { data } = useClientSession();
 
   const onOpenChange = (dialogOpen: boolean) => {
     useServiceFormStore.setState({ isDialogOpen: dialogOpen });
@@ -343,9 +345,11 @@ export const ServiceFormDialog = () => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-min">
-          Add Service
-        </Button>
+        {data?.role === Role.Admin && (
+          <Button variant="outline" className="w-min">
+            Add Service
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent
         className="max-h-full overflow-auto sm:max-w-[525px]  md:max-h-[720px]"

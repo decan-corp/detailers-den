@@ -1,5 +1,6 @@
 'use server';
 
+import { Role } from 'src/constants/common';
 import { servicesTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
@@ -16,16 +17,17 @@ const searchSchema = z.object({
 
 export const getServices = authAction(
   searchSchema.merge(paginationSchema).merge(sortingSchema),
-  async (params) => {
+  async (params, { user }) => {
+    const { role } = user;
     let query = db
       .select({
         id: servicesTable.id,
         serviceName: servicesTable.serviceName,
-        serviceCutPercentage: servicesTable.serviceCutPercentage,
         description: servicesTable.description,
         createdAt: servicesTable.createdAt,
         updatedAt: servicesTable.updatedAt,
         priceMatrix: servicesTable.priceMatrix,
+        ...(role === Role.Admin && { serviceCutPercentage: servicesTable.serviceCutPercentage }),
       })
       .from(servicesTable)
       .$dynamic();
