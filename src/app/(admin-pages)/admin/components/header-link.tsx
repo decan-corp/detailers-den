@@ -17,12 +17,14 @@ const HeaderLink = ({
   children: ReactNode;
 }) => {
   const pathname = usePathname() as AdminRoute | Route;
+  const isPathnameMatch = pathname.startsWith(route) && route !== AdminRoute.Dashboard;
+  const isHomePathname = route === AdminRoute.Dashboard && pathname === AdminRoute.Dashboard;
   return (
     <Link
       href={route}
       className={twMerge(
-        'text-sm  font-bold transition-colors hover:text-primary',
-        pathname !== route && 'font-medium text-muted-foreground',
+        'text-sm font-medium text-muted-foreground transition-colors hover:text-primary',
+        (isPathnameMatch || isHomePathname) && 'font-bold text-primary',
         className
       )}
     >

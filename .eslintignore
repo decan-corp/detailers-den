@@ -12,6 +12,7 @@ jest.*.ts
 *.config.ts
 *.config.mjs
 *.config.cjs
+.eslintrc.js
 
 # env
 .env

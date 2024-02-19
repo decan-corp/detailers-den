@@ -22,7 +22,7 @@ import { UserSelect } from 'src/types/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { userColumns } from './data-columns';
-import { DataTableToolbar } from './data-table-toolbar';
+import { UserToolbar } from './data-table-toolbar';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -209,7 +209,7 @@ This link will allow the user to reset their password.
 Please ensure that the link is securely communicated to the user.`}
         onClickConfirm={() => mutateGenerateResetPasswordToken(selectedUserId as string)}
       />
-      <DataTableToolbar table={table} />
+      <UserToolbar table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>

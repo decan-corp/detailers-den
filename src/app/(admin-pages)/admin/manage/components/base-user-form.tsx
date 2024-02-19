@@ -10,7 +10,7 @@ import {
 import { Role } from 'src/constants/common';
 import { userSchema } from 'src/schemas/users';
 
-import { rolesOptions } from './data-table-options';
+import { roleOptions } from './data-table-options';
 
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
@@ -56,11 +56,11 @@ const BaseUserForm = ({ form }: { form: UseFormReturn<z.input<typeof userSchema>
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select availability..." />
+                  <SelectValue placeholder="Select role" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {rolesOptions.map(({ value, label, icon: Icon }) => (
+                {roleOptions.map(({ value, label, icon: Icon }) => (
                   <SelectItem key={value} value={value}>
                     <div className="flex flex-row items-center gap-3">
                       <Icon className="h-4 w-4 text-muted-foreground" /> {label}

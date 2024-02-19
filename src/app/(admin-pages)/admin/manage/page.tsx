@@ -11,7 +11,7 @@ const Management = async () => {
   const { user } = await validateRequest();
 
   if (user && ![Role.Admin].includes(user.role)) {
-    redirect(AdminRoute.POS);
+    redirect(AdminRoute.ManageServices);
   }
 
   return (

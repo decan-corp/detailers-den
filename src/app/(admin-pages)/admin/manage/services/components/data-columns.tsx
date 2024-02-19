@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -10,7 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from 'src/components/table/data-table-column-header';
+import { Role } from 'src/constants/common';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
+import useClientSession from 'src/hooks/use-client-session';
 import { servicesTable } from 'src/schema';
 
 import { useServiceFormStore } from './data-form-dialog';
@@ -20,18 +24,12 @@ import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { MoreHorizontal } from 'lucide-react';
 
-export const serviceColumns: ColumnDef<
-  Pick<
-    typeof servicesTable.$inferSelect,
-    | 'id'
-    | 'serviceName'
-    | 'description'
-    | 'serviceCutPercentage'
-    | 'createdAt'
-    | 'updatedAt'
-    | 'priceMatrix'
-  >
->[] = [
+export type ServiceColumnsType = Pick<
+  typeof servicesTable.$inferSelect,
+  'id' | 'serviceName' | 'description' | 'createdAt' | 'updatedAt' | 'priceMatrix'
+> & { serviceCutPercentage?: number };
+
+export const serviceColumns: ColumnDef<ServiceColumnsType>[] = [
   {
     accessorKey: 'serviceName',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Service Name" />,
@@ -75,6 +73,7 @@ export const serviceColumns: ColumnDef<
     id: 'actions',
     cell: ({ row }) => {
       const service = row.original;
+      const { data: user } = useClientSession();
 
       return (
         <DropdownMenu>
@@ -93,25 +92,32 @@ export const serviceColumns: ColumnDef<
               Copy ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() =>
-                useServiceFormStore.setState({ isDialogOpen: true, serviceIdToEdit: service.id })
-              }
-            >
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() => {
-                useServiceAlertDialogStore.setState({
-                  isDeleteDialogOpen: true,
-                  serviceIdToDelete: service.id,
-                });
-              }}
-            >
-              Delete
-            </DropdownMenuItem>
+            {user?.role === Role.Admin && (
+              <>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() =>
+                    useServiceFormStore.setState({
+                      isDialogOpen: true,
+                      serviceIdToEdit: service.id,
+                    })
+                  }
+                >
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => {
+                    useServiceAlertDialogStore.setState({
+                      isDeleteDialogOpen: true,
+                      serviceIdToDelete: service.id,
+                    });
+                  }}
+                >
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

@@ -36,7 +36,7 @@ export const login = action(
       isPasswordValid = false;
     }
 
-    // TODO: remove this once migrated to prod and all users has password reset
+    // TODO: remove this once migrated to prod and all users have password reset
     if (!isPasswordValid) {
       isPasswordValid = await new LegacyScrypt().verify(user.hashedPassword, password);
     }

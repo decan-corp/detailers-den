@@ -13,25 +13,27 @@ import { softDeleteService } from 'src/actions/services/delete-service';
 import { getServices, getServicesCount } from 'src/actions/services/get-services';
 import { ConfirmDialog } from 'src/components/dialog/confirmation-dialog';
 import { DataTablePagination } from 'src/components/table/data-table-pagination';
+import { Role } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
+import useClientSession from 'src/hooks/use-client-session';
 import useQueryParams from 'src/hooks/use-query-params';
 import useSetSearchParams from 'src/hooks/use-set-search-params';
-import { servicesTable } from 'src/schema';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
-import { serviceColumns } from './data-columns';
-import { DataTableToolbar } from './data-table-toolbar';
+import { ServiceColumnsType, serviceColumns } from './data-columns';
+import { ServiceToolbar } from './data-table-toolbar';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ColumnFiltersState,
   PaginationState,
   SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
 import { toast } from 'sonner';
 import { create } from 'zustand';
@@ -44,11 +46,12 @@ export const useServiceAlertDialogStore = create<{
   serviceIdToDelete: null,
 }));
 
-const emptyArray: (typeof servicesTable.$inferSelect)[] = [];
+const emptyArray: ServiceColumnsType[] = [];
 
-const ServicesTable = () => {
+const ServiceTable = () => {
   const queryClient = useQueryClient();
 
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [sorting, setSorting] = useQueryParams<SortingState>('sorting', [
     { id: 'createdAt', desc: true },
   ]);
@@ -62,6 +65,13 @@ const ServicesTable = () => {
 
   const isDeleteDialogOpen = useServiceAlertDialogStore((state) => state.isDeleteDialogOpen);
   const serviceIdToDelete = useServiceAlertDialogStore((state) => state.serviceIdToDelete);
+  const { data: user } = useClientSession();
+
+  useEffect(() => {
+    if (user && user.role !== Role.Admin) {
+      setColumnVisibility({ serviceCutPercentage: false });
+    }
+  }, [user]);
 
   useSetSearchParams({
     sorting,
@@ -124,6 +134,7 @@ const ServicesTable = () => {
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
     onGlobalFilterChange: setGlobalFilter,
     manualSorting: true,
@@ -133,6 +144,7 @@ const ServicesTable = () => {
       sorting,
       columnFilters,
       pagination,
+      columnVisibility,
       globalFilter,
     },
   });
@@ -159,7 +171,7 @@ const ServicesTable = () => {
 This action helps maintain historical records and allows for data recovery if needed.`}
         onClickConfirm={() => mutateSoftDeleteService(serviceIdToDelete as string)}
       />
-      <DataTableToolbar table={table} />
+      <ServiceToolbar table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -218,4 +230,4 @@ This action helps maintain historical records and allows for data recovery if ne
   );
 };
 
-export default ServicesTable;
+export default ServiceTable;

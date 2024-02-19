@@ -28,7 +28,7 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-export const DataTableToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
+export const TransactionToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => {
   const isFiltered = table.getState().columnFilters.length > 0;
   const [resetKey, setResetKey] = useState(cuid2.createId());
   const { data: services = [] } = useServiceOptions();
