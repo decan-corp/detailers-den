@@ -36,9 +36,7 @@ export const serviceColumns: ColumnDef<ServiceColumnsType>[] = [
   },
   {
     accessorKey: 'serviceCutPercentage',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Service Cut Percentage" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Cut %" />,
   },
   {
     accessorKey: 'description',
