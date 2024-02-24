@@ -286,7 +286,7 @@ const ServiceForm = ({ serviceIdToEdit }: { serviceIdToEdit?: string | null }) =
                   type="number"
                   className="col-span-4"
                   required
-                  min={1}
+                  min={0}
                   max={100000}
                   step={0.01}
                   onChange={(e) =>
