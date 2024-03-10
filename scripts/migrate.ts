@@ -8,8 +8,6 @@ import { migrate } from 'drizzle-orm/libsql/migrator';
 
 import path from 'path';
 
-migrate(db, { migrationsFolder: path.join(__dirname, '../drizzle') });
-
 // TODO: create script for sqlite local
 (async () => {
   try {
