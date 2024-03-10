@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit -p tsconfig.eslint.json",
-    "drizzle:generate": "bun drizzle-kit generate:mysql",
+    "drizzle:generate": "bun drizzle-kit generate:sqlite",
     "drizzle:migrate": "bunx tsx ./scripts/migrate.ts",
     "prepare": "husky install"
   },
@@ -20,7 +20,9 @@
   "dependencies": {
     "@formkit/auto-animate": "^0.8.1",
     "@hookform/resolvers": "^3.3.4",
+    "@libsql/client": "^0.5.3",
     "@lucia-auth/adapter-drizzle": "^1.0.0",
+    "@lucia-auth/adapter-sqlite": "^3.0.1",
     "@paralleldrive/cuid2": "^2.2.2",
     "@planetscale/database": "^1.11.0",
     "@radix-ui/react-alert-dialog": "^1.0.5",

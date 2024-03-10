@@ -22,7 +22,7 @@ export const addUser = authAction(createUserSchema, async (data, ctx) => {
 
   await db.insert(usersTable).values({
     ...userData,
-    createdById: userId,
+    createdBy: userId,
     hashedPassword,
   });
 });

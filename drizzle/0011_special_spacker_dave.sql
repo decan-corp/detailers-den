@@ -1,1 +1,0 @@
-ALTER TABLE `crew_earnings` ADD `crew_cut_percentage` int DEFAULT 0 NOT NULL;

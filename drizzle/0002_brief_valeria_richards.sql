@@ -1,1 +1,0 @@
-ALTER TABLE `users` ADD `is_first_time_login` boolean DEFAULT true;

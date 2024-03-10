@@ -47,7 +47,7 @@ type ServiceEntry = Pick<
 
 export const getDefaultServiceValue = () => ({
   serviceBy: [''],
-  price: '0',
+  price: 0,
   serviceId: '',
   id: cuid2.createId(),
 });

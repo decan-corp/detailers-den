@@ -15,6 +15,6 @@ export const addService = authAction(createServiceSchema, async (data, ctx) => {
 
   await db.insert(servicesTable).values({
     ...data,
-    createdById: userId,
+    createdBy: userId,
   });
 });

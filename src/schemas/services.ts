@@ -31,9 +31,9 @@ export const serviceSchema = createInsertSchema(servicesTable)
     })
   )
   .omit({
-    createdById: true,
-    updatedById: true,
-    deletedById: true,
+    createdBy: true,
+    updatedBy: true,
+    deletedBy: true,
     createdAt: true,
     updatedAt: true,
     deletedAt: true,

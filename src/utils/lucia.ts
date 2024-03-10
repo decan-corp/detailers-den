@@ -1,16 +1,18 @@
-import { sessionsTable, usersTable } from 'src/schema';
+import { usersTable } from 'src/schema';
 
-import { db } from './db';
+import { tursoClient } from './db';
 
-import { DrizzleMySQLAdapter } from '@lucia-auth/adapter-drizzle';
+import { LibSQLAdapter } from '@lucia-auth/adapter-sqlite';
 import { Lucia, TimeSpan } from 'lucia';
 
 import { webcrypto } from 'node:crypto';
 
 globalThis.crypto = webcrypto as Crypto;
 
-const adapter = new DrizzleMySQLAdapter(db, sessionsTable, usersTable);
-
+const adapter = new LibSQLAdapter(tursoClient, {
+  user: 'users',
+  session: 'sessions',
+});
 export const auth = new Lucia(adapter, {
   sessionCookie: {
     // this sets cookies with super long expiration

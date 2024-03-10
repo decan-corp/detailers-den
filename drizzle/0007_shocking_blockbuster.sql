@@ -1,1 +1,0 @@
-ALTER TABLE `reset_password_tokens` MODIFY COLUMN `is_valid` boolean NOT NULL DEFAULT true;

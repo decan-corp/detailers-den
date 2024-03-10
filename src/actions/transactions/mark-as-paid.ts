@@ -5,7 +5,8 @@ import { transactionsTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 
-import { eq, sql } from 'drizzle-orm';
+import dayjs from 'dayjs';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const markAsPaidTransaction = authAction(z.string().cuid2(), async (id, { session }) => {
@@ -15,7 +16,7 @@ export const markAsPaidTransaction = authAction(z.string().cuid2(), async (id, {
     .update(transactionsTable)
     .set({
       status: TransactionStatus.Paid,
-      completedAt: sql`CURRENT_TIMESTAMP`,
+      completedAt: dayjs().toDate(),
       completedBy: userId,
     })
     .where(eq(transactionsTable.id, id));

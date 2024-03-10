@@ -26,7 +26,10 @@
     "availment",
     "sonner",
     "ddthh",
-    "datetime"
+    "datetime",
+    "turso",
+    "libsql",
+    "unixepoch"
   ],
   "ignorePaths": [
     "node_modules/",

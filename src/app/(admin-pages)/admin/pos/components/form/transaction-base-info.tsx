@@ -88,7 +88,7 @@ const TransactionBaseInfo = ({
 
           return {
             ...data,
-            price: String(priceMatrix.price),
+            price: priceMatrix.price,
           };
         });
     });

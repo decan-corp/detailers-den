@@ -7,7 +7,6 @@ import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
 import { SafeActionError, action, authAction } from 'src/utils/safe-action';
 
-import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
@@ -36,13 +35,14 @@ export const generateResetPasswordToken = authAction(
 
     if (existingResetPasswordToken) return existingResetPasswordToken.id;
 
-    const resetPasswordTokenId = cuid2.createId();
-    await db.insert(resetPasswordTokensTable).values({
-      id: resetPasswordTokenId,
-      userId: generateForUserId,
-      expiresAt: dayjs().add(2, 'hour').toDate(),
-      createdById: userId,
-    });
+    const [{ resetPasswordTokenId }] = await db
+      .insert(resetPasswordTokensTable)
+      .values({
+        userId: generateForUserId,
+        expiresAt: dayjs().add(2, 'hour').toDate(),
+        createdBy: userId,
+      })
+      .returning({ resetPasswordTokenId: resetPasswordTokensTable.id });
 
     return resetPasswordTokenId;
   }
@@ -123,7 +123,8 @@ export const resetPassword = action(
         .update(resetPasswordTokensTable)
         .set({
           isValid: false,
-          updatedById: resetPasswordToken.userId,
+          updatedBy: resetPasswordToken.userId,
+          updatedAt: dayjs().toDate(),
         })
         .where(eq(resetPasswordTokensTable.id, data.resetPasswordTokenId));
 
