@@ -175,12 +175,4 @@ export const resetPasswordTokensTable = sqliteTable('reset_password_tokens', {
   ...commonSchema,
 });
 
-export const testTable = sqliteTable('test_table', {
-  id: text('id', { length: 255 })
-    .$defaultFn(() => createId())
-    .primaryKey(),
-  testId: text('user_id').notNull(),
-  ...commonSchema,
-});
-
 // TODO: profile
