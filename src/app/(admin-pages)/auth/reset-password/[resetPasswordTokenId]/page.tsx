@@ -80,10 +80,7 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
   });
 
   const onSubmit = (event: FormValues) => {
-    mutateResetPassword({
-      ...event,
-      resetPasswordTokenId,
-    });
+    mutateResetPassword(event);
   };
 
   if (isLoading) {

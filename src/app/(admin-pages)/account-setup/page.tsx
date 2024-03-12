@@ -9,23 +9,38 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { setupPassword } from 'src/actions/auth/setup-password';
-import RequiredIndicator from 'src/components/form/required-indicator';
 import { AdminRoute } from 'src/constants/routes';
+import { setupPasswordSchema } from 'src/schemas/auth';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { ComponentProps, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { twJoin } from 'tailwind-merge';
+import { z } from 'zod';
 
-type ValidationError = Partial<Parameters<typeof setupPassword>[number]>;
+const formSchema = setupPasswordSchema;
+type FormValues = z.input<typeof formSchema>;
 
 const AccountSetup = () => {
   const router = useRouter();
-  const [error, setError] = useState<ValidationError>({});
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    shouldFocusError: true,
+  });
+
   const { mutate: mutateSetupPassword, isPending } = useMutation({
     mutationFn: setupPassword,
     onSuccess: (result) => {
@@ -34,8 +49,6 @@ const AccountSetup = () => {
           description:
             'Please check your input fields for errors. Ensure all required fields are filled correctly and try again.',
         });
-
-        setError(result.validationErrors as ValidationError);
         return;
       }
 
@@ -54,79 +67,57 @@ const AccountSetup = () => {
     },
   });
 
-  const onSubmit: ComponentProps<'form'>['onSubmit'] = (event) => {
-    event.preventDefault();
-
-    setError({});
-
-    const formData = new FormData(event.currentTarget);
-
-    mutateSetupPassword({
-      password: formData.get('password') as string,
-      confirmPassword: formData.get('confirmPassword') as string,
-    });
+  const onSubmit = (event: FormValues) => {
+    mutateSetupPassword(event);
   };
 
   return (
     <div className="flex h-screen items-center justify-center p-8">
       <Card className="w-full max-w-md">
-        <form onSubmit={onSubmit}>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-center text-2xl">Secure Your Account</CardTitle>
-            <CardDescription className="text-center">
-              Create a strong password to protect your account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div>
-              <div className="grid gap-2">
-                <Label className="flex" htmlFor="password">
-                  Password <RequiredIndicator />
-                </Label>
-                <Input
-                  className={twJoin(error.password && 'border-destructive-200')}
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  minLength={8}
-                  disabled={isPending}
-                />
-              </div>
-              {error.password && (
-                <div className="text-sm text-destructive dark:text-destructive-200">
-                  {error.password}
-                </div>
-              )}
-            </div>
-            <div>
-              <div className="grid gap-2">
-                <Label className="flex" htmlFor="confirmPassword">
-                  Confirm Password <RequiredIndicator />
-                </Label>
-                <Input
-                  className={twJoin(error.confirmPassword && 'border-destructive-200')}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  minLength={8}
-                  disabled={isPending}
-                />
-              </div>
-              {error.confirmPassword && (
-                <div className="text-sm text-destructive dark:text-destructive-200">
-                  {error.confirmPassword}
-                </div>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full" disabled={isPending}>
-              Submit
-            </Button>
-          </CardFooter>
-        </form>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-center text-2xl">Secure Your Account</CardTitle>
+              <CardDescription className="text-center">
+                Create a strong password to protect your account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
+                Submit
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </div>
   );
