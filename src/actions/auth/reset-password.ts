@@ -1,8 +1,8 @@
 'use server';
 
 import { Role } from 'src/constants/common';
-import { INVALID_PASSWORD_FORMAT, passwordRegex } from 'src/constants/passwords';
 import { resetPasswordTokensTable, usersTable } from 'src/schema';
+import { resetPasswordSchema } from 'src/schemas/auth';
 import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
 import { SafeActionError, action, authAction } from 'src/utils/safe-action';
@@ -75,68 +75,53 @@ export const verifyResetPasswordToken = action(
   }
 );
 
-export const resetPassword = action(
-  z
-    .object({
-      resetPasswordTokenId: z.string().cuid2(),
-      password: z.string().min(8, { message: 'Must contain at least 8 characters' }),
-      confirmPassword: z.string().min(8, { message: 'Must contain at least 8 characters' }),
-    })
-    .refine((value) => value.confirmPassword === value.password, {
-      message:
-        'The passwords you entered do not match. Please ensure that both passwords are identical before proceeding.',
-      path: ['confirmPassword'],
-    })
-    .refine((value) => passwordRegex.test(value.password), {
-      message: INVALID_PASSWORD_FORMAT,
-      path: ['password'],
-    }),
-  async (data) => {
-    await db.transaction(async (tx) => {
-      const [resetPasswordToken] = await tx
-        .select()
-        .from(resetPasswordTokensTable)
-        .where(
-          and(
-            eq(resetPasswordTokensTable.id, data.resetPasswordTokenId),
-            gt(resetPasswordTokensTable.expiresAt, new Date()),
-            eq(resetPasswordTokensTable.isValid, true)
-          )
-        );
+export const resetPassword = action(resetPasswordSchema, async (data) => {
+  const result = await db.transaction(async (tx) => {
+    const [resetPasswordToken] = await tx
+      .select()
+      .from(resetPasswordTokensTable)
+      .where(
+        and(
+          eq(resetPasswordTokensTable.id, data.resetPasswordTokenId),
+          gt(resetPasswordTokensTable.expiresAt, new Date()),
+          eq(resetPasswordTokensTable.isValid, true)
+        )
+      );
 
-      if (!resetPasswordToken) {
-        throw new SafeActionError('Invalid reset password token');
-      }
+    if (!resetPasswordToken) {
+      throw new SafeActionError('Invalid reset password token');
+    }
 
-      const [user] = await tx
-        .select({ id: usersTable.id, email: usersTable.email })
-        .from(usersTable)
-        .where(and(isNull(usersTable.deletedAt), eq(usersTable.id, resetPasswordToken.userId)));
+    const [user] = await tx
+      .select({ id: usersTable.id, email: usersTable.email })
+      .from(usersTable)
+      .where(and(isNull(usersTable.deletedAt), eq(usersTable.id, resetPasswordToken.userId)));
 
-      if (!user) {
-        throw new SafeActionError('User may have been deleted or does not exist.');
-      }
+    if (!user) {
+      throw new SafeActionError('User may have been deleted or does not exist.');
+    }
 
-      const hashedPassword = await new Argon2id().hash(data.password);
+    const hashedPassword = await new Argon2id().hash(data.password);
 
-      await tx
-        .update(resetPasswordTokensTable)
-        .set({
-          isValid: false,
-          updatedBy: resetPasswordToken.userId,
-          updatedAt: dayjs().toDate(),
-        })
-        .where(eq(resetPasswordTokensTable.id, data.resetPasswordTokenId));
+    await tx
+      .update(resetPasswordTokensTable)
+      .set({
+        isValid: false,
+        updatedBy: resetPasswordToken.userId,
+        updatedAt: dayjs().toDate(),
+      })
+      .where(eq(resetPasswordTokensTable.id, data.resetPasswordTokenId));
 
-      await tx
-        .update(usersTable)
-        .set({
-          isFirstTimeLogin: false,
-          hashedPassword,
-        })
-        .where(eq(usersTable.id, resetPasswordToken.userId));
+    await tx
+      .update(usersTable)
+      .set({
+        isFirstTimeLogin: false,
+        hashedPassword,
+      })
+      .where(eq(usersTable.id, resetPasswordToken.userId));
 
-      await auth.invalidateUserSessions(resetPasswordToken.userId);
-    });
-  }
-);
+    return resetPasswordToken;
+  });
+
+  await auth.invalidateUserSessions(result.userId);
+});

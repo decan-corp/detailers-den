@@ -26,16 +26,13 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 const formSchema = changePasswordSchema;
-export type ChangePasswordFormValues = z.input<typeof formSchema>;
-
-const defaultValues: Partial<ChangePasswordFormValues> = {};
+type FormValues = z.input<typeof formSchema>;
 
 const ChangePasswordForm = () => {
   const router = useRouter();
 
-  const form = useForm<ChangePasswordFormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
     shouldFocusError: true,
   });
 
@@ -62,7 +59,7 @@ const ChangePasswordForm = () => {
     },
   });
 
-  const onSubmit = (event: ChangePasswordFormValues) => {
+  const onSubmit = (event: FormValues) => {
     mutateChangePassword(event);
   };
 
@@ -73,7 +70,7 @@ const ChangePasswordForm = () => {
           control={form.control}
           name="currentPassword"
           render={({ field }) => (
-            <FormItem className="space-y-0">
+            <FormItem>
               <FormLabel>Current Password</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
@@ -86,7 +83,7 @@ const ChangePasswordForm = () => {
           control={form.control}
           name="newPassword"
           render={({ field }) => (
-            <FormItem className="space-y-0">
+            <FormItem>
               <FormLabel>New Password</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
@@ -99,7 +96,7 @@ const ChangePasswordForm = () => {
           control={form.control}
           name="confirmPassword"
           render={({ field }) => (
-            <FormItem className="space-y-0">
+            <FormItem>
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />

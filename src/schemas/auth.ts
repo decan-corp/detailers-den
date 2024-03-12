@@ -21,3 +21,19 @@ export const changePasswordSchema = z
     message: INVALID_PASSWORD_FORMAT,
     path: ['newPassword'],
   });
+
+export const resetPasswordSchema = z
+  .object({
+    resetPasswordTokenId: z.string().cuid2(),
+    password: z.string().min(8, { message: 'Must contain at least 8 characters' }),
+    confirmPassword: z.string().min(8, { message: 'Must contain at least 8 characters' }),
+  })
+  .refine((value) => value.confirmPassword === value.password, {
+    message:
+      'The passwords you entered do not match. Please ensure that both passwords are identical before proceeding.',
+    path: ['confirmPassword'],
+  })
+  .refine((value) => passwordRegex.test(value.password), {
+    message: INVALID_PASSWORD_FORMAT,
+    path: ['password'],
+  });
