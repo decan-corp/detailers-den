@@ -3,31 +3,51 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { changePassword } from 'src/actions/auth/change-password';
-import RequiredIndicator from 'src/components/form/required-indicator';
 import { AdminRoute } from 'src/constants/routes';
+import { changePasswordSchema } from 'src/schemas/auth';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { ComponentProps, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { twJoin } from 'tailwind-merge';
+import { z } from 'zod';
 
-type ValidationError = Partial<Parameters<typeof changePassword>[number]>;
+const formSchema = changePasswordSchema;
+export type ChangePasswordFormValues = z.input<typeof formSchema>;
+
+const defaultValues: Partial<ChangePasswordFormValues> = {};
 
 const ChangePasswordForm = () => {
   const router = useRouter();
-  const [error, setError] = useState<ValidationError>({});
+
+  const form = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+    shouldFocusError: true,
+  });
 
   const { mutate: mutateChangePassword, isPending } = useMutation({
     mutationFn: changePassword,
     onSuccess: (result) => {
       if (result.validationErrors || result.serverError) {
         handleSafeActionError(result);
-        setError((result.validationErrors as ValidationError) || {});
+
+        if (result.serverError === 'Incorrect current password') {
+          form.setError('currentPassword', { type: 'validate', message: result.serverError });
+        }
         return;
       }
 
@@ -42,87 +62,58 @@ const ChangePasswordForm = () => {
     },
   });
 
-  const onSubmit: ComponentProps<'form'>['onSubmit'] = (event) => {
-    event.preventDefault();
-
-    setError({});
-
-    const formData = new FormData(event.currentTarget);
-
-    mutateChangePassword({
-      currentPassword: formData.get('currentPassword') as string,
-      newPassword: formData.get('newPassword') as string,
-      confirmPassword: formData.get('confirmPassword') as string,
-    });
+  const onSubmit = (event: ChangePasswordFormValues) => {
+    mutateChangePassword(event);
   };
 
   return (
-    <form id="change-password-form" className="space-y-6" onSubmit={onSubmit}>
-      <div>
-        <div className="space-y-4">
-          <Label htmlFor="currentPassword" className="flex">
-            Current Password <RequiredIndicator />
-          </Label>
-          <Input
-            className={twJoin(error.currentPassword && 'border-destructive-200')}
-            type="password"
-            id="currentPassword"
-            name="currentPassword"
-            required
-            minLength={1}
-          />
-        </div>
-        {error.currentPassword && (
-          <div className="text-sm text-destructive dark:text-destructive-200">
-            {error.currentPassword}
-          </div>
-        )}
-      </div>
-      <div>
-        <div className="space-y-4">
-          <Label htmlFor="newPassword" className="flex">
-            New Password <RequiredIndicator />
-          </Label>
-          <Input
-            className={twJoin(error.newPassword && 'border-destructive-200')}
-            type="password"
-            id="newPassword"
-            name="newPassword"
-            required
-            minLength={8}
-          />
-        </div>
-        {error.newPassword && (
-          <div className="text-sm text-destructive dark:text-destructive-200">
-            {error.newPassword}
-          </div>
-        )}
-      </div>
-      <div>
-        <div className="space-y-4">
-          <Label htmlFor="confirmPassword" className="flex">
-            Confirm Password <RequiredIndicator />
-          </Label>
-          <Input
-            className={twJoin(error.confirmPassword && 'border-destructive-200')}
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            required
-            minLength={8}
-          />
-        </div>
-        {error.confirmPassword && (
-          <div className="text-sm text-destructive dark:text-destructive-200">
-            {error.confirmPassword}
-          </div>
-        )}
-      </div>
-
-      <Button type="submit" disabled={isPending}>
-        Change Password
-      </Button>
-    </form>
+    <Form {...form}>
+      <form id="change-password-form" className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="currentPassword"
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormLabel>Current Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="newPassword"
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormLabel>New Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" disabled={isPending}>
+          {isPending && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
+          Change Password
+        </Button>
+      </form>
+    </Form>
   );
 };
 
