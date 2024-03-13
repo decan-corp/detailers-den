@@ -8,10 +8,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (request.nextUrl.pathname === '/api/health') {
-    return NextResponse.next();
-  }
-
   // For CSRF protection
   const originHeader = request.headers.get('Origin');
   const hostHeader = request.headers.get('X-Forwarded-Host');
