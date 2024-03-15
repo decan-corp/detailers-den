@@ -8,7 +8,7 @@ import { z } from 'zod';
 export const priceMatrixSchema = z
   .array(
     z.object({
-      price: z.number().int().min(0),
+      price: z.coerce.number().int().min(0),
       vehicleSize: z.nativeEnum(VehicleSize),
     })
   )

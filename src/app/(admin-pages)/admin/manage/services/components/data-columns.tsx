@@ -97,7 +97,7 @@ export const serviceColumns: ColumnDef<ServiceColumnsType>[] = [
                   onClick={() =>
                     useServiceFormStore.setState({
                       isDialogOpen: true,
-                      serviceIdToEdit: service.id,
+                      selectedId: service.id,
                     })
                   }
                 >
