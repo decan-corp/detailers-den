@@ -36,7 +36,7 @@ const ServiceMatrixForm = ({ form }: { form: UseFormReturn<ServiceFormValues> })
             <div className="flex flex-row place-content-between items-center">
               <div className="font-semibold leading-none tracking-tight">Service {index + 1}</div>
               <Button
-                className=""
+                className="disabled:pointer-events-auto disabled:cursor-not-allowed"
                 variant="ghost"
                 type="button"
                 size="sm"
@@ -107,8 +107,9 @@ const ServiceMatrixForm = ({ form }: { form: UseFormReturn<ServiceFormValues> })
         ))}
       </div>
       <Button
-        className="gap-2 text-center"
+        className="gap-2 text-center disabled:pointer-events-auto disabled:cursor-not-allowed"
         variant="outline"
+        disabled={fields.length === vehicleSizeOptions.length}
         onClick={() => append({ price: 0, vehicleSize: undefined as unknown as VehicleSize })}
         type="button"
       >
