@@ -14,11 +14,14 @@ import { ServiceFormValues } from './service-form';
 
 import { vehicleSizeOptions } from '../../../pos/components/data-table-options';
 
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { PlusCircleIcon, XIcon } from 'lucide-react';
 import { UseFormReturn, useFieldArray } from 'react-hook-form';
 import { useImmer } from 'use-immer';
 
 const ServiceMatrixForm = ({ form }: { form: UseFormReturn<ServiceFormValues> }) => {
+  const [parent] = useAutoAnimate();
+
   const { fields, remove, append } = useFieldArray({
     control: form.control,
     name: 'priceMatrix',
@@ -30,7 +33,7 @@ const ServiceMatrixForm = ({ form }: { form: UseFormReturn<ServiceFormValues> })
   return (
     <div className="space-y-4">
       <div className="mb-2 text-base font-medium leading-none">Price Matrix:</div>
-      <div className="space-y-4">
+      <div ref={parent} className="space-y-4">
         {fields.map((item, index) => (
           <div key={item.id} className="space-y-2 rounded-lg border p-4">
             <div className="flex flex-row place-content-between items-center">
