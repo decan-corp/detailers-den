@@ -201,11 +201,11 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
     if (deleteServiceList.length) {
       const deleteServiceIds = deleteServiceList.map(({ id }) => id);
       await tx
-        .delete(transactionServicesTable)
-        .where(inArray(transactionServicesTable.id, deleteServiceIds));
-      await tx
         .delete(crewEarningsTable)
         .where(inArray(crewEarningsTable.transactionServiceId, deleteServiceIds));
+      await tx
+        .delete(transactionServicesTable)
+        .where(inArray(transactionServicesTable.id, deleteServiceIds));
     }
 
     if (totalPrice < Number(transactionData.discount)) {
