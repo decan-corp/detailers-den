@@ -52,7 +52,7 @@ const AvailedServices = ({
         ({ vehicleSize }) => vehicleSize === prevState.selectedVehicleSize
       );
       prevState.transactionServices[index].serviceId = serviceId;
-      prevState.transactionServices[index].price = String(priceMatrix?.price || 0);
+      prevState.transactionServices[index].price = priceMatrix?.price || 0;
       prevState.recentSelectedService.push(serviceId);
     });
     saveRecentSelectedService(serviceId);

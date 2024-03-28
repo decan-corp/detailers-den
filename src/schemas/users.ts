@@ -15,9 +15,9 @@ export const userSchema = createInsertSchema(usersTable, {
     .max(100)
     .nullish(),
 }).omit({
-  createdById: true,
-  updatedById: true,
-  deletedById: true,
+  createdBy: true,
+  updatedBy: true,
+  deletedBy: true,
   createdAt: true,
   updatedAt: true,
   deletedAt: true,

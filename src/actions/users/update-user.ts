@@ -6,6 +6,7 @@ import { updateUserSchema } from 'src/schemas/users';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
+import dayjs from 'dayjs';
 import { eq } from 'drizzle-orm';
 
 export const updateUser = authAction(updateUserSchema, (params, ctx) => {
@@ -21,7 +22,11 @@ export const updateUser = authAction(updateUserSchema, (params, ctx) => {
   return db.transaction(async (tx) => {
     await tx
       .update(usersTable)
-      .set({ ...userData, updatedById: userId })
+      .set({
+        ...userData,
+        updatedBy: userId,
+        updatedAt: dayjs().toDate(),
+      })
       .where(eq(usersTable.id, id));
   });
 });

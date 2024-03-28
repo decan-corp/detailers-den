@@ -11,14 +11,8 @@ export const transactionSchema = createInsertSchema(transactionsTable)
   .merge(
     z.object({
       plateNumber: z.string().toUpperCase(),
-      discount: z.coerce
-        .number()
-        .transform((value) => String(value))
-        .optional(),
-      tip: z.coerce
-        .number()
-        .transform((value) => String(value))
-        .optional(),
+      discount: z.coerce.number().optional(),
+      tip: z.coerce.number().optional(),
       transactionServices: z
         .array(transactionServicesSchema)
         .min(1)
@@ -32,9 +26,9 @@ export const transactionSchema = createInsertSchema(transactionsTable)
     })
   )
   .omit({
-    createdById: true,
-    updatedById: true,
-    deletedById: true,
+    createdBy: true,
+    updatedBy: true,
+    deletedBy: true,
     createdAt: true,
     updatedAt: true,
     deletedAt: true,

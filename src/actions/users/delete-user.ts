@@ -6,7 +6,8 @@ import { db } from 'src/utils/db';
 import { auth } from 'src/utils/lucia';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { eq, sql } from 'drizzle-orm';
+import dayjs from 'dayjs';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const softDeleteUser = authAction(z.string().cuid2(), async (id, ctx) => {
@@ -21,8 +22,8 @@ export const softDeleteUser = authAction(z.string().cuid2(), async (id, ctx) => 
     await tx
       .update(usersTable)
       .set({
-        deletedById: userId,
-        deletedAt: sql`CURRENT_TIMESTAMP`,
+        deletedBy: userId,
+        deletedAt: dayjs().toDate(),
       })
       .where(eq(usersTable.id, id));
 
@@ -40,7 +41,7 @@ export const recoverUser = authAction(z.string().cuid2(), async (id, { user }) =
   await db
     .update(usersTable)
     .set({
-      deletedById: null,
+      deletedBy: null,
       deletedAt: null,
     })
     .where(eq(usersTable.id, id));

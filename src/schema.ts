@@ -1,50 +1,56 @@
 import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from './constants/common';
 
 import { createId } from '@paralleldrive/cuid2';
-import {
-  boolean,
-  datetime,
-  decimal,
-  index,
-  int,
-  json,
-  mysqlTable,
-  text,
-  timestamp,
-  varchar,
-} from 'drizzle-orm/mysql-core';
+import { index, sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
 
 const dateSchema = {
-  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date' }).onUpdateNow(),
-  deletedAt: timestamp('deleted_at', { mode: 'date' }),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }),
+  deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
 };
 
 const commonSchema = {
   ...dateSchema,
-  createdById: varchar('created_by_id', { length: 255 }),
-  updatedById: varchar('updated_by_id', { length: 255 }),
-  deletedById: varchar('deleted_by_id', { length: 255 }),
+  createdBy: text('created_by'),
+  updatedBy: text('updated_by'),
+  deletedBy: text('deleted_by'),
 };
 
-export const transactionsTable = mysqlTable(
+export const usersTable = sqliteTable('users', {
+  id: text('id')
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  role: text('role', {
+    length: 64,
+    enum: [Role.StayInCrew, Role.Crew, Role.Cashier, Role.Accounting, Role.Detailer, Role.Admin],
+  }).notNull(),
+  serviceCutPercentage: integer('service_cut_percentage', { mode: 'number' }).default(0),
+  image: text('image'),
+  isFirstTimeLogin: integer('is_first_time_login', { mode: 'boolean' }).default(true),
+  hashedPassword: text('hashed_password', {
+    length: 255,
+  }).notNull(),
+  ...commonSchema,
+});
+
+export const transactionsTable = sqliteTable(
   'transactions',
   {
-    id: varchar('id', { length: 255 })
+    id: text('id')
       .$defaultFn(() => createId())
       .primaryKey(),
-    customerName: varchar('customer_name', { length: 255 }),
-    status: varchar('status', {
-      length: 64,
+    customerName: text('customer_name'),
+    status: text('status', {
       enum: [TransactionStatus.Paid, TransactionStatus.Pending, TransactionStatus.Void],
     })
       .notNull()
       .default(TransactionStatus.Pending),
-    totalPrice: decimal('total_price', { scale: 2, precision: 8 }).notNull(),
+    totalPrice: real('total_price').notNull(),
     note: text('note'),
-    plateNumber: varchar('plate_number', { length: 12 }).notNull(),
-    vehicleSize: varchar('vehicle_size', {
-      length: 24,
+    plateNumber: text('plate_number', { length: 12 }).notNull(),
+    vehicleSize: text('vehicle_size', {
       enum: [
         VehicleSize.Motorcycle,
         VehicleSize.Small,
@@ -53,9 +59,9 @@ export const transactionsTable = mysqlTable(
         VehicleSize.ExtraLarge,
       ],
     }).notNull(),
-    discount: decimal('discount', { scale: 2, precision: 8 }).default('0.00'),
-    tip: decimal('tip', { scale: 2, precision: 8 }).default('0.00'),
-    modeOfPayment: varchar('mode_of_payment', {
+    discount: real('discount').default(0),
+    tip: real('tip').default(0),
+    modeOfPayment: text('mode_of_payment', {
       length: 64,
       enum: [
         ModeOfPayment.Cash,
@@ -66,42 +72,23 @@ export const transactionsTable = mysqlTable(
     })
       .notNull()
       .default(ModeOfPayment.Cash),
-    completedAt: timestamp('completed_at', { mode: 'date' }),
-    completedBy: varchar('completed_by', { length: 255 }),
+    completedAt: integer('completed_at', { mode: 'timestamp_ms' }),
+    completedBy: text('completed_by').references(() => usersTable.id),
     ...commonSchema,
   },
   (table) => ({
-    createdAtIdx: index('created_at_idx').on(table.createdAt),
+    createdAtIdx: index('transaction_created_at_idx').on(table.createdAt),
   })
 );
 
-export const usersTable = mysqlTable('users', {
-  id: varchar('id', { length: 255 })
+export const servicesTable = sqliteTable('services', {
+  id: text('id')
     .$defaultFn(() => createId())
     .primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  role: varchar('role', {
-    length: 64,
-    enum: [Role.StayInCrew, Role.Crew, Role.Cashier, Role.Accounting, Role.Detailer, Role.Admin],
-  }).notNull(),
-  serviceCutPercentage: int('service_cut_percentage').default(0),
-  image: varchar('image', { length: 255 }),
-  isFirstTimeLogin: boolean('is_first_time_login').default(true),
-  hashedPassword: varchar('hashed_password', {
-    length: 255,
-  }).notNull(),
-  ...commonSchema,
-});
-
-export const servicesTable = mysqlTable('services', {
-  id: varchar('id', { length: 255 })
-    .$defaultFn(() => createId())
-    .primaryKey(),
-  serviceName: varchar('service_name', { length: 255 }).notNull(),
+  serviceName: text('service_name').notNull(),
   description: text('description'),
-  serviceCutPercentage: int('service_cut_percentage').default(0).notNull(),
-  priceMatrix: json('price_matrix')
+  serviceCutPercentage: integer('service_cut_percentage', { mode: 'number' }).default(0).notNull(),
+  priceMatrix: text('price_matrix', { mode: 'json' })
     .$type<
       {
         price: number;
@@ -112,75 +99,79 @@ export const servicesTable = mysqlTable('services', {
   ...commonSchema,
 });
 
-export const transactionServicesTable = mysqlTable(
+export const transactionServicesTable = sqliteTable(
   'transaction_services',
   {
-    id: varchar('id', { length: 255 })
+    id: text('id')
       .$defaultFn(() => createId())
       .primaryKey(),
-    transactionId: varchar('transaction_id', { length: 255 })
-      // .references(() => transactions.id) // TODO: foreign key constraint is not yet supported in planetscale
+    transactionId: text('transaction_id')
+      .references(() => transactionsTable.id)
       .notNull(),
-    serviceId: varchar('service_id', { length: 255 })
-      // .references(() => services.id) // TODO: foreign key constraint is not yet supported in planetscale
+    serviceId: text('service_id')
+      .references(() => servicesTable.id)
       .notNull(),
-    price: decimal('price', { scale: 2, precision: 8 }).notNull(),
-    serviceBy: json('service_by').$type<string[]>().notNull(),
-    serviceCutPercentage: int('service_cut_percentage').default(0).notNull(),
+    price: real('price').notNull(),
+    serviceBy: text('service_by', { mode: 'json' }).$type<string[]>().notNull(),
+    serviceCutPercentage: integer('service_cut_percentage', { mode: 'number' })
+      .default(0)
+      .notNull(),
     ...commonSchema,
   },
   (table) => ({
-    createdAtIdx: index('created_at_idx').on(table.createdAt),
-    transactionIdIdx: index('transaction_id_idx').on(table.transactionId),
-    serviceIdIdx: index('service_id_idx').on(table.serviceId),
+    createdAtIdx: index('transaction_service_created_at_idx').on(table.createdAt),
+    transactionIdIdx: index('transaction_service_transaction_id_idx').on(table.transactionId),
+    serviceIdIdx: index('transaction_service_service_id_idx').on(table.serviceId),
   })
 );
 
-export const crewEarningsTable = mysqlTable(
+export const crewEarningsTable = sqliteTable(
   'crew_earnings',
   {
-    id: varchar('id', { length: 255 })
+    id: text('id')
       .$defaultFn(() => createId())
       .primaryKey(),
-    transactionServiceId: varchar('transaction_service_id', { length: 255 })
-      // .references(() => transactionServices.id) // TODO: foreign key constraint is not yet supported in planetscale
+    transactionServiceId: text('transaction_service_id')
+      .references(() => transactionServicesTable.id)
       .notNull(),
-    crewId: varchar('crew_id', { length: 255 })
-      // .references(() => users.id) // TODO: foreign key constraint is not yet supported in planetscale
+    crewId: text('crew_id')
+      .references(() => usersTable.id)
       .notNull(),
-    computedServiceCutPercentage: int('computed_service_cut_percentage'),
-    amount: decimal('amount', { scale: 2, precision: 8 }).notNull(),
-    crewCutPercentage: int('crew_cut_percentage').default(0).notNull(),
+    computedServiceCutPercentage: integer('computed_service_cut_percentage', { mode: 'number' }),
+    amount: real('amount').notNull(),
+    crewCutPercentage: integer('crew_cut_percentage', { mode: 'number' }).default(0).notNull(),
     ...commonSchema,
   },
   (table) => ({
-    createdAtIdx: index('created_at_idx').on(table.createdAt),
-    transactionServiceIdIdx: index('transaction_service_id_idx').on(table.transactionServiceId),
-    crewIdIdx: index('crew_id_idx').on(table.crewId),
+    createdAtIdx: index('crew_earning_created_at_idx').on(table.createdAt),
+    transactionServiceIdIdx: index('crew_earning_transaction_service_id_idx').on(
+      table.transactionServiceId
+    ),
+    crewIdIdx: index('crew_earning_crew_id_idx').on(table.crewId),
   })
 );
 
-export const sessionsTable = mysqlTable('sessions', {
-  id: varchar('id', {
+export const sessionsTable = sqliteTable('sessions', {
+  id: text('id', {
     length: 255,
   }).primaryKey(),
-  userId: varchar('user_id', {
+  userId: text('user_id', {
     length: 255,
-  }).notNull(),
-  // .references(() => userTable.id),
-  expiresAt: datetime('expires_at').notNull(),
+  })
+    .notNull()
+    .references(() => usersTable.id),
+  expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
 });
 
-export const resetPasswordTokensTable = mysqlTable('reset_password_tokens', {
-  id: varchar('id', { length: 255 })
+export const resetPasswordTokensTable = sqliteTable('reset_password_tokens', {
+  id: text('id', { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),
-  userId: varchar('user_id', {
-    length: 255,
-  }).notNull(),
-  // .references(() => users.id),
-  expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
-  isValid: boolean('is_valid').default(true).notNull(),
+  userId: text('user_id')
+    .references(() => usersTable.id)
+    .notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
+  isValid: integer('is_valid', { mode: 'boolean' }).default(true).notNull(),
   ...commonSchema,
 });
 

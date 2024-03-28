@@ -5,7 +5,8 @@ import { transactionsTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
-import { eq, sql } from 'drizzle-orm';
+import dayjs from 'dayjs';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const softDeleteTransaction = authAction(z.string().cuid2(), async (id, ctx) => {
@@ -18,8 +19,8 @@ export const softDeleteTransaction = authAction(z.string().cuid2(), async (id, c
   await db
     .update(transactionsTable)
     .set({
-      deletedById: userId,
-      deletedAt: sql`CURRENT_TIMESTAMP`,
+      deletedBy: userId,
+      deletedAt: dayjs().toDate(),
     })
     .where(eq(transactionsTable.id, id));
 });
@@ -32,7 +33,7 @@ export const recoverTransaction = authAction(z.string().cuid2(), async (id, { us
   await db
     .update(transactionsTable)
     .set({
-      deletedById: null,
+      deletedBy: null,
       deletedAt: null,
     })
     .where(eq(transactionsTable.id, id));

@@ -7,6 +7,8 @@ export const serverEnv = createEnv({
     DB_USERNAME: z.string().min(1),
     DB_PASSWORD: z.string().min(1),
     DB_NAME: z.string().optional(), // used for db connection in local development
+    TURSO_DATABASE_URL: z.string().min(1),
+    TURSO_AUTH_TOKEN: z.string().min(1),
   },
   experimental__runtimeEnv: {},
 });

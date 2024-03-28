@@ -10,26 +10,43 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { resetPassword, verifyResetPasswordToken } from 'src/actions/auth/reset-password';
-import RequiredIndicator from 'src/components/form/required-indicator';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
+import { resetPasswordSchema } from 'src/schemas/auth';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { ComponentProps, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { twJoin } from 'tailwind-merge';
+import { z } from 'zod';
 
-type ValidationError = Partial<Parameters<typeof resetPassword>[number]>;
+const formSchema = resetPasswordSchema;
+type FormValues = z.input<typeof formSchema>;
 
 const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }) => {
   const { resetPasswordTokenId } = params;
   const router = useRouter();
-  const [error, setError] = useState<ValidationError>({});
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    shouldFocusError: true,
+    defaultValues: {
+      resetPasswordTokenId,
+    },
+  });
 
   const { error: tokenErrorMessage, isLoading } = useQuery({
     queryKey: [Entity.ResetPasswordTokens, resetPasswordTokenId],
@@ -51,7 +68,6 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
     onSuccess: (result) => {
       if (result.validationErrors || result.serverError) {
         handleSafeActionError(result);
-        setError((result.validationErrors as ValidationError) || {});
         return;
       }
 
@@ -63,18 +79,8 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
     },
   });
 
-  const onSubmit: ComponentProps<'form'>['onSubmit'] = (event) => {
-    event.preventDefault();
-
-    setError({});
-
-    const formData = new FormData(event.currentTarget);
-
-    mutateResetPassword({
-      resetPasswordTokenId,
-      password: formData.get('password') as string,
-      confirmPassword: formData.get('confirmPassword') as string,
-    });
+  const onSubmit = (event: FormValues) => {
+    mutateResetPassword(event);
   };
 
   if (isLoading) {
@@ -102,62 +108,51 @@ const ForgotPassword = ({ params }: { params: { resetPasswordTokenId: string } }
   return (
     <div className="flex h-screen items-center justify-center p-8">
       <Card className="w-full max-w-md">
-        <form onSubmit={onSubmit}>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-center text-2xl">Reset Password</CardTitle>
-            <CardDescription className="text-center">
-              You&apos;re almost there! Enter your new password below to regain access to your
-              account. Choose a strong and secure password to keep your account safe.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div>
-              <div className="grid gap-2">
-                <Label className="flex" htmlFor="password">
-                  Password <RequiredIndicator />
-                </Label>
-                <Input
-                  className={twJoin(error.password && 'border-destructive-200')}
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  minLength={8}
-                />
-              </div>
-              {error.password && (
-                <div className="text-sm text-destructive dark:text-destructive-200">
-                  {error.password}
-                </div>
-              )}
-            </div>
-            <div>
-              <div className="grid gap-2">
-                <Label className="flex" htmlFor="confirmPassword">
-                  Confirm Password <RequiredIndicator />
-                </Label>
-                <Input
-                  className={twJoin(error.confirmPassword && 'border-destructive-200')}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  minLength={8}
-                />
-              </div>
-              {error.confirmPassword && (
-                <div className="text-sm text-destructive dark:text-destructive-200">
-                  {error.confirmPassword}
-                </div>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full" disabled={isPending}>
-              Submit
-            </Button>
-          </CardFooter>
-        </form>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-center text-2xl">Reset Password</CardTitle>
+              <CardDescription className="text-center">
+                You&apos;re almost there! Enter your new password below to regain access to your
+                account. Choose a strong and secure password to keep your account safe.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
+                Submit
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </div>
   );

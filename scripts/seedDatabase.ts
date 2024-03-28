@@ -19,7 +19,7 @@ const seedDatabase = async () => {
 
   await db.insert(usersTable).values({
     id,
-    createdById: id,
+    createdBy: id,
     role: Role.Admin,
     email,
     name,

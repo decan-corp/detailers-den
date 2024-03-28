@@ -18,7 +18,7 @@ export const recoverUser = authAction(z.string().cuid2(), async (id, { user }) =
   await db
     .update(usersTable)
     .set({
-      deletedById: null,
+      deletedBy: null,
       deletedAt: null,
     })
     .where(eq(usersTable.id, id));

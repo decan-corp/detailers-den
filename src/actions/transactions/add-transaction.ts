@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 /* eslint-disable no-restricted-syntax */
 
 'use server';
@@ -16,7 +15,8 @@ import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import cuid2 from '@paralleldrive/cuid2';
-import { inArray, sql } from 'drizzle-orm';
+import dayjs from 'dayjs';
+import { inArray } from 'drizzle-orm';
 import { clamp, uniq } from 'lodash';
 
 export const addTransaction = authAction(createTransactionSchema, (data, { session }) => {
@@ -59,8 +59,8 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
       insertTransactionServicesData.push({
         ...transactionService,
         id: transactionServiceId,
-        createdById: userId,
-        price: String(priceMatrix.price),
+        createdBy: userId,
+        price: priceMatrix.price,
         transactionId,
         serviceCutPercentage: service.serviceCutPercentage,
       });
@@ -81,8 +81,8 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
           computedServiceCutPercentage,
           crewCutPercentage: crew?.serviceCutPercentage || 0,
           crewId,
-          amount: String(amount),
-          createdById: userId,
+          amount,
+          createdBy: userId,
         });
       });
     }
@@ -100,11 +100,11 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
     await tx.insert(transactionsTable).values({
       ...transactionData,
       id: transactionId,
-      createdById: userId,
+      createdBy: userId,
       plateNumber: transactionData.plateNumber.replace(/\s/g, ''),
-      totalPrice: String(discountedPrice),
+      totalPrice: discountedPrice,
       ...(transactionData.status === TransactionStatus.Paid && {
-        completedAt: sql`CURRENT_TIMESTAMP`,
+        completedAt: dayjs().toDate(),
         completedBy: userId,
       }),
     });

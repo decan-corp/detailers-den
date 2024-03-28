@@ -17,7 +17,7 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
-import { and, eq, inArray, notInArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, notInArray } from 'drizzle-orm';
 import { clamp, omit, uniq } from 'lodash';
 
 export const updateTransaction = authAction(updateTransactionSchema, async (data, ctx) => {
@@ -114,8 +114,8 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       const createTransactionService = {
         ...transactionService,
         id: transactionService.id || cuid2.createId(),
-        createdById: userId,
-        price: String(priceMatrix.price),
+        createdBy: userId,
+        price: priceMatrix.price,
         transactionId: transactionData.id,
         createdAt: data.createdAt,
         serviceCutPercentage: serviceCutModifier,
@@ -126,10 +126,12 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       await tx
         .insert(transactionServicesTable)
         .values(createTransactionService)
-        .onDuplicateKeyUpdate({
+        .onConflictDoUpdate({
+          target: transactionServicesTable.id,
           set: {
-            ...omit(createTransactionService, ['createdById', 'serviceCutPercentage']),
-            updatedById: userId,
+            ...omit(createTransactionService, ['createdBy', 'serviceCutPercentage']),
+            updatedBy: userId,
+            updatedAt: dayjs().toDate(),
           },
         });
 
@@ -156,18 +158,20 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
           computedServiceCutPercentage,
           crewCutPercentage,
           crewId,
-          amount: String(amount),
-          createdById: userId,
+          amount,
+          createdBy: userId,
           createdAt: data.createdAt,
         };
 
         await tx
           .insert(crewEarningsTable)
           .values(createCrewEarning)
-          .onDuplicateKeyUpdate({
+          .onConflictDoUpdate({
+            target: crewEarningsTable.id,
             set: {
-              ...omit(createCrewEarning, ['createdById', 'crewCutPercentage']),
-              updatedById: userId,
+              ...omit(createCrewEarning, ['createdBy', 'crewCutPercentage']),
+              updatedBy: userId,
+              updatedAt: dayjs().toDate(),
             },
           });
       }
@@ -197,11 +201,11 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
     if (deleteServiceList.length) {
       const deleteServiceIds = deleteServiceList.map(({ id }) => id);
       await tx
-        .delete(transactionServicesTable)
-        .where(inArray(transactionServicesTable.id, deleteServiceIds));
-      await tx
         .delete(crewEarningsTable)
         .where(inArray(crewEarningsTable.transactionServiceId, deleteServiceIds));
+      await tx
+        .delete(transactionServicesTable)
+        .where(inArray(transactionServicesTable.id, deleteServiceIds));
     }
 
     if (totalPrice < Number(transactionData.discount)) {
@@ -214,12 +218,13 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       .update(transactionsTable)
       .set({
         ...transactionData,
-        updatedById: userId,
+        updatedBy: userId,
+        updatedAt: dayjs().toDate(),
         plateNumber: transactionData.plateNumber.replace(/\s/g, ''),
-        totalPrice: String(discountedPrice),
+        totalPrice: discountedPrice,
         ...(transactionData.status === TransactionStatus.Paid &&
           transaction.completedAt === null && {
-            completedAt: sql`CURRENT_TIMESTAMP`,
+            completedAt: dayjs().toDate(),
             completedBy: userId,
           }),
       })
