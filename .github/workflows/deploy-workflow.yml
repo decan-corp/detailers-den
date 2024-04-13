@@ -74,7 +74,7 @@ jobs:
           bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull .env
 
       - name: Run Database Migration
-        run: bun drizzle:migrate
+        run: bun --env-file .env drizzle:migrate
 
   db-migration-prod:
     name: Run Database Migration in Production
@@ -109,7 +109,7 @@ jobs:
           bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull --environment=production .env
 
       - name: Run Database Migration
-        run: bun drizzle:migrate
+        run: bun --env-file .env drizzle:migrate
 
   release:
     name: Release
