@@ -34,3 +34,61 @@ jobs:
           "bun typecheck" \
           "bun prettier --check --ignore-unknown ./" \
           "bun cspell ./ --no-progress --no-must-find-files"
+
+  deploy-preview:
+    if: github.event.pull_request.base.ref == 'develop'
+    needs: [pr-lint-and-test]
+    runs-on: ubuntu-latest
+    environment:
+      name: Preview
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_DOMAIN: ${{ vars.VERCEL_DOMAIN }}
+      VERCEL_ORG_NAME: ${{ vars.VERCEL_ORG_NAME }}
+    steps:
+      - name: Checkout ${{ github.ref }} branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.17.0
+
+      - uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          path: ~/.bun/install/cache
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Deploy to Vercel
+        id: vercel_deploy
+        run: |
+          vercel_url="preview-${{ github.event.pull_request.number }}-$VERCEL_DOMAIN"
+
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes --environment=preview
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull --environment=preview
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} build
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} deploy --prebuilt > domain.txt
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} --scope=$VERCEL_ORG_NAME alias set `cat domain.txt` $vercel_url
+
+          echo "PR_PREVIEW_URL=https://${vercel_url}" >> $GITHUB_OUTPUT
+
+      - name: Comment deploy preview URL
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            :white_check_mark: Preview
+            ${{ steps.vercel_deploy.outputs.PR_PREVIEW_URL }}
+
+            Built with commit ${{ github.event.pull_request.head.sha }}.
+          comment_tag: execution
+          pr_number: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

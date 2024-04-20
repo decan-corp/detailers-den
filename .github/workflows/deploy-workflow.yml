@@ -46,6 +46,9 @@ jobs:
     if: github.event.ref == 'refs/heads/develop'
     needs: lint-and-test
     runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - name: Checkout ${{ github.ref }} branch
         uses: actions/checkout@v4
@@ -81,6 +84,9 @@ jobs:
     if: github.event.ref == 'refs/heads/main'
     needs: lint-and-test
     runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - name: Checkout ${{ github.ref }} branch
         uses: actions/checkout@v4
@@ -145,3 +151,95 @@ jobs:
           tag_name: ${{ steps.changelog.outputs.tag }}
           release_name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
+
+  deploy-dev:
+    if: github.event.ref == 'refs/heads/develop'
+    needs: [lint-and-test, db-migration-dev]
+    runs-on: ubuntu-latest
+    environment:
+      name: Develop
+      url: ${{ steps.vercel_deploy.outputs.VERCEL_URL }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_DOMAIN: ${{ vars.VERCEL_DOMAIN }}
+      VERCEL_ORG_NAME: ${{ vars.VERCEL_ORG_NAME }}
+    steps:
+      - name: Checkout ${{ github.ref }} branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.17.0
+
+      - uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          path: ~/.bun/install/cache
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Deploy to Vercel
+        id: vercel_deploy
+        run: |
+          vercel_url="develop-$VERCEL_DOMAIN"
+
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} build
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} deploy --prebuilt > domain.txt
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} --scope=$VERCEL_ORG_NAME alias set `cat domain.txt` $vercel_url
+
+          echo "VERCEL_URL=https://${vercel_url}" >> $GITHUB_OUTPUT
+
+  deploy-main:
+    if: github.event.ref == 'refs/heads/main'
+    needs: [lint-and-test, db-migration-prod, release]
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: ${{ steps.vercel_deploy.outputs.VERCEL_URL }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_DOMAIN: ${{ vars.VERCEL_DOMAIN }}
+    steps:
+      - name: Checkout ${{ github.ref }} branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.17.0
+
+      - uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          path: ~/.bun/install/cache
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Deploy to Vercel
+        id: vercel_deploy
+        run: |
+          vercel_url="$VERCEL_DOMAIN"
+
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes --environment=production
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull --environment=production
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} build --prod
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} deploy --prebuilt --prod > domain.txt
+
+          echo "VERCEL_URL=https://${vercel_url}" >> $GITHUB_OUTPUT
