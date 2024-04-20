@@ -70,8 +70,8 @@ jobs:
 
       - name: Get Environment Variables from Vercel
         run: |
-          bun vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes --environment=development
-          bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull --environment=development .env
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes
+          bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull .env
           echo ".env"
           cat .env
 
