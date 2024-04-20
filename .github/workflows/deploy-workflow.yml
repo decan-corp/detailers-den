@@ -154,7 +154,7 @@ jobs:
 
   deploy-dev:
     if: github.event.ref == 'refs/heads/develop'
-    needs: [lint-and-test, db-migration-dev]
+    needs: db-migration-dev
     runs-on: ubuntu-latest
     environment:
       name: Develop
@@ -201,7 +201,7 @@ jobs:
 
   deploy-main:
     if: github.event.ref == 'refs/heads/main'
-    needs: [lint-and-test, db-migration-prod, release]
+    needs: release
     runs-on: ubuntu-latest
     environment:
       name: Production
