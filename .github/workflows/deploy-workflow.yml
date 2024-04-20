@@ -72,6 +72,11 @@ jobs:
         run: |
           bun vercel --token=${{ secrets.VERCEL_TOKEN }} pull --yes
           bun vercel --token=${{ secrets.VERCEL_TOKEN }} env pull .env
+          echo "\n.env"
+          cat .env
+
+          echo "\nvercel env.development.local"
+          cat .vercel/.env.development.local
 
       - name: Run Database Migration
         run: bun --env-file .env drizzle:migrate
