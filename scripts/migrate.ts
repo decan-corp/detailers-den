@@ -9,7 +9,9 @@ import { migrate } from 'drizzle-orm/libsql/migrator';
 
 import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: '../.env' });
+
+console.log('process.env', process.env);
 
 // TODO: create script for sqlite local
 (async () => {
