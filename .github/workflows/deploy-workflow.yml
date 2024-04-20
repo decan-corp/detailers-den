@@ -117,6 +117,41 @@ jobs:
       - name: Run Database Migration
         run: bun --env-file .env drizzle:migrate
 
+  release:
+    name: Release
+    if: github.event.ref == 'refs/heads/main'
+    needs: [lint-and-test, db-migration-prod]
+    runs-on: ubuntu-latest
+    outputs:
+      skipped: ${{ steps.changelog.outputs.skipped }}
+      tag: ${{ steps.changelog.outputs.tag }}
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.PAT }}
+
+      - id: changelog
+        name: Conventional Changelog
+        uses: TriPSs/conventional-changelog-action@v3
+        with:
+          git-message: 'chore(release): {version} [no ci]'
+          git-user-email: emnnipal@gmail.com
+          git-user-name: Emmanuel Nipal
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-file: 'false'
+
+      - name: Create Github Release
+        uses: actions/create-release@v1
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+
   deploy-dev:
     if: github.event.ref == 'refs/heads/develop'
     needs: [lint-and-test, db-migration-dev]
@@ -163,41 +198,6 @@ jobs:
           bun vercel --token=${{ secrets.VERCEL_TOKEN }} --scope=$VERCEL_ORG_NAME alias set `cat domain.txt` $vercel_url
 
           echo "VERCEL_URL=https://${vercel_url}" >> $GITHUB_OUTPUT
-
-  release:
-    name: Release
-    if: github.event.ref == 'refs/heads/main'
-    needs: [lint-and-test, db-migration-prod]
-    runs-on: ubuntu-latest
-    outputs:
-      skipped: ${{ steps.changelog.outputs.skipped }}
-      tag: ${{ steps.changelog.outputs.tag }}
-    steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.PAT }}
-
-      - id: changelog
-        name: Conventional Changelog
-        uses: TriPSs/conventional-changelog-action@v3
-        with:
-          git-message: 'chore(release): {version} [no ci]'
-          git-user-email: emnnipal@gmail.com
-          git-user-name: Emmanuel Nipal
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          output-file: 'false'
-
-      - name: Create Github Release
-        uses: actions/create-release@v1
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.changelog.outputs.tag }}
-          release_name: ${{ steps.changelog.outputs.tag }}
-          body: ${{ steps.changelog.outputs.clean_changelog }}
 
   deploy-main:
     if: github.event.ref == 'refs/heads/main'
