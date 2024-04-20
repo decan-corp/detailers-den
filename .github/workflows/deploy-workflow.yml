@@ -199,8 +199,8 @@ jobs:
 
           echo "VERCEL_URL=https://${vercel_url}" >> $GITHUB_OUTPUT
 
-  deploy-main:
-    if: github.event.ref == 'refs/heads/main'
+  deploy-prod:
+    if: needs.release.outputs.skipped == 'false'
     needs: release
     runs-on: ubuntu-latest
     environment:
@@ -211,10 +211,10 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       CUSTOM_DOMAIN: 185dd.pro
     steps:
-      - name: Checkout ${{ github.ref }} branch
+      - name: Checkout ${{ needs.release.outputs.tag }} branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: refs/tags/${{ needs.release.outputs.tag }}
 
       - uses: oven-sh/setup-bun@v1
         with:
