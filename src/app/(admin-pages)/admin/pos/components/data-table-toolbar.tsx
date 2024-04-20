@@ -129,7 +129,7 @@ export const TransactionToolbar = <TData,>({ table }: DataTableToolbarProps<TDat
       </div>
       <div className="flex flex-row-reverse justify-end gap-4 md:flex-row">
         <DataTableViewOptions table={table} />
-        <Button className="w-max" variant="outline">
+        <Button className="w-max" size="sm" variant="outline">
           <Link href={AdminRoute.AddTransaction}>Add Transaction</Link>
         </Button>
       </div>

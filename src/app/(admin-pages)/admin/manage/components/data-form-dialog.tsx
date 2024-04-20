@@ -58,7 +58,7 @@ export const UserFormDialog = () => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-min">
+        <Button variant="outline" size="sm" className="w-min">
           Add User
         </Button>
       </DialogTrigger>
