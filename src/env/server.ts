@@ -4,6 +4,9 @@ import { z } from 'zod';
 
 dotenv.config();
 
+// eslint-disable-next-line no-console
+console.log('process.env', process.env);
+
 export const serverEnv = createEnv({
   server: {
     TURSO_DATABASE_URL: z.string().min(1),
