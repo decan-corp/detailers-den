@@ -34,6 +34,7 @@ module.exports = {
     'class-methods-use-this': 'off',
     'linebreak-style': 'off',
     'no-undef': 'off',
+    'no-void': 'off',
     'no-console': 'error',
     'prefer-default-export': 'off',
     'import/prefer-default-export': 'off',

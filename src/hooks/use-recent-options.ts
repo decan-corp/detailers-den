@@ -1,18 +1,14 @@
 import { LocalStorageKey } from 'src/constants/storage-keys';
 import LocalStorage from 'src/utils/local-storage';
 
-import { useCallback, useEffect, useMemo } from 'react';
-import { useImmer } from 'use-immer';
+import { useCallback, useMemo } from 'react';
 
 export const useRecentOptions = (
   storageKey: LocalStorageKey,
   options?: {
     maxRecentLength?: number;
-    autoSave?: boolean;
   }
 ) => {
-  const [recentSelections, setRecentSelections] = useImmer(() => []);
-
   const storedRecentSelections = useMemo(() => {
     const savedList = LocalStorage.get<string[]>(storageKey);
     if (!savedList || !Array.isArray(savedList)) return [];
@@ -20,33 +16,17 @@ export const useRecentOptions = (
   }, [storageKey]);
 
   const saveRecentSelections = useCallback(
-    (option?: string) => {
-      const combinedList = [...storedRecentSelections, ...recentSelections];
+    (option: string) => {
+      const list = [...storedRecentSelections, option];
 
-      // we may want to just save directly to storage without using setRecentSelections
-      if (option) {
-        combinedList.push(option);
-      }
-
-      const derivedList = combinedList.slice(
-        combinedList.length - (options?.maxRecentLength || 2),
-        combinedList.length
-      );
+      const derivedList = list.slice(list.length - (options?.maxRecentLength || 2), list.length);
 
       LocalStorage.set(storageKey, derivedList);
     },
-    [options?.maxRecentLength, recentSelections, storageKey, storedRecentSelections]
+    [options?.maxRecentLength, storageKey, storedRecentSelections]
   );
 
-  useEffect(() => {
-    if (options?.autoSave) {
-      saveRecentSelections();
-    }
-  }, [options?.autoSave, saveRecentSelections]);
-
   return {
-    recentSelections,
-    setRecentSelections,
     saveRecentSelections,
     storedRecentSelections,
   };

@@ -18,17 +18,15 @@ export const softDeleteUser = authAction(z.string().cuid2(), async (id, ctx) => 
     throw new SafeActionError('Forbidden access');
   }
 
-  await db.transaction(async (tx) => {
-    await tx
-      .update(usersTable)
-      .set({
-        deletedBy: userId,
-        deletedAt: dayjs().toDate(),
-      })
-      .where(eq(usersTable.id, id));
+  await db
+    .update(usersTable)
+    .set({
+      deletedBy: userId,
+      deletedAt: dayjs().toDate(),
+    })
+    .where(eq(usersTable.id, id));
 
-    await auth.invalidateUserSessions(id);
-  });
+  await auth.invalidateUserSessions(id);
 });
 
 export const recoverUser = authAction(z.string().cuid2(), async (id, { user }) => {

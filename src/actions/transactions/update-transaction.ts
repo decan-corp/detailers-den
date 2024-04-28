@@ -67,7 +67,9 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
   const { transactionServices: transactionServicesList, ...transactionData } = data;
   return db.transaction(async (tx) => {
     const serviceIds = transactionServicesList.map(({ serviceId }) => serviceId);
-    const crewIds = uniq(transactionServicesList.flatMap(({ serviceBy }) => serviceBy));
+    const crewIds = uniq(transactionServicesList.flatMap(({ serviceBy }) => serviceBy)).map(
+      ({ crewId }) => crewId
+    );
     const transactionServiceIds = uniq(
       transactionServicesList.map(({ id }) => id || '').filter(Boolean)
     );
@@ -119,6 +121,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         transactionId: transactionData.id,
         createdAt: data.createdAt,
         serviceCutPercentage: serviceCutModifier,
+        serviceBy: transactionService.serviceBy.map(({ crewId }) => crewId),
       } satisfies typeof transactionServicesTable.$inferInsert;
 
       totalPrice += Number(priceMatrix.price);
@@ -135,7 +138,8 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
           },
         });
 
-      for (const crewId of transactionService.serviceBy) {
+      for (const item of transactionService.serviceBy) {
+        const { crewId } = item;
         const crewEarning = crewEarningsRef.find(
           (earning) =>
             earning.crewId === crewId &&
@@ -177,12 +181,13 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       }
 
       if (transactionService.id) {
+        const listOfIds = transactionService.serviceBy.map(({ crewId }) => crewId);
         await tx
           .delete(crewEarningsTable)
           .where(
             and(
               eq(crewEarningsTable.transactionServiceId, transactionService.id),
-              notInArray(crewEarningsTable.crewId, transactionService.serviceBy)
+              notInArray(crewEarningsTable.crewId, listOfIds)
             )
           );
       }

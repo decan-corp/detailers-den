@@ -16,19 +16,22 @@ import { vehicleSizeOptions } from '../../../pos/components/data-table-options';
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { PlusCircleIcon, XIcon } from 'lucide-react';
-import { UseFormReturn, useFieldArray } from 'react-hook-form';
-import { useImmer } from 'use-immer';
+import { useMemo } from 'react';
+import { UseFormReturn, useFieldArray, useWatch } from 'react-hook-form';
 
 const ServiceMatrixForm = ({ form }: { form: UseFormReturn<ServiceFormValues> }) => {
   const [parent] = useAutoAnimate();
+
+  const watchedData = useWatch();
+
+  const formState = useMemo(() => ({ ...watchedData, ...form.getValues() }), [form, watchedData]);
 
   const { fields, remove, append } = useFieldArray({
     control: form.control,
     name: 'priceMatrix',
   });
-  const [vehicleSizes, setVehicleSizes] = useImmer<VehicleSize[]>(() =>
-    fields.map(({ vehicleSize }) => vehicleSize)
-  );
+
+  const vehicleSizes = formState.priceMatrix.map(({ vehicleSize }) => vehicleSize);
 
   return (
     <div className="space-y-4">
@@ -60,9 +63,6 @@ const ServiceMatrixForm = ({ form }: { form: UseFormReturn<ServiceFormValues> })
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
-                        setVehicleSizes((prevState) => {
-                          prevState[index] = value as VehicleSize;
-                        });
                       }}
                       value={field.value}
                     >
@@ -75,7 +75,8 @@ const ServiceMatrixForm = ({ form }: { form: UseFormReturn<ServiceFormValues> })
                         {vehicleSizeOptions
                           .filter(
                             ({ value }) =>
-                              value === vehicleSizes[index] || !vehicleSizes.includes(value)
+                              formState.priceMatrix[index]?.vehicleSize === value ||
+                              !vehicleSizes.includes(value)
                           )
                           .map(({ value, icon: Icon, label }) => (
                             <SelectItem key={value} value={value}>

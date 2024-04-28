@@ -11,10 +11,14 @@ export const transactionSchema = createInsertSchema(transactionsTable)
   .merge(
     z.object({
       plateNumber: z.string().toUpperCase(),
-      discount: z.coerce.number().optional(),
-      tip: z.coerce.number().optional(),
+      discount: z.coerce.number().nullish(),
+      tip: z.coerce.number().nullish(),
       transactionServices: z
-        .array(transactionServicesSchema)
+        .array(
+          transactionServicesSchema.extend({
+            id: z.string().cuid2().optional(),
+          })
+        )
         .min(1)
         .refine(
           (value) => {
@@ -53,21 +57,5 @@ export const updateTransactionSchema = transactionSchema.merge(
       .refine((value) => dayjs(value).isBefore(dayjs()), {
         message: 'Please select a date and time on or before today.',
       }),
-    transactionServices: z
-      .array(
-        transactionServicesSchema.extend({
-          id: z.string().cuid2().optional(),
-        })
-      )
-      .min(1)
-      .refine(
-        (value) => {
-          const uniqueServiceIds = uniqBy(value, 'serviceId');
-          return value.length === uniqueServiceIds.length;
-        },
-        {
-          message: 'Service must be unique',
-        }
-      ),
   })
 );

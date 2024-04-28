@@ -26,7 +26,9 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
   return db.transaction(async (tx) => {
     const transactionId = cuid2.createId();
     const serviceIds = transactionServicesList.map(({ serviceId }) => serviceId);
-    const crewIds = uniq(transactionServicesList.flatMap(({ serviceBy }) => serviceBy));
+    const crewIds = uniq(
+      transactionServicesList.flatMap(({ serviceBy }) => serviceBy).map(({ crewId }) => crewId)
+    );
 
     const servicesRef = await tx
       .select()
@@ -63,9 +65,10 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
         price: priceMatrix.price,
         transactionId,
         serviceCutPercentage: service.serviceCutPercentage,
+        serviceBy: transactionService.serviceBy.map(({ crewId }) => crewId),
       });
 
-      transactionService.serviceBy.forEach((crewId) => {
+      transactionService.serviceBy.forEach(({ crewId }) => {
         const crew = usersRef.find(({ id }) => crewId === id);
 
         const computedServiceCutPercentage = clamp(

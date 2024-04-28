@@ -12,27 +12,27 @@ import {
 import { Form } from '@/components/ui/form';
 import { Icons } from '@/components/ui/icons';
 import { Separator } from '@/components/ui/separator';
-import { addTransaction } from 'src/actions/transactions/add-transaction';
+import { updateTransaction } from 'src/actions/transactions/update-transaction';
 import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
-import { createTransactionSchema } from 'src/schemas/transactions';
+import { transactionSchema, updateTransactionSchema } from 'src/schemas/transactions';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
-import ServiceList, { defaultTransactionServiceItem } from '../components/form/service-list';
-import TransactionBaseInfo from '../components/form/transaction-base-info';
+import ServiceList, { defaultTransactionServiceItem } from '../../components/form/service-list';
+import TransactionBaseInfo from '../../components/form/transaction-base-info';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { UseFormReturn, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-const formSchema = createTransactionSchema;
-export type CreateTransactionFormValues = z.input<typeof formSchema>;
+const formSchema = updateTransactionSchema;
+export type UpdateTransactionFormValues = z.input<typeof formSchema>;
 
-const defaultValues: Partial<CreateTransactionFormValues> = {
+const defaultValues: Partial<UpdateTransactionFormValues> = {
   discount: 0,
   tip: 0,
   status: TransactionStatus.Pending,
@@ -40,37 +40,37 @@ const defaultValues: Partial<CreateTransactionFormValues> = {
   modeOfPayment: ModeOfPayment.Cash,
 };
 
-const Page = () => {
+const EditForm = ({ data }: { data?: UpdateTransactionFormValues }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const form = useForm<CreateTransactionFormValues>({
+  const form = useForm<UpdateTransactionFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: data || {
       ...defaultValues,
       transactionServices: [defaultTransactionServiceItem],
     },
     shouldFocusError: true,
   });
 
-  const { mutate: mutateAdd, isPending } = useMutation({
-    mutationFn: addTransaction,
+  const { mutate: mutateUpdate, isPending } = useMutation({
+    mutationFn: updateTransaction,
     mutationKey: [Entity.Transactions],
-    onSuccess: async (result) => {
+    onSuccess: (result) => {
       if (result.validationErrors || result.serverError) {
         handleSafeActionError(result);
         return;
       }
 
-      await queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
-      await queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
+      void queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
+      void queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
       toast.success('Transaction created successfully.');
       router.push(AdminRoute.POS);
     },
   });
 
-  const onSubmit = (event: CreateTransactionFormValues) => {
-    mutateAdd(event);
+  const onSubmit = (event: UpdateTransactionFormValues) => {
+    mutateUpdate(event);
   };
 
   return (
@@ -83,17 +83,19 @@ const Page = () => {
           >
             <Card className="rounded-none border-0 shadow-none md:rounded-xl md:border md:shadow">
               <CardHeader>
-                <CardTitle>Add Transaction</CardTitle>
+                <CardTitle>Edit Transaction</CardTitle>
                 <CardDescription>
-                  Add new transaction here. Click save when you&apos;re done.
+                  Edit transaction here. Click save when you&apos;re done.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
-                <TransactionBaseInfo form={form} />
+                <TransactionBaseInfo
+                  form={form as UseFormReturn<z.input<typeof transactionSchema>>}
+                />
 
                 <Separator className="opacity-70" />
 
-                <ServiceList form={form} />
+                <ServiceList form={form as UseFormReturn<z.input<typeof transactionSchema>>} />
               </CardContent>
               <CardFooter className="flex justify-end">
                 <Button type="submit" disabled={isPending}>
@@ -109,4 +111,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default EditForm;

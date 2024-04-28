@@ -209,14 +209,5 @@ export const getTransaction = authAction(z.string().cuid2(), async (id) => {
     return undefined;
   }
 
-  const transactionServicesList = await db
-    .select()
-    .from(transactionServicesTable)
-    .where(eq(transactionServicesTable.transactionId, id))
-    .orderBy(asc(transactionServicesTable.createdAt));
-
-  return {
-    ...transaction,
-    transactionServices: transactionServicesList,
-  };
+  return transaction;
 });

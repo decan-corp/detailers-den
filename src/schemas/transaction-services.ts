@@ -3,14 +3,19 @@ import { z } from 'zod';
 
 export const transactionServicesSchema = z.object({
   serviceBy: z
-    .array(z.string().cuid2())
+    .array(
+      z.object({
+        id: z.string().cuid2(),
+        crewId: z.string().min(1, { message: 'Required' }).cuid2(),
+      })
+    )
     .min(1)
     .refine(
       (value) => {
-        const uniqueUserIds = uniq(value);
+        const uniqueUserIds = uniq(value.map(({ crewId }) => crewId));
         return value.length === uniqueUserIds.length;
       },
       { message: 'List of crews of must be unique' }
     ),
-  serviceId: z.string().cuid2(),
+  serviceId: z.string().min(1, { message: 'Required' }).cuid2(),
 });

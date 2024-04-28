@@ -6,4 +6,8 @@ const RequiredIndicator = () => (
   </div>
 );
 
+export const RequiredIndicatorIcon = () => (
+  <DotFilledIcon className="absolute right-[-14px] top-[-3px] text-destructive dark:text-destructive-200" />
+);
+
 export default RequiredIndicator;
