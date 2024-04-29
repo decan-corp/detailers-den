@@ -3,6 +3,7 @@ import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from './constants
 import { createId } from '@paralleldrive/cuid2';
 import { index, sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
 
+// TODO: migrate to neon database and postgresql since database migrations is too painful with sqlite
 const dateSchema = {
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' }),
@@ -59,8 +60,8 @@ export const transactionsTable = sqliteTable(
         VehicleSize.ExtraLarge,
       ],
     }).notNull(),
-    discount: real('discount').default(0),
-    tip: real('tip').default(0),
+    discount: real('discount').notNull().default(0),
+    tip: real('tip').notNull().default(0),
     modeOfPayment: text('mode_of_payment', {
       length: 64,
       enum: [
