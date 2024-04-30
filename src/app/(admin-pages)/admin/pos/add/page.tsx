@@ -69,8 +69,8 @@ const Page = () => {
     },
   });
 
-  const onSubmit = (event: CreateTransactionFormValues) => {
-    mutateAdd(event);
+  const onSubmit = (payload: CreateTransactionFormValues) => {
+    mutateAdd(payload);
   };
 
   return (

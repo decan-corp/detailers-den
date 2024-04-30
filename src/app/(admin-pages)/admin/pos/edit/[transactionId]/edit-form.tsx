@@ -21,9 +21,10 @@ import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { updateTransaction } from 'src/actions/transactions/update-transaction';
-import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
+import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { AdminRoute } from 'src/constants/routes';
+import useClientSession from 'src/hooks/use-client-session';
 import { transactionSchema, updateTransactionSchema } from 'src/schemas/transactions';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
@@ -52,6 +53,7 @@ const defaultValues: Partial<UpdateTransactionFormValues> = {
 const EditForm = ({ data }: { data?: UpdateTransactionFormValues }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: session } = useClientSession();
 
   const form = useForm<UpdateTransactionFormValues>({
     resolver: zodResolver(formSchema),
@@ -72,14 +74,15 @@ const EditForm = ({ data }: { data?: UpdateTransactionFormValues }) => {
       }
 
       void queryClient.invalidateQueries({ queryKey: [Entity.Transactions] });
+      void queryClient.invalidateQueries({ queryKey: [Entity.CrewEarnings] });
       void queryClient.invalidateQueries({ queryKey: [Entity.Metrics] });
       toast.success('Transaction created successfully.');
       router.push(AdminRoute.POS);
     },
   });
 
-  const onSubmit = (event: UpdateTransactionFormValues) => {
-    mutateUpdate(event);
+  const onSubmit = (payload: UpdateTransactionFormValues) => {
+    mutateUpdate(payload);
   };
 
   return (
@@ -98,23 +101,25 @@ const EditForm = ({ data }: { data?: UpdateTransactionFormValues }) => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
-                <FormField
-                  control={form.control}
-                  name="createdAt"
-                  render={({ field }) => (
-                    <FormItem className="">
-                      <FormLabel>Customer Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="datetime-local"
-                          value={dayjs(field?.value).format('YYYY-MM-DDTHH:mm')}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {session && [Role.Admin, Role.Cashier, Role.Accounting].includes(session.role) && (
+                  <FormField
+                    control={form.control}
+                    name="createdAt"
+                    render={({ field }) => (
+                      <FormItem className="">
+                        <FormLabel>Customer Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="datetime-local"
+                            value={dayjs(field?.value).format('YYYY-MM-DDTHH:mm')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <TransactionBaseInfo
                   form={form as UseFormReturn<z.input<typeof transactionSchema>>}

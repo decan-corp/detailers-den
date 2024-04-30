@@ -17,6 +17,7 @@ import { transactionSchema } from 'src/schemas/transactions';
 
 import { useMemo } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const ServiceOption = ({
@@ -56,7 +57,7 @@ const SelectServiceField = ({
   const serviceState = formState.transactionServices[index];
   const selectedServiceIds = formState.transactionServices.map(({ serviceId }) => serviceId);
 
-  const derivedOptions = useMemo(
+  const filteredOptionsBySize = useMemo(
     () =>
       optionsRef.filter(({ priceMatrix }) =>
         priceMatrix.map(({ vehicleSize }) => vehicleSize).includes(formState.vehicleSize)
@@ -66,10 +67,10 @@ const SelectServiceField = ({
 
   const options = useMemo(
     () =>
-      derivedOptions.filter(
+      filteredOptionsBySize.filter(
         (option) => option.id === serviceState.serviceId || !selectedServiceIds.includes(option.id)
       ),
-    [derivedOptions, serviceState.serviceId, selectedServiceIds]
+    [filteredOptionsBySize, serviceState.serviceId, selectedServiceIds]
   );
 
   const mostRecentOptions = useMemo(
@@ -84,7 +85,18 @@ const SelectServiceField = ({
   const hasBothOptions = mostRecentOptions.length > 0 && leastRecentOptions.length > 0;
 
   const onSelect = (serviceId: string, idx: number) => {
+    const service = filteredOptionsBySize.find(({ id }) => id === serviceId);
+    const priceMatrix = service?.priceMatrix.find(
+      ({ vehicleSize }) => vehicleSize === formState.vehicleSize
+    );
+
+    if (!service || !priceMatrix) {
+      toast.error('Missing service/price matrix.');
+      return;
+    }
+
     form.setValue(`transactionServices.${idx}.serviceId`, serviceId);
+    form.setValue(`transactionServices.${idx}.price`, priceMatrix.price);
     saveRecentSelections(serviceId);
   };
 

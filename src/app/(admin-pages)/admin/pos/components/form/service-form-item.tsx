@@ -1,14 +1,17 @@
 import { Button } from '@/components/ui/button';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { useServiceOptions } from 'src/queries/services';
+import { Role } from 'src/constants/common';
+import { AdminRoute } from 'src/constants/routes';
+import useClientSession from 'src/hooks/use-client-session';
 import { transactionSchema } from 'src/schemas/transactions';
 
 import CrewList from './crew-list';
 import SelectServiceField from './select-service-field';
 
 import { XIcon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -22,9 +25,9 @@ const ServiceFormItem = ({
   form: UseFormReturn<z.input<typeof transactionSchema>>;
   onDelete: () => void;
 }) => {
-  const { data: serviceOptionsRef = [] } = useServiceOptions();
-
+  const pathname = usePathname();
   const watchedData = useWatch();
+  const { data: session } = useClientSession();
 
   const formState = useMemo(
     () => ({
@@ -34,19 +37,8 @@ const ServiceFormItem = ({
     [form, watchedData]
   );
 
-  const itemState = formState.transactionServices[index];
-
-  const selectedService = useMemo(
-    () => serviceOptionsRef.find(({ id }) => id === itemState.serviceId),
-    [itemState.serviceId, serviceOptionsRef]
-  );
-
-  const price = useMemo(
-    () =>
-      selectedService?.priceMatrix.find(({ vehicleSize }) => vehicleSize === formState.vehicleSize)
-        ?.price || 0,
-    [formState.vehicleSize, selectedService?.priceMatrix]
-  );
+  const isEdit = pathname.startsWith(AdminRoute.EditTransaction);
+  const allowedToEditPrice = !!session && [Role.Admin, Role.Accounting].includes(session?.role);
 
   return (
     <div className="space-y-4 rounded-lg border p-4">
@@ -65,10 +57,20 @@ const ServiceFormItem = ({
       <div className="space-y-6">
         <SelectServiceField form={form} index={index} />
 
-        <div className="space-y-2">
-          <Label>Price</Label>
-          <Input disabled value={price} />
-        </div>
+        <FormField
+          control={form.control}
+          name={`transactionServices.${index}.price`}
+          disabled={!isEdit || !allowedToEditPrice}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Price</FormLabel>
+              <FormControl>
+                <Input type="number" min={0} step={0.01} {...field} value={field.value} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Separator />
 

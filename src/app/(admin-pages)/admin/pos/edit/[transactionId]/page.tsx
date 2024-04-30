@@ -1,7 +1,8 @@
 'use client';
 
-import { getTransactionAndEarnings } from 'src/actions/transactions/get-transaction-and-services';
+import { getEditTransactionData } from 'src/actions/transactions/get-edit-transaction-data';
 import { Entity } from 'src/constants/entities';
+import useClientSession from 'src/hooks/use-client-session';
 
 import EditForm from './edit-form';
 
@@ -14,14 +15,15 @@ const Page = ({ params }: { params: { transactionId: string } }) => {
   const { data: transaction, isLoading } = useQuery({
     queryKey: [Entity.Transactions, 'edit', transactionId],
     queryFn: async () => {
-      const { data } = await getTransactionAndEarnings(transactionId);
+      const { data } = await getEditTransactionData(transactionId);
       return data;
     },
     enabled: !!transactionId,
     refetchOnWindowFocus: false,
   });
+  const { isLoading: isFetchingSession } = useClientSession();
 
-  if (isLoading) {
+  if (isLoading || isFetchingSession) {
     return (
       <div className="flex h-96 items-center justify-center">
         <span className="loading loading-ring loading-lg text-foreground" />

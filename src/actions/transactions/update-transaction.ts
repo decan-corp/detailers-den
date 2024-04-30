@@ -113,18 +113,24 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         throw new SafeActionError('Invalid transaction service id');
       }
 
+      let derivedPrice = priceMatrix.price;
+
+      if (transactionService.price !== undefined) {
+        derivedPrice = transactionService.price;
+      }
+
       const createTransactionService = {
         ...transactionService,
         id: transactionService.id || cuid2.createId(),
         createdBy: userId,
-        price: priceMatrix.price,
+        price: derivedPrice,
         transactionId: transactionData.id,
         createdAt: data.createdAt,
         serviceCutPercentage: serviceCutModifier,
         serviceBy: transactionService.serviceBy.map(({ crewId }) => crewId),
       } satisfies typeof transactionServicesTable.$inferInsert;
 
-      totalPrice += Number(priceMatrix.price);
+      totalPrice += Number(derivedPrice);
 
       await tx
         .insert(transactionServicesTable)
@@ -139,22 +145,32 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         });
 
       for (const item of transactionService.serviceBy) {
-        const { crewId } = item;
+        const { crewId, amount: overrideAmount } = item;
         const crewEarning = crewEarningsRef.find(
           (earning) =>
             earning.crewId === crewId &&
             earning.transactionServiceId === createTransactionService.id
         );
         const crew = usersRef.find(({ id }) => crewId === id);
+
         const crewCutPercentage =
           (crewEarning?.crewCutPercentage ?? crew?.serviceCutPercentage) || 0;
+        let amount = 0;
+        let computedServiceCutPercentage = 0;
 
-        const computedServiceCutPercentage = clamp(
-          (crewCutPercentage + serviceCutModifier) / transactionService.serviceBy.length,
-          0,
-          100
-        );
-        const amount = (computedServiceCutPercentage / 100) * Number(priceMatrix.price);
+        if (overrideAmount === undefined) {
+          computedServiceCutPercentage = clamp(
+            (crewCutPercentage + serviceCutModifier) / transactionService.serviceBy.length,
+            0,
+            100
+          );
+          amount = (computedServiceCutPercentage / 100) * Number(derivedPrice);
+        }
+
+        if (overrideAmount !== undefined) {
+          amount = overrideAmount;
+          computedServiceCutPercentage = (overrideAmount / derivedPrice) * 100;
+        }
 
         const createCrewEarning = {
           id: crewEarning?.id || cuid2.createId(),

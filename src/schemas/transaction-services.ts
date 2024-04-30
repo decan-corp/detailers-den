@@ -7,6 +7,7 @@ export const transactionServicesSchema = z.object({
       z.object({
         id: z.string().cuid2(),
         crewId: z.string().min(1, { message: 'Required' }).cuid2(),
+        amount: z.coerce.number().min(0.01).optional(),
       })
     )
     .min(1)
@@ -18,4 +19,5 @@ export const transactionServicesSchema = z.object({
       { message: 'List of crews of must be unique' }
     ),
   serviceId: z.string().min(1, { message: 'Required' }).cuid2(),
+  price: z.coerce.number().min(0.01).optional(),
 });
