@@ -9,8 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Form } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Icons } from '@/components/ui/icons';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { updateTransaction } from 'src/actions/transactions/update-transaction';
 import { ModeOfPayment, TransactionStatus, VehicleSize } from 'src/constants/common';
@@ -24,6 +32,7 @@ import TransactionBaseInfo from '../../components/form/transaction-base-info';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { UseFormReturn, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -89,6 +98,24 @@ const EditForm = ({ data }: { data?: UpdateTransactionFormValues }) => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
+                <FormField
+                  control={form.control}
+                  name="createdAt"
+                  render={({ field }) => (
+                    <FormItem className="">
+                      <FormLabel>Customer Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="datetime-local"
+                          value={dayjs(field?.value).format('YYYY-MM-DDTHH:mm')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <TransactionBaseInfo
                   form={form as UseFormReturn<z.input<typeof transactionSchema>>}
                 />
