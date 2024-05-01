@@ -7,9 +7,9 @@ import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import dayjs from 'dayjs';
-import { eq } from 'drizzle-orm';
+import { and, eq, like, ne } from 'drizzle-orm';
 
-export const updateUser = authAction(updateUserSchema, (params, ctx) => {
+export const updateUser = authAction(updateUserSchema, async (params, ctx) => {
   const { userId } = ctx.session;
   const { role } = ctx.user;
 
@@ -17,16 +17,23 @@ export const updateUser = authAction(updateUserSchema, (params, ctx) => {
     throw new SafeActionError('Forbidden access');
   }
 
+  const [existingEmail] = await db
+    .select()
+    .from(usersTable)
+    .where(and(ne(usersTable.id, params.id), like(usersTable.email, `%${params.email}%`)));
+
+  if (existingEmail) {
+    throw new SafeActionError('Email is already taken.');
+  }
+
   const { id, ...userData } = params;
 
-  return db.transaction(async (tx) => {
-    await tx
-      .update(usersTable)
-      .set({
-        ...userData,
-        updatedBy: userId,
-        updatedAt: dayjs().toDate(),
-      })
-      .where(eq(usersTable.id, id));
-  });
+  await db
+    .update(usersTable)
+    .set({
+      ...userData,
+      updatedBy: userId,
+      updatedAt: dayjs().toDate(),
+    })
+    .where(eq(usersTable.id, id));
 });

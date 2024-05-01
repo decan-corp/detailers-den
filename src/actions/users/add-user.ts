@@ -6,6 +6,7 @@ import { createUserSchema } from 'src/schemas/users';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
+import { like } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
 
 export const addUser = authAction(createUserSchema, async (data, ctx) => {
@@ -14,6 +15,15 @@ export const addUser = authAction(createUserSchema, async (data, ctx) => {
 
   if (role !== Role.Admin) {
     throw new SafeActionError('Forbidden access');
+  }
+
+  const [existingEmail] = await db
+    .select()
+    .from(usersTable)
+    .where(like(usersTable.email, `%${data.email}%`));
+
+  if (existingEmail) {
+    throw new SafeActionError('Email is already taken.');
   }
 
   const { password, ...userData } = data;
