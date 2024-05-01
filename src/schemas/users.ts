@@ -6,8 +6,8 @@ import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 export const userSchema = createInsertSchema(usersTable, {
-  name: (schema) => schema.name.min(1),
-  email: (schema) => schema.email.email().min(1).toLowerCase(),
+  name: (schema) => schema.name.min(1).trim(),
+  email: (schema) => schema.email.email().min(1).toLowerCase().trim(),
   serviceCutPercentage: z.coerce
     .number()
     .int({ message: 'Must not contain decimal values' })

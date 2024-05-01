@@ -14,6 +14,7 @@ import { updateAccount } from 'src/actions/account/update';
 import RequiredIndicator from 'src/components/form/required-indicator';
 import { Entity } from 'src/constants/entities';
 import { updateAccountSchema } from 'src/schemas/users';
+import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -37,7 +38,13 @@ export const ProfileForm = ({ profile }: { profile?: FormValues }) => {
 
   const { mutate: update, isPending } = useMutation({
     mutationFn: updateAccount,
-    onSuccess: () => {
+    onSuccess: (result) => {
+      if (result.validationErrors || result.serverError) {
+        handleSafeActionError(result);
+
+        return;
+      }
+
       void queryClient.invalidateQueries({ queryKey: [Entity.Users] });
       toast.success('Account updated successfully.');
 

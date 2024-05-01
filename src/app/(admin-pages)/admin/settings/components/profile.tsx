@@ -2,7 +2,7 @@
 
 import useClientSession from 'src/hooks/use-client-session';
 
-import { ProfileForm } from './account-form';
+import { ProfileForm } from './profile-form';
 
 export const Profile = () => {
   const { data: account, isLoading } = useClientSession();
