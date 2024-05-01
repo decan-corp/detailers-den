@@ -80,7 +80,6 @@ export const ProfileForm = ({ profile }: { profile?: FormValues }) => {
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormDescription>Email used to log in to your account.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
