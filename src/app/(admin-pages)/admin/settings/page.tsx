@@ -1,5 +1,7 @@
 import { Separator } from '@/components/ui/separator';
 
+import { Profile } from './components/profile';
+
 const SettingsProfilePage = () => (
   <div className="space-y-6">
     <div>
@@ -7,7 +9,7 @@ const SettingsProfilePage = () => (
       <p className="text-sm text-muted-foreground">This is how others will see you on the site.</p>
     </div>
     <Separator />
-    <div className="mt-2">WIP</div>
+    <Profile />
   </div>
 );
 

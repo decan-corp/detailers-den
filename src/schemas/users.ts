@@ -76,3 +76,16 @@ export const updateUserSchema = userSchema
       path: ['serviceCutPercentage'],
     }
   );
+
+export const updateAccountSchema = userSchema
+  .omit({
+    isFirstTimeLogin: true,
+    hashedPassword: true,
+    serviceCutPercentage: true,
+    id: true,
+    role: true,
+    image: true, // not yet supported
+  })
+  .extend({
+    role: z.nativeEnum(Role).optional(),
+  });
