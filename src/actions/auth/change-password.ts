@@ -9,30 +9,26 @@ import { SafeActionError, authAction } from 'src/utils/safe-action';
 import { eq } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
 
-export const changePassword = authAction(
-  changePasswordSchema,
+export const changePassword = authAction(changePasswordSchema, async (data, ctx) => {
+  const { userId } = ctx.session;
 
-  async (data, ctx) => {
-    const { userId } = ctx.session;
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
 
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
-
-    if (!user) {
-      throw new SafeActionError("User doesn't exist");
-    }
-
-    const isCurrentPasswordValid = await new Argon2id().verify(
-      user.hashedPassword,
-      data.currentPassword
-    );
-
-    if (!isCurrentPasswordValid) {
-      throw new SafeActionError('Incorrect current password');
-    }
-
-    const hashedPassword = await new Argon2id().hash(data.newPassword);
-    await db.update(usersTable).set({ hashedPassword }).where(eq(usersTable.id, userId));
-
-    await auth.invalidateUserSessions(userId);
+  if (!user) {
+    throw new SafeActionError("User doesn't exist");
   }
-);
+
+  const isCurrentPasswordValid = await new Argon2id().verify(
+    user.hashedPassword,
+    data.currentPassword
+  );
+
+  if (!isCurrentPasswordValid) {
+    throw new SafeActionError('Incorrect current password');
+  }
+
+  const hashedPassword = await new Argon2id().hash(data.newPassword);
+  await db.update(usersTable).set({ hashedPassword }).where(eq(usersTable.id, userId));
+
+  await auth.invalidateUserSessions(userId);
+});
