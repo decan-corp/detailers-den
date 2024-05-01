@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Role } from 'src/constants/common';
 import { AdminRoute } from 'src/constants/routes';
 import useClientSession from 'src/hooks/use-client-session';
+import { useServiceOptions } from 'src/queries/services';
 import { transactionSchema } from 'src/schemas/transactions';
 
 import CrewList from './crew-list';
@@ -28,6 +29,7 @@ const ServiceFormItem = ({
   const pathname = usePathname();
   const watchedData = useWatch();
   const { data: session } = useClientSession();
+  const { data: serviceOptions = [] } = useServiceOptions();
 
   const formState = useMemo(
     () => ({
@@ -37,8 +39,23 @@ const ServiceFormItem = ({
     [form, watchedData]
   );
 
+  const itemState = formState.transactionServices[index];
+
   const isEdit = pathname.startsWith(AdminRoute.EditTransaction);
-  const allowedToEditPrice = !!session && [Role.Admin, Role.Accounting].includes(session?.role);
+  const allowedToEditPrice =
+    !!session && [Role.Admin, Role.Accounting, Role.Cashier].includes(session?.role);
+
+  const selectedService = useMemo(
+    () => serviceOptions.find(({ id }) => id === itemState.serviceId),
+    [itemState.serviceId, serviceOptions]
+  );
+
+  const price = useMemo(
+    () =>
+      selectedService?.priceMatrix.find(({ vehicleSize }) => vehicleSize === formState.vehicleSize)
+        ?.price || 0,
+    [formState.vehicleSize, selectedService?.priceMatrix]
+  );
 
   return (
     <div className="space-y-4 rounded-lg border p-4">
@@ -61,6 +78,7 @@ const ServiceFormItem = ({
           control={form.control}
           name={`transactionServices.${index}.price`}
           disabled={!isEdit || !allowedToEditPrice}
+          defaultValue={price}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Price</FormLabel>

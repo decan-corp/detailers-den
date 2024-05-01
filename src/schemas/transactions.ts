@@ -10,7 +10,7 @@ import { z } from 'zod';
 export const transactionSchema = createInsertSchema(transactionsTable)
   .merge(
     z.object({
-      plateNumber: z.string().toUpperCase(),
+      plateNumber: z.string().max(12).toUpperCase(),
       discount: z.coerce.number().optional(),
       tip: z.coerce.number().optional(),
       transactionServices: z

@@ -50,7 +50,20 @@ const TransactionBaseInfo = ({
               Plate Number <RequiredIndicatorIcon />
             </FormLabel>
             <FormControl>
-              <Input {...field} value={field.value || ''} />
+              <Input
+                {...field}
+                value={field.value || ''}
+                minLength={6}
+                maxLength={12}
+                onKeyDown={(e) => {
+                  if (e.code === 'Space') {
+                    e.preventDefault();
+                  }
+                }}
+                onChange={(e) => {
+                  field.onChange(e.currentTarget.value.toUpperCase());
+                }}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
