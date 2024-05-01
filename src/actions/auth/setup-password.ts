@@ -9,21 +9,17 @@ import { authAction } from 'src/utils/safe-action';
 import { eq } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
 
-export const setupPassword = authAction(
-  setupPasswordSchema,
+export const setupPassword = authAction(setupPasswordSchema, async (data, { session }) => {
+  const { userId } = session;
+  const hashedPassword = await new Argon2id().hash(data.password);
 
-  async (data, { session }) => {
-    const { userId } = session;
-    const hashedPassword = await new Argon2id().hash(data.password);
+  await db
+    .update(usersTable)
+    .set({
+      isFirstTimeLogin: false,
+      hashedPassword,
+    })
+    .where(eq(usersTable.id, userId));
 
-    await db
-      .update(usersTable)
-      .set({
-        isFirstTimeLogin: false,
-        hashedPassword,
-      })
-      .where(eq(usersTable.id, userId));
-
-    await auth.invalidateUserSessions(userId);
-  }
-);
+  await auth.invalidateUserSessions(userId);
+});
