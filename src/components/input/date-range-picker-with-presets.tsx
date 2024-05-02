@@ -17,6 +17,11 @@ import dayjs from 'dayjs';
 import { ComponentProps, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 
+export interface StringDateRange {
+  from: string | undefined;
+  to?: string | undefined;
+}
+
 export const DateRangePickerWithPresets = ({
   initialDateRange,
   onChange,
@@ -24,21 +29,42 @@ export const DateRangePickerWithPresets = ({
   buttonSize,
   placeholder,
   presetPlaceholder,
+  mode,
 }: {
-  initialDateRange?: DateRange;
-  onChange?: (value: DateRange | undefined) => void;
   options: { [label: string]: DateRange };
   buttonSize?: ComponentProps<typeof Button>['size'];
   placeholder?: string;
   presetPlaceholder?: string;
-}) => {
-  const [date, setDate] = useState<DateRange | undefined>(initialDateRange);
+} & (
+  | {
+      mode: 'date';
+      initialDateRange?: DateRange;
+      onChange?: (value: DateRange | undefined) => void;
+    }
+  | {
+      mode: 'string';
+      initialDateRange?: StringDateRange;
+      onChange?: (value: StringDateRange | undefined) => void;
+    }
+)) => {
+  const [date, setDate] = useState<DateRange | StringDateRange | undefined>(initialDateRange);
   const [open, setOpen] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>('');
 
   const handleOnSelect = (value: DateRange | undefined) => {
     setDate(value);
-    onChange?.(value);
+    if (mode === 'date') {
+      onChange?.(value);
+    } else {
+      onChange?.(
+        value
+          ? {
+              from: dayjs(value.from).toISOString(),
+              to: value.to ? dayjs(value.to).toISOString() : undefined,
+            }
+          : value
+      );
+    }
   };
 
   const buttonLabel = useMemo(() => {
@@ -96,8 +122,8 @@ export const DateRangePickerWithPresets = ({
         <div className="rounded-md border">
           <Calendar
             mode="range"
-            selected={date}
-            defaultMonth={date?.from}
+            selected={date as DateRange}
+            defaultMonth={date?.from as Date | undefined}
             onSelect={(value) => {
               handleOnSelect(
                 value

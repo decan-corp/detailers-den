@@ -214,8 +214,8 @@ const OverviewTab = () => {
           </CardHeader>
           <CardContent>
             <CrewTransactions
-              startDate={currentWeekDateRange.startDate.toDate()}
-              endDate={currentWeekDateRange.endDate.toDate()}
+              startDate={currentWeekDateRange.startDate.toISOString()}
+              endDate={currentWeekDateRange.endDate.toISOString()}
             />
           </CardContent>
         </Card>
@@ -246,8 +246,8 @@ const OverviewTab = () => {
           </CardHeader>
           <CardContent>
             <CrewTransactions
-              startDate={dayjs().startOf('month').toDate()}
-              endDate={dayjs().endOf('month').toDate()}
+              startDate={dayjs().startOf('month').toISOString()}
+              endDate={dayjs().endOf('month').toISOString()}
             />
           </CardContent>
         </Card>

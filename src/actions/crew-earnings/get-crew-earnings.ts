@@ -10,13 +10,14 @@ import {
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
+import dayjs from 'dayjs';
 import { and, between, desc, eq, isNull, sum } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getCrewEarnings = authAction(
   z.object({
-    startDate: z.date(),
-    endDate: z.date(),
+    startDate: z.string().datetime(),
+    endDate: z.string().datetime(),
   }),
   async ({ startDate, endDate }, { user }) => {
     if (user.role !== Role.Admin) {
@@ -43,7 +44,7 @@ export const getCrewEarnings = authAction(
       )
       .where(
         and(
-          between(crewEarningsTable.createdAt, startDate, endDate),
+          between(crewEarningsTable.createdAt, dayjs(startDate).toDate(), dayjs(endDate).toDate()),
           eq(transactionsTable.status, TransactionStatus.Paid),
           isNull(transactionsTable.deletedAt)
         )

@@ -6,7 +6,7 @@ import { getInitials } from 'src/utils/formatters';
 
 import { useQuery } from '@tanstack/react-query';
 
-const CrewTransactions = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
+const CrewTransactions = ({ startDate, endDate }: { startDate: string; endDate: string }) => {
   const { data: crewEarnings = [], isLoading } = useQuery({
     queryKey: [Entity.Metrics, Entity.CrewEarnings, startDate, endDate],
     queryFn: async () => {

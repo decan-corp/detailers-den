@@ -1,6 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
-import { DateRangePickerWithPresets } from 'src/components/input/date-range-picker-with-presets';
+import {
+  DateRangePickerWithPresets,
+  StringDateRange,
+} from 'src/components/input/date-range-picker-with-presets';
 import { DATE_RANGE_OPTIONS } from 'src/constants/options';
 
 import CrewTransactions from '../common/crew-transactions';
@@ -8,23 +11,23 @@ import { DashboardTab } from '../tabs-container';
 
 import dayjs from 'dayjs';
 import { useState } from 'react';
-import { DateRange } from 'react-day-picker';
 
 // TODO: add filters for crew, date range and frequency (daily, weekly monthly)
 // TODO: replace list type of card content with charts
 
 const initialDate = {
-  from: dayjs().startOf('week').toDate(),
-  to: dayjs().endOf('week').toDate(),
+  from: dayjs().startOf('week').toISOString(),
+  to: dayjs().endOf('week').toISOString(),
 };
 
 const CrewEarningsTab = () => {
-  const [date, setDate] = useState<DateRange | undefined>(initialDate);
+  const [date, setDate] = useState<StringDateRange | undefined>(initialDate);
 
   return (
     <TabsContent value={DashboardTab.CrewEarnings} className="space-y-4">
       <div>
         <DateRangePickerWithPresets
+          mode="string"
           initialDateRange={date}
           onChange={setDate}
           options={DATE_RANGE_OPTIONS}

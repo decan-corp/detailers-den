@@ -12,6 +12,7 @@ import { db } from 'src/utils/db';
 import { authAction } from 'src/utils/safe-action';
 import { paginationSchema, sortingSchema } from 'src/utils/zod-schema';
 
+import dayjs from 'dayjs';
 import { count, eq, inArray, like, or, desc, asc, isNull, and, between, sql } from 'drizzle-orm';
 import { castArray } from 'lodash';
 import { z } from 'zod';
@@ -66,8 +67,8 @@ const searchSchema = z.object({
   customerName: z.string().toLowerCase().optional(),
   createdAt: z
     .object({
-      from: z.date(),
-      to: z.date(),
+      from: z.string().datetime(),
+      to: z.string().datetime(),
     })
     .optional(),
 });
@@ -127,7 +128,11 @@ export const getTransactions = authAction(
             })
           : undefined,
         params.createdAt
-          ? between(transactionsTable.createdAt, params.createdAt.from, params.createdAt.to)
+          ? between(
+              transactionsTable.createdAt,
+              dayjs(params.createdAt.from).toDate(),
+              dayjs(params.createdAt.to).toDate()
+            )
           : undefined,
         params.services ? inArray(servicesTable.id, params.services) : undefined,
         params.crews ? inArray(usersTable.id, params.crews) : undefined
@@ -186,7 +191,11 @@ export const getTransactionsCount = authAction(searchSchema, async (params) => {
           })
         : undefined,
       params.createdAt
-        ? between(transactionsTable.createdAt, params.createdAt.from, params.createdAt.to)
+        ? between(
+            transactionsTable.createdAt,
+            dayjs(params.createdAt.from).toDate(),
+            dayjs(params.createdAt.to).toDate()
+          )
         : undefined,
       params.services ? inArray(servicesTable.id, params.services) : undefined,
       params.crews ? inArray(usersTable.id, params.crews) : undefined

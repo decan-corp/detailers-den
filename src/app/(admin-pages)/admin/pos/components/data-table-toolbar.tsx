@@ -2,7 +2,10 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { DateRangePickerWithPresets } from 'src/components/input/date-range-picker-with-presets';
+import {
+  DateRangePickerWithPresets,
+  StringDateRange,
+} from 'src/components/input/date-range-picker-with-presets';
 import { DataTableFacetedFilter } from 'src/components/table/data-table-faceted-filter';
 import DataTableViewOptions from 'src/components/table/data-table-view-options';
 import { DATE_RANGE_OPTIONS } from 'src/constants/options';
@@ -22,7 +25,6 @@ import { Table } from '@tanstack/react-table';
 import { isEmpty } from 'lodash';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { DateRange } from 'react-day-picker';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -63,9 +65,10 @@ export const TransactionToolbar = <TData,>({ table }: DataTableToolbarProps<TDat
           <DateRangePickerWithPresets
             key={resetKey}
             buttonSize="sm"
+            mode="string"
             initialDateRange={
               !isEmpty(table.getColumn('createdAt')?.getFilterValue())
-                ? (table.getColumn('createdAt')?.getFilterValue() as DateRange)
+                ? (table.getColumn('createdAt')?.getFilterValue() as StringDateRange)
                 : { from: undefined, to: undefined }
             }
             placeholder="Filter by date"
