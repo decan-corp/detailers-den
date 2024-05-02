@@ -51,8 +51,8 @@ export const updateTransactionSchema = transactionSchema.merge(
     createdAt: z.coerce
       .date({ invalid_type_error: 'Invalid date and time format.' })
       .nullish()
-      .refine((value) => dayjs(value).isAfter(dayjs().subtract(60, 'days').startOf('day')), {
-        message: 'Please enter a date and time within the past 60 days.',
+      .refine((value) => dayjs(value).isAfter(dayjs().subtract(180, 'days').startOf('day')), {
+        message: 'Please enter a date and time within the past 180 days.',
       })
       .refine((value) => dayjs(value).isBefore(dayjs()), {
         message: 'Please select a date and time on or before today.',
