@@ -14,7 +14,6 @@ import { z } from 'zod';
 
 export const generateResetPasswordToken = authAction(
   z.string().cuid2(),
-
   async (generateForUserId, ctx) => {
     const { userId } = ctx.session;
 

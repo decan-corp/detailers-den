@@ -3,10 +3,12 @@ import { z } from 'zod';
 
 export const serverEnv = createEnv({
   server: {
+    RESEND_API_KEY: z.string().min(1),
     TURSO_DATABASE_URL: z.string().min(1),
     TURSO_AUTH_TOKEN: z.string().min(1),
   },
   runtimeEnv: {
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
     TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
     TURSO_DATABASE_URL: process.env.TURSO_DATABASE_URL,
   },
