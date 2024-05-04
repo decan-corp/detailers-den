@@ -4,7 +4,7 @@ import { getEditTransactionData } from 'src/actions/transactions/get-edit-transa
 import { Entity } from 'src/constants/entities';
 import useClientSession from 'src/hooks/use-client-session';
 
-import EditForm from './edit-form';
+import EditTransactionForm from './edit-transaction-form';
 
 import { useQuery } from '@tanstack/react-query';
 import { notFound } from 'next/navigation';
@@ -35,7 +35,7 @@ const Page = ({ params }: { params: { transactionId: string } }) => {
     notFound();
   }
 
-  return <EditForm data={transaction} />;
+  return <EditTransactionForm data={transaction} />;
 };
 
 export default Page;

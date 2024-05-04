@@ -12,12 +12,13 @@ import {
 } from 'src/schema';
 import { createTransactionSchema } from 'src/schemas/transactions';
 import { db } from 'src/utils/db';
+import { computeCrewEarnedAmount } from 'src/utils/formula';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { inArray } from 'drizzle-orm';
-import { clamp, uniq } from 'lodash';
+import { uniq } from 'lodash';
 
 export const addTransaction = authAction(createTransactionSchema, (data, { session }) => {
   const { userId } = session;
@@ -71,13 +72,12 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
       transactionService.serviceBy.forEach(({ crewId }) => {
         const crew = usersRef.find(({ id }) => crewId === id);
 
-        const computedServiceCutPercentage = clamp(
-          ((crew?.serviceCutPercentage || 0) + (service?.serviceCutPercentage || 0)) /
-            transactionService.serviceBy.length,
-          0,
-          100
-        );
-        const amount = (computedServiceCutPercentage / 100) * Number(priceMatrix.price);
+        const { computedServiceCutPercentage, amount } = computeCrewEarnedAmount({
+          crewCutPercentage: crew?.serviceCutPercentage || 0,
+          serviceCutPercentage: service?.serviceCutPercentage || 0,
+          numberOfCrews: transactionService.serviceBy.length,
+          servicePrice: priceMatrix.price,
+        });
 
         insertCrewEarnings.push({
           transactionServiceId,

@@ -13,12 +13,13 @@ import {
 } from 'src/schema';
 import { updateTransactionSchema } from 'src/schemas/transactions';
 import { db } from 'src/utils/db';
+import { computeCrewEarnedAmount } from 'src/utils/formula';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
 import cuid2 from '@paralleldrive/cuid2';
 import dayjs from 'dayjs';
 import { and, eq, inArray, notInArray } from 'drizzle-orm';
-import { clamp, omit, uniq } from 'lodash';
+import { omit, uniq } from 'lodash';
 
 export const updateTransaction = authAction(updateTransactionSchema, async (data, ctx) => {
   const { userId } = ctx.session;
@@ -159,12 +160,15 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         let computedServiceCutPercentage = 0;
 
         if (overrideAmount === undefined) {
-          computedServiceCutPercentage = clamp(
-            (crewCutPercentage + serviceCutModifier) / transactionService.serviceBy.length,
-            0,
-            100
-          );
-          amount = (computedServiceCutPercentage / 100) * Number(derivedPrice);
+          const results = computeCrewEarnedAmount({
+            crewCutPercentage,
+            serviceCutPercentage: serviceCutModifier,
+            numberOfCrews: transactionService.serviceBy.length,
+            servicePrice: derivedPrice,
+          });
+
+          computedServiceCutPercentage = results.computedServiceCutPercentage;
+          amount = results.amount;
         }
 
         if (overrideAmount !== undefined) {

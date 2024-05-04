@@ -50,7 +50,7 @@ const defaultValues: Partial<UpdateTransactionFormValues> = {
   modeOfPayment: ModeOfPayment.Cash,
 };
 
-const EditForm = ({ data }: { data?: UpdateTransactionFormValues }) => {
+const EditTransactionForm = ({ data }: { data?: UpdateTransactionFormValues }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = useClientSession();
@@ -143,4 +143,4 @@ const EditForm = ({ data }: { data?: UpdateTransactionFormValues }) => {
   );
 };
 
-export default EditForm;
+export default EditTransactionForm;

@@ -29,6 +29,10 @@ const CrewList = ({
   const serviceState = formState.transactionServices[serviceIndex];
 
   const onAddCrew = () => {
+    // TODO: auto compute/auto fill crew earned amount field upon adding crew in edit transaction form
+    // TODO: do not recompute crew earned amount when change the service price since the computation will already handle
+    // it and since this is override. They just have to enter the desired override amount.
+    // TODO: do not recompute crew earned amount when adding a crew
     const state = [...formState.transactionServices];
     state[serviceIndex].serviceBy.push(defaultServiceByItem);
     form.setValue('transactionServices', state);
