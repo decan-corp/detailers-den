@@ -23,7 +23,7 @@ export const forgotPassword = action(
       .where(eq(usersTable.email, email));
 
     if (!user) {
-      throw new SafeActionError('Invalid email.');
+      throw new SafeActionError('Email not registered.');
     }
 
     const [existingResetPasswordToken] = await db
