@@ -66,6 +66,7 @@
     "next-safe-action": "^6.0.1",
     "next-themes": "^0.2.1",
     "oslo": "^1.0.3",
+    "pg": "^8.11.5",
     "postcss": "^8.4.31",
     "query-string": "^8.1.0",
     "react": "^18.2.0",

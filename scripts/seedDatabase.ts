@@ -1,5 +1,4 @@
 // spell-checker:disable
-/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable no-console */
 
 import { Role } from 'src/constants/common';
@@ -11,8 +10,8 @@ import { Argon2id } from 'oslo/password';
 
 const seedDatabase = async () => {
   // Create default user
-  const email = 'emnnipal@gmail.com'.toLowerCase();
-  const name = 'Emman';
+  const email = 'admin@gmail.com'.toLowerCase();
+  const name = 'Admin';
 
   const id = cuid2.createId();
   const hashedPassword = await new Argon2id().hash('P@ssw0rd!23');

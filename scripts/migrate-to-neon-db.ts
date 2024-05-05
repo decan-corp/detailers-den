@@ -48,7 +48,7 @@ const script = async () => {
   );
   console.log('success migrating crew earnings');
 
-  console.log('finish migrating all records');
+  console.log('finished migrating all records');
 
   process.exit(0);
 };
