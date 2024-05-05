@@ -17,6 +17,9 @@ export const useRecentOptions = (
 
   const saveRecentSelections = useCallback(
     (option: string) => {
+      if (storedRecentSelections.includes(option)) {
+        return;
+      }
       const list = [...storedRecentSelections, option];
 
       const derivedList = list.slice(list.length - (options?.maxRecentLength || 2), list.length);
