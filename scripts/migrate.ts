@@ -26,7 +26,7 @@ import path from 'path';
       await migrate(db, { migrationsFolder: path.join(__dirname, '../drizzle') });
     }
 
-    console.log('Success migrating to database', serverEnv.DATABASE_URL);
+    console.log('Success migrating to database');
     process.exit(0);
   } catch (err) {
     console.error('Failed migrating to database:', err);
