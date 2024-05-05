@@ -23,7 +23,7 @@ import { uniq } from 'lodash';
 export const addTransaction = authAction(createTransactionSchema, (data, { session }) => {
   const { userId } = session;
 
-  const { transactionServices: transactionServicesList, ...transactionData } = data;
+  const { transactionServices: transactionServicesList, ...payload } = data;
   return db.transaction(async (tx) => {
     const transactionId = cuid2.createId();
     const serviceIds = transactionServicesList.map(({ serviceId }) => serviceId);
@@ -47,7 +47,7 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
     for (const transactionService of transactionServicesList) {
       const service = servicesRef.find(({ id }) => id === transactionService.serviceId);
       const priceMatrix = service?.priceMatrix.find(
-        ({ vehicleSize }) => vehicleSize === transactionData.vehicleSize
+        ({ vehicleSize }) => vehicleSize === payload.vehicleSize
       );
 
       if (!priceMatrix) {
@@ -81,32 +81,34 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
 
         insertCrewEarnings.push({
           transactionServiceId,
-          computedServiceCutPercentage,
+          computedServiceCutPercentage: computedServiceCutPercentage.toFixed(2),
           crewCutPercentage: crew?.serviceCutPercentage || 0,
           crewId,
-          amount,
+          amount: amount.toFixed(2),
           createdBy: userId,
         });
       });
     }
     const totalPrice = insertTransactionServicesData.reduce(
-      (total, value) => total + Number(value.price),
+      (total, value) => total + value.price,
       0
     );
 
-    if (totalPrice < Number(transactionData.discount)) {
+    if (totalPrice < payload.discount) {
       throw new SafeActionError("Discount can't be higher than the total price.");
     }
 
-    const discountedPrice = totalPrice - (Number(transactionData.discount) || 0);
+    const discountedPrice = totalPrice - payload.discount;
 
     await tx.insert(transactionsTable).values({
-      ...transactionData,
+      ...payload,
       id: transactionId,
       createdBy: userId,
-      plateNumber: transactionData.plateNumber.replace(/\s/g, ''),
-      totalPrice: discountedPrice,
-      ...(transactionData.status === TransactionStatus.Paid && {
+      plateNumber: payload.plateNumber.replace(/\s/g, ''),
+      totalPrice: discountedPrice.toFixed(2),
+      tip: payload.tip?.toFixed(2),
+      discount: payload.discount?.toFixed(2),
+      ...(payload.status === TransactionStatus.Paid && {
         completedAt: dayjs().toDate(),
         completedBy: userId,
       }),

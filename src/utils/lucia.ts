@@ -1,28 +1,15 @@
-import { usersTable } from 'src/schema';
+import { sessionsTable, usersTable } from 'src/schema';
 
-import { tursoClient } from './db';
+import { db } from './db';
 
-import { LibSQLAdapter } from '@lucia-auth/adapter-sqlite';
-import { camelCase } from 'lodash';
+import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import { Lucia, TimeSpan } from 'lucia';
 
 import { webcrypto } from 'node:crypto';
 
 globalThis.crypto = webcrypto as Crypto;
 
-const transformDbColumns = <T extends Record<string, unknown>>(data: T): T =>
-  Object.entries(data).reduce(
-    (acc, [key, value]) => ({
-      ...acc,
-      [camelCase(key)]: value,
-    }),
-    {}
-  ) as T;
-
-const adapter = new LibSQLAdapter(tursoClient, {
-  user: 'users',
-  session: 'sessions',
-});
+const adapter = new DrizzlePostgreSQLAdapter(db, sessionsTable, usersTable);
 export const auth = new Lucia(adapter, {
   sessionCookie: {
     // this sets cookies with super long expiration
@@ -36,16 +23,14 @@ export const auth = new Lucia(adapter, {
   },
   sessionExpiresIn: new TimeSpan(3, 'd'),
   // getSessionAttributes: (attributes) => ({}),
-  getUserAttributes: (attributes) => {
-    const userData = transformDbColumns(attributes);
-    return {
-      email: userData.email,
-      role: userData.role,
-      name: userData.name,
-      image: userData.image,
-      isFirstTimeLogin: Boolean(userData.isFirstTimeLogin),
-    } satisfies DatabaseUserAttributes;
-  },
+  getUserAttributes: (attributes) =>
+    ({
+      email: attributes.email,
+      role: attributes.role,
+      name: attributes.name,
+      image: attributes.image,
+      isFirstTimeLogin: attributes.isFirstTimeLogin,
+    }) satisfies DatabaseUserAttributes,
 });
 
 // IMPORTANT!

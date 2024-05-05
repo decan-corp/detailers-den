@@ -11,8 +11,8 @@ export const transactionSchema = createInsertSchema(transactionsTable)
   .merge(
     z.object({
       plateNumber: z.string().max(12).toUpperCase(),
-      discount: z.coerce.number().optional(),
-      tip: z.coerce.number().optional(),
+      discount: z.union([z.string(), z.number()]).pipe(z.coerce.number()),
+      tip: z.union([z.string(), z.number()]).pipe(z.coerce.number()),
       transactionServices: z
         .array(
           transactionServicesSchema.extend({

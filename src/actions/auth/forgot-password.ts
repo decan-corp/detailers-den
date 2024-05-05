@@ -59,7 +59,7 @@ export const forgotPassword = action(
     const resend = new Resend(serverEnv.RESEND_API_KEY);
 
     await resend.emails.send({
-      from: 'detailers-den@resend.dev',
+      from: 'no-reply@185dd.pro',
       to: email,
       subject: 'Reset Your 185 Detailers Den Password',
       html: `

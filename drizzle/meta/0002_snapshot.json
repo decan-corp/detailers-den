@@ -1,6 +1,6 @@
 {
-  "id": "1dafe7b6-e882-4802-b772-5d4bf063f7a6",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "5adbb28f-8658-407d-976d-966333948139",
+  "prevId": "7f05c99b-ee79-48d3-a463-183aae19f355",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -28,9 +28,9 @@
         },
         "computed_service_cut_percentage": {
           "name": "computed_service_cut_percentage",
-          "type": "integer",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "amount": {
           "name": "amount",
@@ -477,7 +477,7 @@
         },
         "plate_number": {
           "name": "plate_number",
-          "type": "varchar(12)",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },

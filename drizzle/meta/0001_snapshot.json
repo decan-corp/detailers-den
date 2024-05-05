@@ -1,6 +1,6 @@
 {
-  "id": "1dafe7b6-e882-4802-b772-5d4bf063f7a6",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "7f05c99b-ee79-48d3-a463-183aae19f355",
+  "prevId": "1dafe7b6-e882-4802-b772-5d4bf063f7a6",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -477,7 +477,7 @@
         },
         "plate_number": {
           "name": "plate_number",
-          "type": "varchar(12)",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },

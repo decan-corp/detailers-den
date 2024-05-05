@@ -90,12 +90,12 @@ export const getTransactions = authAction(
         completedAt: transactionsTable.completedAt,
         updatedAt: transactionsTable.updatedAt,
         note: transactionsTable.note,
-        services: sql`GROUP_CONCAT(DISTINCT ${servicesTable.serviceName})`.mapWith({
+        services: sql`STRING_AGG(DISTINCT ${servicesTable.serviceName}, ',')`.mapWith({
           mapFromDriverValue(value: unknown) {
             return String(value).split(',');
           },
         }),
-        crews: sql`GROUP_CONCAT(DISTINCT ${usersTable.name})`.mapWith({
+        crews: sql`STRING_AGG(DISTINCT ${usersTable.name}, ',')`.mapWith({
           mapFromDriverValue(value: unknown) {
             return String(value).split(',');
           },

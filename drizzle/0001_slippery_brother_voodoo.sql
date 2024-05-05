@@ -1,0 +1,1 @@
+ALTER TABLE "transactions" ALTER COLUMN "plate_number" SET DATA TYPE varchar;

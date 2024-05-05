@@ -1,57 +1,67 @@
 import { ModeOfPayment, Role, TransactionStatus, VehicleSize } from './constants/common';
 
 import { createId } from '@paralleldrive/cuid2';
-import { index, sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import {
+  boolean,
+  decimal,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  real,
+  text,
+  timestamp,
+  varchar,
+} from 'drizzle-orm/pg-core';
 
-// TODO: migrate to neon database and postgresql since database migrations is too painful with sqlite
 const dateSchema = {
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }).$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }),
-  deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }),
+  deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
 };
 
 const commonSchema = {
   ...dateSchema,
-  createdBy: text('created_by'),
-  updatedBy: text('updated_by'),
-  deletedBy: text('deleted_by'),
+  createdBy: varchar('created_by'),
+  updatedBy: varchar('updated_by'),
+  deletedBy: varchar('deleted_by'),
 };
 
-export const usersTable = sqliteTable('users', {
-  id: text('id')
+export const usersTable = pgTable('users', {
+  id: varchar('id')
+    .primaryKey()
     .$defaultFn(() => createId())
-    .primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  role: text('role', {
+    .notNull(),
+  name: varchar('name').notNull(),
+  email: varchar('email').notNull().unique(),
+  role: varchar('role', {
     length: 64,
     enum: [Role.StayInCrew, Role.Crew, Role.Cashier, Role.Accounting, Role.Detailer, Role.Admin],
   }).notNull(),
-  serviceCutPercentage: integer('service_cut_percentage', { mode: 'number' }).default(0),
-  image: text('image'),
-  isFirstTimeLogin: integer('is_first_time_login', { mode: 'boolean' }).default(true),
-  hashedPassword: text('hashed_password', {
-    length: 255,
-  }).notNull(),
+  serviceCutPercentage: integer('service_cut_percentage').default(0),
+  image: varchar('image'),
+  isFirstTimeLogin: boolean('is_first_time_login').notNull().default(true),
+  hashedPassword: varchar('hashed_password').notNull(),
   ...commonSchema,
 });
 
-export const transactionsTable = sqliteTable(
+export const transactionsTable = pgTable(
   'transactions',
   {
-    id: text('id')
+    id: varchar('id')
+      .primaryKey()
       .$defaultFn(() => createId())
-      .primaryKey(),
-    customerName: text('customer_name'),
-    status: text('status', {
+      .notNull(),
+    customerName: varchar('customer_name'),
+    status: varchar('status', {
       enum: [TransactionStatus.Paid, TransactionStatus.Pending, TransactionStatus.Void],
     })
       .notNull()
       .default(TransactionStatus.Pending),
-    totalPrice: real('total_price').notNull(),
-    note: text('note'),
-    plateNumber: text('plate_number', { length: 12 }).notNull(),
-    vehicleSize: text('vehicle_size', {
+    totalPrice: decimal('total_price', { scale: 2, precision: 10 }).notNull(),
+    note: varchar('note'),
+    plateNumber: varchar('plate_number').notNull(),
+    vehicleSize: varchar('vehicle_size', {
       enum: [
         VehicleSize.Motorcycle,
         VehicleSize.Small,
@@ -60,9 +70,9 @@ export const transactionsTable = sqliteTable(
         VehicleSize.ExtraLarge,
       ],
     }).notNull(),
-    discount: real('discount').notNull().default(0),
-    tip: real('tip').notNull().default(0),
-    modeOfPayment: text('mode_of_payment', {
+    discount: decimal('discount', { scale: 2, precision: 10 }).notNull().default('0'),
+    tip: decimal('tip', { scale: 2, precision: 10 }).notNull().default('0'),
+    modeOfPayment: varchar('mode_of_payment', {
       length: 64,
       enum: [
         ModeOfPayment.Cash,
@@ -73,8 +83,8 @@ export const transactionsTable = sqliteTable(
     })
       .notNull()
       .default(ModeOfPayment.Cash),
-    completedAt: integer('completed_at', { mode: 'timestamp_ms' }),
-    completedBy: text('completed_by').references(() => usersTable.id),
+    completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
+    completedBy: varchar('completed_by').references(() => usersTable.id),
     ...commonSchema,
   },
   (table) => ({
@@ -82,14 +92,15 @@ export const transactionsTable = sqliteTable(
   })
 );
 
-export const servicesTable = sqliteTable('services', {
-  id: text('id')
+export const servicesTable = pgTable('services', {
+  id: varchar('id')
+    .primaryKey()
     .$defaultFn(() => createId())
-    .primaryKey(),
-  serviceName: text('service_name').notNull(),
+    .notNull(),
+  serviceName: varchar('service_name').notNull(),
   description: text('description'),
-  serviceCutPercentage: integer('service_cut_percentage', { mode: 'number' }).default(0).notNull(),
-  priceMatrix: text('price_matrix', { mode: 'json' })
+  serviceCutPercentage: integer('service_cut_percentage').notNull().default(0),
+  priceMatrix: jsonb('price_matrix')
     .$type<
       {
         price: number;
@@ -100,23 +111,22 @@ export const servicesTable = sqliteTable('services', {
   ...commonSchema,
 });
 
-export const transactionServicesTable = sqliteTable(
+export const transactionServicesTable = pgTable(
   'transaction_services',
   {
-    id: text('id')
+    id: varchar('id')
+      .primaryKey()
       .$defaultFn(() => createId())
-      .primaryKey(),
-    transactionId: text('transaction_id')
+      .notNull(),
+    transactionId: varchar('transaction_id')
       .references(() => transactionsTable.id)
       .notNull(),
-    serviceId: text('service_id')
+    serviceId: varchar('service_id')
       .references(() => servicesTable.id)
       .notNull(),
     price: real('price').notNull(),
-    serviceBy: text('service_by', { mode: 'json' }).$type<string[]>().notNull(),
-    serviceCutPercentage: integer('service_cut_percentage', { mode: 'number' })
-      .default(0)
-      .notNull(),
+    serviceBy: jsonb('service_by').$type<string[]>().notNull(),
+    serviceCutPercentage: integer('service_cut_percentage').notNull().default(0),
     ...commonSchema,
   },
   (table) => ({
@@ -126,21 +136,25 @@ export const transactionServicesTable = sqliteTable(
   })
 );
 
-export const crewEarningsTable = sqliteTable(
+export const crewEarningsTable = pgTable(
   'crew_earnings',
   {
-    id: text('id')
+    id: varchar('id')
+      .primaryKey()
       .$defaultFn(() => createId())
-      .primaryKey(),
-    transactionServiceId: text('transaction_service_id')
+      .notNull(),
+    transactionServiceId: varchar('transaction_service_id')
       .references(() => transactionServicesTable.id)
       .notNull(),
-    crewId: text('crew_id')
+    crewId: varchar('crew_id')
       .references(() => usersTable.id)
       .notNull(),
-    computedServiceCutPercentage: integer('computed_service_cut_percentage', { mode: 'number' }),
-    amount: real('amount').notNull(),
-    crewCutPercentage: integer('crew_cut_percentage', { mode: 'number' }).default(0).notNull(),
+    computedServiceCutPercentage: decimal('computed_service_cut_percentage', {
+      scale: 2,
+      precision: 10,
+    }).notNull(),
+    amount: decimal('amount', { scale: 2, precision: 10 }).notNull(),
+    crewCutPercentage: integer('crew_cut_percentage').notNull().default(0),
     ...commonSchema,
   },
   (table) => ({
@@ -152,27 +166,26 @@ export const crewEarningsTable = sqliteTable(
   })
 );
 
-export const sessionsTable = sqliteTable('sessions', {
-  id: text('id', {
-    length: 255,
-  }).primaryKey(),
-  userId: text('user_id', {
+export const sessionsTable = pgTable('sessions', {
+  id: varchar('id').primaryKey(),
+  userId: varchar('user_id', {
     length: 255,
   })
     .notNull()
     .references(() => usersTable.id),
-  expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
 });
 
-export const resetPasswordTokensTable = sqliteTable('reset_password_tokens', {
-  id: text('id', { length: 255 })
+export const resetPasswordTokensTable = pgTable('reset_password_tokens', {
+  id: varchar('id')
+    .primaryKey()
     .$defaultFn(() => createId())
-    .primaryKey(),
-  userId: text('user_id')
+    .notNull(),
+  userId: varchar('user_id')
     .references(() => usersTable.id)
     .notNull(),
-  expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
-  isValid: integer('is_valid', { mode: 'boolean' }).default(true).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+  isValid: boolean('is_valid').notNull().default(true),
   ...commonSchema,
 });
 

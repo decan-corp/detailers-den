@@ -1,0 +1,2 @@
+ALTER TABLE "crew_earnings" ALTER COLUMN "computed_service_cut_percentage" SET DATA TYPE numeric(10, 2);--> statement-breakpoint
+ALTER TABLE "crew_earnings" ALTER COLUMN "computed_service_cut_percentage" SET NOT NULL;

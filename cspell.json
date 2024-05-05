@@ -29,7 +29,8 @@
     "datetime",
     "turso",
     "libsql",
-    "unixepoch"
+    "unixepoch",
+    "neondatabase"
   ],
   "ignorePaths": [
     "node_modules/",

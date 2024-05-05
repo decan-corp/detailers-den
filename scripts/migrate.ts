@@ -2,17 +2,21 @@
 /* eslint-disable no-console */
 
 import { serverEnv } from 'src/env/server';
-import { db } from 'src/utils/db';
+import * as schema from 'src/schema';
 
-import { migrate } from 'drizzle-orm/libsql/migrator';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { migrate } from 'drizzle-orm/neon-http/migrator';
 
 import path from 'path';
 
-// TODO: create script for sqlite local
+const dbClient = neon(serverEnv.DATABASE_URL);
+const db = drizzle(dbClient, { schema });
+
 (async () => {
   try {
     await migrate(db, { migrationsFolder: path.join(__dirname, '../drizzle') });
-    console.log('Success migrating to database', serverEnv.TURSO_DATABASE_URL);
+    console.log('Success migrating to database', serverEnv.DATABASE_URL);
     process.exit(0);
   } catch (err) {
     console.error('Failed migrating to database:', err);

@@ -37,7 +37,7 @@ export const getAvailedServiceCount = authAction(
           isNull(transactionsTable.deletedAt)
         )
       )
-      .groupBy(({ serviceId }) => serviceId)
+      .groupBy(({ serviceId, serviceName }) => [serviceId, serviceName])
       .orderBy(({ serviceCount }) => desc(serviceCount));
 
     return records;

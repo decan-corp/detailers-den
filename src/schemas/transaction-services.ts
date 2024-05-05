@@ -7,7 +7,7 @@ export const transactionServicesSchema = z.object({
       z.object({
         id: z.string().cuid2(),
         crewId: z.string().min(1, { message: 'Required' }).cuid2(),
-        amount: z.coerce.number().min(0.01).optional(),
+        amount: z.union([z.string(), z.number()]).pipe(z.coerce.number()).optional(),
       })
     )
     .min(1)

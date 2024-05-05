@@ -1,0 +1,15 @@
+services:
+  db:
+    container_name: postgresql_16
+    image: postgres:16.2
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 321
+      POSTGRES_DB: detailers_den
+    ports:
+      - 5432:5432
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local

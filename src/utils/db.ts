@@ -1,11 +1,20 @@
+/* eslint-disable no-var */
+/* eslint-disable vars-on-top */
 import { serverEnv } from 'src/env/server';
+import * as schema from 'src/schema';
 
-import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
+import { Pool } from '@neondatabase/serverless';
+import { NeonDatabase, drizzle } from 'drizzle-orm/neon-serverless';
 
-export const tursoClient = createClient({
-  url: serverEnv.TURSO_DATABASE_URL,
-  authToken: serverEnv.TURSO_AUTH_TOKEN,
-});
+declare global {
+  var globalDb: undefined | NeonDatabase<typeof schema>;
+  var globalPool: undefined | Pool;
+}
 
-export const db = drizzle(tursoClient);
+export const pool = globalThis.globalPool ?? new Pool({ connectionString: serverEnv.DATABASE_URL });
+export const db = globalThis.globalDb ?? drizzle(pool, { schema });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.globalPool = pool;
+  globalThis.globalDb = db;
+}

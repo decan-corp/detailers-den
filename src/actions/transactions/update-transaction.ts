@@ -65,7 +65,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
     );
   }
 
-  const { transactionServices: transactionServicesList, ...transactionData } = data;
+  const { transactionServices: transactionServicesList, ...payload } = data;
   return db.transaction(async (tx) => {
     const serviceIds = transactionServicesList.map(({ serviceId }) => serviceId);
     const crewIds = uniq(transactionServicesList.flatMap(({ serviceBy }) => serviceBy)).map(
@@ -98,7 +98,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
     for (const transactionService of transactionServicesList) {
       const service = servicesRef.find(({ id }) => id === transactionService.serviceId);
       const priceMatrix = service?.priceMatrix.find(
-        ({ vehicleSize }) => vehicleSize === transactionData.vehicleSize
+        ({ vehicleSize }) => vehicleSize === payload.vehicleSize
       );
       const savedTransactionServiceRef = transactionServicesRef.find(
         ({ id }) => id === transactionService.id
@@ -125,13 +125,13 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         id: transactionService.id || cuid2.createId(),
         createdBy: userId,
         price: derivedPrice,
-        transactionId: transactionData.id,
+        transactionId: payload.id,
         createdAt: data.createdAt,
         serviceCutPercentage: serviceCutModifier,
         serviceBy: transactionService.serviceBy.map(({ crewId }) => crewId),
       } satisfies typeof transactionServicesTable.$inferInsert;
 
-      totalPrice += Number(derivedPrice);
+      totalPrice += derivedPrice;
 
       await tx
         .insert(transactionServicesTable)
@@ -180,13 +180,13 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         const createCrewEarning = {
           id: crewEarning?.id || cuid2.createId(),
           transactionServiceId: createTransactionService.id,
-          computedServiceCutPercentage,
+          computedServiceCutPercentage: computedServiceCutPercentage.toFixed(2),
           crewCutPercentage,
           crewId,
-          amount,
+          amount: amount.toFixed(2),
           createdBy: userId,
           createdAt: data.createdAt,
-        };
+        } satisfies typeof crewEarningsTable.$inferInsert;
 
         await tx
           .insert(crewEarningsTable)
@@ -219,7 +219,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       .from(transactionServicesTable)
       .where(
         and(
-          eq(transactionServicesTable.transactionId, transactionData.id),
+          eq(transactionServicesTable.transactionId, payload.id),
           notInArray(transactionServicesTable.id, transactionServiceIds)
         )
       );
@@ -234,26 +234,28 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         .where(inArray(transactionServicesTable.id, deleteServiceIds));
     }
 
-    if (totalPrice < Number(transactionData.discount)) {
+    if (totalPrice < payload.discount) {
       throw new SafeActionError("Discount can't be higher than the total price.");
     }
 
-    const discountedPrice = totalPrice - (Number(transactionData.discount) || 0);
+    const discountedPrice = totalPrice - payload.discount;
 
     await tx
       .update(transactionsTable)
       .set({
-        ...transactionData,
+        ...payload,
         updatedBy: userId,
         updatedAt: dayjs().toDate(),
-        plateNumber: transactionData.plateNumber.replace(/\s/g, ''),
-        totalPrice: discountedPrice,
-        ...(transactionData.status === TransactionStatus.Paid &&
+        plateNumber: payload.plateNumber.replace(/\s/g, ''),
+        totalPrice: discountedPrice.toFixed(2),
+        tip: payload.tip?.toFixed(2),
+        discount: payload.discount?.toFixed(2),
+        ...(payload.status === TransactionStatus.Paid &&
           transaction.completedAt === null && {
             completedAt: dayjs().toDate(),
             completedBy: userId,
           }),
       })
-      .where(eq(transactionsTable.id, transactionData.id));
+      .where(eq(transactionsTable.id, payload.id));
   });
 });

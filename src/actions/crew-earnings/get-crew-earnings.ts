@@ -49,7 +49,7 @@ export const getCrewEarnings = authAction(
           isNull(transactionsTable.deletedAt)
         )
       )
-      .groupBy(({ crewId }) => crewId)
+      .groupBy(({ crewId, crewName, image, role }) => [crewId, crewName, image, role])
       .orderBy(({ amount }) => desc(amount));
 
     return records;

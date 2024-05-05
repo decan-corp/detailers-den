@@ -9,8 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit -p tsconfig.eslint.json",
-    "drizzle:generate": "bun drizzle-kit generate:sqlite",
+    "drizzle:generate": "bun drizzle-kit generate:pg",
     "drizzle:migrate": "bunx tsx ./scripts/migrate.ts",
+    "script:migrate": "bunx tsx ./scripts/migrate-to-neon-db.ts",
     "prepare": "husky install"
   },
   "lint-staged": {
@@ -20,9 +21,10 @@
   "dependencies": {
     "@formkit/auto-animate": "^0.8.1",
     "@hookform/resolvers": "^3.3.4",
-    "@libsql/client": "^0.5.3",
+    "@libsql/client": "^0.6.0",
     "@lucia-auth/adapter-drizzle": "^1.0.0",
-    "@lucia-auth/adapter-sqlite": "^3.0.1",
+    "@lucia-auth/adapter-postgresql": "^3.1.2",
+    "@neondatabase/serverless": "^0.9.1",
     "@paralleldrive/cuid2": "^2.2.2",
     "@planetscale/database": "^1.11.0",
     "@radix-ui/react-alert-dialog": "^1.0.5",
