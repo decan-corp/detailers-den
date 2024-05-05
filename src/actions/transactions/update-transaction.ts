@@ -177,7 +177,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
           computedServiceCutPercentage = Number(computedCut);
 
           // eslint-disable-next-line no-console
-          console.log('OVERRIDE!!', {
+          console.error('OVERRIDE!!', {
             toFixed: computedServiceCutPercentage.toFixed(2),
             computedCut,
             computedServiceCutPercentage,
