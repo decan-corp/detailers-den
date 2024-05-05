@@ -173,8 +173,8 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
 
         if (overrideAmount !== undefined) {
           amount = overrideAmount;
-          const computedValue = (overrideAmount / derivedPrice) * 100;
-          computedServiceCutPercentage = Number(computedValue.toFixed(2));
+          const computedCut = (overrideAmount / derivedPrice) * 100;
+          computedServiceCutPercentage = Number(computedCut);
         }
 
         const createCrewEarning = {
