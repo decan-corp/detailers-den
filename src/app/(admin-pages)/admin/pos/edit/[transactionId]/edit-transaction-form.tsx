@@ -29,7 +29,7 @@ import { transactionSchema, updateTransactionSchema } from 'src/schemas/transact
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import ServiceList, { defaultTransactionServiceItem } from '../../components/form/service-list';
-import TransactionBaseInfo from '../../components/form/transaction-base-info';
+import TransactionBaseForm from '../../components/form/transaction-base-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -121,7 +121,7 @@ const EditTransactionForm = ({ data }: { data?: UpdateTransactionFormValues }) =
                   />
                 )}
 
-                <TransactionBaseInfo
+                <TransactionBaseForm
                   form={form as UseFormReturn<z.input<typeof transactionSchema>>}
                 />
 

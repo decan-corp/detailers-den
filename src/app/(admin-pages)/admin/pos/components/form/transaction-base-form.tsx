@@ -23,7 +23,7 @@ import { useMemo } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
-const TransactionBaseInfo = ({
+const TransactionBaseForm = ({
   form,
 }: {
   form: UseFormReturn<z.input<typeof transactionSchema>>;
@@ -258,4 +258,4 @@ const TransactionBaseInfo = ({
   );
 };
 
-export default TransactionBaseInfo;
+export default TransactionBaseForm;

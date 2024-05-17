@@ -20,7 +20,7 @@ import { createTransactionSchema } from 'src/schemas/transactions';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import ServiceList, { defaultTransactionServiceItem } from '../components/form/service-list';
-import TransactionBaseInfo from '../components/form/transaction-base-info';
+import TransactionBaseForm from '../components/form/transaction-base-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -89,7 +89,7 @@ const Page = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
-                <TransactionBaseInfo form={form} />
+                <TransactionBaseForm form={form} />
 
                 <Separator className="opacity-70" />
 
