@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const Dashboard = async () => {
   const { user } = await validateRequest();
 
-  if (user && ![Role.Admin].includes(user.role)) {
+  if (user && ![Role.Admin, Role.Cashier].includes(user.role)) {
     redirect(AdminRoute.POS);
   }
 
