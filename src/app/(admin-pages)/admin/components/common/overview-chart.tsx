@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-continue */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable @typescript-eslint/no-for-in-array */
@@ -6,8 +7,8 @@ import { Entity } from 'src/constants/entities';
 
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { useMemo } from 'react';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { ReactElement, useMemo } from 'react';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const dateFormat = 'MM-DD';
 
@@ -39,11 +40,14 @@ const TransactionsCountChart = ({
   const data = useMemo(() => {
     const now = dayjs();
     const list = [];
-    const isFutureDate = dayjs(endDate).isAfter(dayjs().endOf('day'));
-    const diff = dayjs(isFutureDate ? dayjs() : endDate).diff(startDate, 'day');
+    const endOfToday = dayjs().endOf('day');
+    const isFutureDate = dayjs(endDate).isAfter(endOfToday);
+
+    const derivedEndDate = isFutureDate ? endOfToday : endDate;
+    const diff = dayjs(derivedEndDate).diff(startDate, 'day');
 
     for (let key = diff; key !== -1; key -= 1) {
-      const day = now.subtract(key, 'day').format(dateFormat);
+      const day = dayjs(derivedEndDate).subtract(key, 'day').format(dateFormat);
       const transactionCount = transactions.find(({ name }) => name === day);
 
       if (transactionCount) {
@@ -74,7 +78,7 @@ const TransactionsCountChart = ({
           axisLine={false}
           tickFormatter={(value) => `${value}`}
         />
-        {/* <Tooltip /> */}
+        <Tooltip content={CustomTooltip as unknown as ReactElement} />
         <Bar
           dataKey="total"
           fill="#adfa1d"
@@ -84,6 +88,29 @@ const TransactionsCountChart = ({
       </BarChart>
     </ResponsiveContainer>
   );
+};
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: {
+  active: boolean;
+  payload: { value: number }[];
+  label: string;
+}) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="space-y-1 rounded-lg border border-border bg-background p-4 opacity-90">
+        <div className="font-medium">
+          {dayjs(label === 'Now' ? dayjs() : label, 'MM-DD').format('MMM DD (dddd)')}
+        </div>
+        <div className="font-medium">Count: {payload?.[0]?.value}</div>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default TransactionsCountChart;
