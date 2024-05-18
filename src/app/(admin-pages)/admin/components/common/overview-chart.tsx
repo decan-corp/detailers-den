@@ -39,7 +39,8 @@ const TransactionsCountChart = ({
   const data = useMemo(() => {
     const now = dayjs();
     const list = [];
-    const diff = dayjs(endDate).diff(startDate, 'day');
+    const isFutureDate = dayjs(endDate).isAfter(dayjs().endOf('day'));
+    const diff = dayjs(isFutureDate ? dayjs() : endDate).diff(startDate, 'day');
 
     for (let key = diff; key !== -1; key -= 1) {
       const day = now.subtract(key, 'day').format(dateFormat);
