@@ -12,9 +12,6 @@ import { DashboardTab } from '../tabs-container';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 
-// TODO: add filters for crew, date range and frequency (daily, weekly monthly)
-// TODO: replace list type of card content with charts
-
 const initialDate = {
   from: dayjs().startOf('week').toISOString(),
   to: dayjs().endOf('week').toISOString(),
