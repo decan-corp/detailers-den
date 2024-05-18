@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getCrewEarnings } from 'src/actions/crew-earnings/get-crew-earnings';
 import { Entity } from 'src/constants/entities';
+import { formatAmount } from 'src/utils/format';
 import { getInitials } from 'src/utils/formatters';
 
 import { useQuery } from '@tanstack/react-query';
@@ -46,7 +47,7 @@ const CrewTransactions = ({ startDate, endDate }: { startDate: string; endDate: 
               <p className="text-sm font-medium leading-none">{crewEarning.crewName}</p>
               <p className="text-sm text-muted-foreground">{crewEarning.role}</p>
             </div>
-            <div className="ml-auto font-medium">Php {crewEarning.amount}</div>
+            <div className="ml-auto font-medium">{formatAmount(crewEarning.amount)}</div>
           </div>
         ))}
       {!isLoading && crewEarnings.length === 0 && (

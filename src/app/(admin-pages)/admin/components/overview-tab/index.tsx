@@ -6,6 +6,7 @@ import ReceiptIcon from 'public/icons/receipt.svg';
 import { getTotalRevenue } from 'src/actions/transactions/get-total-revenue';
 import { getTotalTransactionCount } from 'src/actions/transactions/get-total-transactions-count';
 import { Entity } from 'src/constants/entities';
+import { formatAmount } from 'src/utils/format';
 
 import OverviewChart from './overview-chart';
 
@@ -104,7 +105,7 @@ const OverviewTab = () => {
               <Skeleton className="h-8" />
             ) : (
               <div className="text-2xl font-bold">
-                Php {currentMonthRevenue?.currentRevenue ?? 0}
+                {formatAmount(currentMonthRevenue?.currentRevenue ?? 0)}
               </div>
             )}
             {isLoadingCurrentMonthRevenue ? (
@@ -161,7 +162,9 @@ const OverviewTab = () => {
             {isLoadingYearlyRevenue ? (
               <Skeleton className="h-8" />
             ) : (
-              <div className="text-2xl font-bold">Php {yearlyRevenue?.currentRevenue || 0}</div>
+              <div className="text-2xl font-bold">
+                {formatAmount(yearlyRevenue?.currentRevenue || 0)}
+              </div>
             )}
           </CardContent>
         </Card>

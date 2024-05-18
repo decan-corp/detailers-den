@@ -16,6 +16,7 @@ import { Role } from 'src/constants/common';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
 import useClientSession from 'src/hooks/use-client-session';
 import { servicesTable } from 'src/schema';
+import { formatAmount } from 'src/utils/format';
 
 import { useServiceFormStore } from './data-form-dialog';
 import { useServiceAlertDialogStore } from './data-table';
@@ -41,18 +42,27 @@ export const serviceColumns: ColumnDef<ServiceColumnsType>[] = [
   {
     accessorKey: 'description',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+    cell: ({ row }) => {
+      const { description } = row.original;
+
+      return <div className="max-w-80 whitespace-pre-wrap break-words">{description}</div>;
+    },
   },
   {
     accessorKey: 'priceMatrix',
     enableSorting: false,
     cell: ({ row }) => {
       const { priceMatrix } = row.original;
-      return priceMatrix.map((matrix) => (
-        <div key={matrix.vehicleSize} className="flex place-content-between">
-          <div>{matrix.vehicleSize}</div>
-          <div>{matrix.price}</div>
+      return (
+        <div className="space-y-1">
+          {priceMatrix.map((matrix) => (
+            <div key={matrix.vehicleSize} className="flex place-content-between gap-2">
+              <div>{matrix.vehicleSize}</div>
+              <div>{formatAmount(matrix.price)}</div>
+            </div>
+          ))}
         </div>
-      ));
+      );
     },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Price Matrix" />,
   },

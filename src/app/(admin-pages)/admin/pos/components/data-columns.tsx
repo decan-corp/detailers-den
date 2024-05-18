@@ -15,6 +15,7 @@ import { TransactionStatus } from 'src/constants/common';
 import { DATE_TABLE_DATE_FORMAT } from 'src/constants/date-format';
 import { AdminRoute } from 'src/constants/routes';
 import { transactionsTable } from 'src/schema';
+import { formatAmount } from 'src/utils/format';
 
 import { useTransactionAlertDialogStore } from './data-table';
 
@@ -51,10 +52,12 @@ export const transactionColumns: ColumnDef<
   {
     accessorKey: 'totalPrice',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Total Price" />,
+    cell: ({ row }) => formatAmount(row.original.totalPrice),
   },
   {
     accessorKey: 'discount',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Discount" />,
+    cell: ({ row }) => formatAmount(row.original.discount),
   },
   {
     accessorKey: 'vehicleSize',

@@ -11,6 +11,7 @@ import {
 import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { addService } from 'src/actions/services/add-service';
 import { updateService } from 'src/actions/services/update-service';
 import { VehicleSize } from 'src/constants/common';
@@ -112,7 +113,7 @@ const ServiceForm = ({
             <FormItem className="space-y-0">
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Textarea {...field} className="[field-sizing:content]" value={field.value || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
