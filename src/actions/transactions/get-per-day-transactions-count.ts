@@ -5,13 +5,14 @@ import { transactionsTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
+import dayjs from 'dayjs';
 import { and, between, count, eq, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getPerDayTransactionsCount = authAction(
   z.object({
-    startDate: z.date(),
-    endDate: z.date(),
+    startDate: z.string().datetime(),
+    endDate: z.string().datetime(),
   }),
   async ({ startDate, endDate }, { user }) => {
     if (user.role !== Role.Admin) {
@@ -28,7 +29,7 @@ export const getPerDayTransactionsCount = authAction(
       .from(transactionsTable)
       .where(
         and(
-          between(transactionsTable.createdAt, startDate, endDate),
+          between(transactionsTable.createdAt, dayjs(startDate).toDate(), dayjs(endDate).toDate()),
           eq(transactionsTable.status, TransactionStatus.Paid),
           isNull(transactionsTable.deletedAt)
         )

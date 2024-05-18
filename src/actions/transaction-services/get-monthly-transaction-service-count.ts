@@ -5,13 +5,14 @@ import { servicesTable, transactionServicesTable, transactionsTable } from 'src/
 import { db } from 'src/utils/db';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
+import dayjs from 'dayjs';
 import { and, between, count, desc, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getAvailedServiceCount = authAction(
   z.object({
-    startDate: z.date(),
-    endDate: z.date(),
+    startDate: z.string().datetime(),
+    endDate: z.string().datetime(),
   }),
   async ({ startDate, endDate }, { user }) => {
     if (user.role !== Role.Admin) {
@@ -32,7 +33,11 @@ export const getAvailedServiceCount = authAction(
       )
       .where(
         and(
-          between(transactionServicesTable.createdAt, startDate, endDate),
+          between(
+            transactionServicesTable.createdAt,
+            dayjs(startDate).toDate(),
+            dayjs(endDate).toDate()
+          ),
           eq(transactionsTable.status, TransactionStatus.Paid),
           isNull(transactionsTable.deletedAt)
         )

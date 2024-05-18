@@ -8,10 +8,9 @@ import { getTotalTransactionCount } from 'src/actions/transactions/get-total-tra
 import { Entity } from 'src/constants/entities';
 import { formatAmount } from 'src/utils/format';
 
-import OverviewChart from './overview-chart';
-
 import AvailedServiceCount from '../common/availed-service-count';
 import CrewTransactions from '../common/crew-transactions';
+import TransactionsCountChart from '../common/overview-chart';
 import { DashboardTab } from '../tabs-container';
 
 import { useQuery } from '@tanstack/react-query';
@@ -26,12 +25,12 @@ const OverviewTab = () => {
       const endDate = dayjs().endOf('month');
       const { data } = await getTotalRevenue({
         current: {
-          startDate: startDate.toDate(),
-          endDate: endDate.toDate(),
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
         },
         previous: {
-          startDate: startDate.subtract(1, 'month').toDate(),
-          endDate: endDate.subtract(1, 'month').toDate(),
+          startDate: startDate.subtract(1, 'month').toISOString(),
+          endDate: endDate.subtract(1, 'month').toISOString(),
         },
       });
       return data;
@@ -46,12 +45,12 @@ const OverviewTab = () => {
         const endDate = dayjs().endOf('month');
         const { data } = await getTotalTransactionCount({
           current: {
-            startDate: startDate.toDate(),
-            endDate: endDate.toDate(),
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
           },
           previous: {
-            startDate: startDate.subtract(1, 'month').toDate(),
-            endDate: endDate.subtract(1, 'month').toDate(),
+            startDate: startDate.subtract(1, 'month').toISOString(),
+            endDate: endDate.subtract(1, 'month').toISOString(),
           },
         });
         return data;
@@ -63,8 +62,8 @@ const OverviewTab = () => {
     queryFn: async () => {
       const { data } = await getTotalRevenue({
         current: {
-          startDate: dayjs().startOf('year').toDate(),
-          endDate: dayjs().endOf('year').toDate(),
+          startDate: dayjs().startOf('year').toISOString(),
+          endDate: dayjs().endOf('year').toISOString(),
         },
       });
       return data;
@@ -76,8 +75,8 @@ const OverviewTab = () => {
     queryFn: async () => {
       const { data } = await getTotalTransactionCount({
         current: {
-          startDate: dayjs().startOf('year').toDate(),
-          endDate: dayjs().endOf('year').toDate(),
+          startDate: dayjs().startOf('year').toISOString(),
+          endDate: dayjs().endOf('year').toISOString(),
         },
       });
       return data;
@@ -202,7 +201,10 @@ const OverviewTab = () => {
             <CardDescription>Number of transactions for the last 14 days.</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <OverviewChart />
+            <TransactionsCountChart
+              startDate={dayjs().subtract(13, 'days').startOf('day').toISOString()}
+              endDate={dayjs().endOf('day').toISOString()}
+            />
           </CardContent>
         </Card>
 
@@ -234,8 +236,8 @@ const OverviewTab = () => {
           </CardHeader>
           <CardContent>
             <AvailedServiceCount
-              startDate={dayjs().startOf('month').toDate()}
-              endDate={dayjs().endOf('month').toDate()}
+              startDate={dayjs().startOf('month').toISOString()}
+              endDate={dayjs().endOf('month').toISOString()}
             />
           </CardContent>
         </Card>
