@@ -1,3 +1,5 @@
+import 'server-only';
+
 /* eslint-disable no-var */
 /* eslint-disable vars-on-top */
 import { serverEnv } from 'src/env/server';
