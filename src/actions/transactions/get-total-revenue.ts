@@ -24,7 +24,7 @@ export const getTotalRevenue = authAction(
       .optional(),
   }),
   async ({ current, previous }, { user }) => {
-    if (user.role !== Role.Admin) {
+    if (![Role.Admin, Role.Cashier].includes(user.role)) {
       throw new SafeActionError('Forbidden Access');
     }
 
