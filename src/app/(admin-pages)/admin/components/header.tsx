@@ -41,7 +41,7 @@ const Header = async () => {
           <Link href={AdminRoute.Dashboard}>185 Detailers Den</Link>
         </div>
         <nav className="hidden items-center space-x-4 sm:flex lg:space-x-6">
-          {[Role.Admin].includes(user.role) && (
+          {[Role.Admin, Role.Cashier].includes(user.role) && (
             <HeaderLink route={AdminRoute.Dashboard}>Dashboard</HeaderLink>
           )}
           <HeaderLink route={AdminRoute.ManageUsers}>Manage</HeaderLink>

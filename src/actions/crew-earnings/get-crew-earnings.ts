@@ -20,7 +20,7 @@ export const getCrewEarnings = authAction(
     endDate: z.string().datetime(),
   }),
   async ({ startDate, endDate }, { user }) => {
-    if (user.role !== Role.Admin) {
+    if (![Role.Admin, Role.Cashier].includes(user.role)) {
       throw new SafeActionError('Forbidden Access');
     }
 
