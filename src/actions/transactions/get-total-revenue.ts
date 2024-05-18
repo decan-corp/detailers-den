@@ -6,19 +6,20 @@ import { db } from 'src/utils/db';
 import { getIncreaseInPercentage } from 'src/utils/formula';
 import { SafeActionError, authAction } from 'src/utils/safe-action';
 
+import dayjs from 'dayjs';
 import { and, between, eq, isNull, sum } from 'drizzle-orm';
 import { z } from 'zod';
 
 export const getTotalRevenue = authAction(
   z.object({
     current: z.object({
-      startDate: z.date(),
-      endDate: z.date(),
+      startDate: z.string().datetime(),
+      endDate: z.string().datetime(),
     }),
     previous: z
       .object({
-        startDate: z.date(),
-        endDate: z.date(),
+        startDate: z.string().datetime(),
+        endDate: z.string().datetime(),
       })
       .optional(),
   }),
@@ -32,7 +33,11 @@ export const getTotalRevenue = authAction(
       .from(transactionsTable)
       .where(
         and(
-          between(transactionsTable.createdAt, current.startDate, current.endDate),
+          between(
+            transactionsTable.createdAt,
+            dayjs(current.startDate).toDate(),
+            dayjs(current.endDate).toDate()
+          ),
           eq(transactionsTable.status, TransactionStatus.Paid),
           isNull(transactionsTable.deletedAt)
         )
@@ -46,7 +51,11 @@ export const getTotalRevenue = authAction(
         .from(transactionsTable)
         .where(
           and(
-            between(transactionsTable.createdAt, previous.startDate, previous.endDate),
+            between(
+              transactionsTable.createdAt,
+              dayjs(previous.startDate).toDate(),
+              dayjs(previous.endDate).toDate()
+            ),
             eq(transactionsTable.status, TransactionStatus.Paid),
             isNull(transactionsTable.deletedAt)
           )

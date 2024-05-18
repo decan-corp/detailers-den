@@ -1,3 +1,6 @@
+/* eslint-disable no-continue */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable @typescript-eslint/no-for-in-array */
 import { getPerDayTransactionsCount } from 'src/actions/transactions/get-per-day-transactions-count';
 import { Entity } from 'src/constants/entities';
 
@@ -8,13 +11,21 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 const dateFormat = 'MM-DD';
 
-const OverviewChart = () => {
-  const { data: transactionCounts = [] } = useQuery({
-    queryKey: [Entity.Metrics, Entity.Transactions, 'recent-transactions-count'],
+const TransactionsCountChart = ({
+  startDate,
+  endDate,
+}: {
+  startDate?: string;
+  endDate?: string;
+}) => {
+  const { data: transactions = [] } = useQuery({
+    queryKey: [Entity.Metrics, Entity.Transactions, 'transactions-count', startDate, endDate],
     queryFn: async () => {
+      if (!startDate || !endDate) return [];
+
       const { data: records } = await getPerDayTransactionsCount({
-        startDate: dayjs().subtract(13, 'days').startOf('day').toDate(),
-        endDate: dayjs().endOf('day').toDate(),
+        startDate,
+        endDate,
       });
 
       return (records || []).map((record) => ({
@@ -22,15 +33,17 @@ const OverviewChart = () => {
         total: record.count,
       }));
     },
+    enabled: !!startDate && !!endDate,
   });
 
   const data = useMemo(() => {
     const now = dayjs();
     const list = [];
+    const diff = dayjs(endDate).diff(startDate, 'day');
 
-    for (let key = 13; key !== -1; key -= 1) {
+    for (let key = diff; key !== -1; key -= 1) {
       const day = now.subtract(key, 'day').format(dateFormat);
-      const transactionCount = transactionCounts.find(({ name }) => name === day);
+      const transactionCount = transactions.find(({ name }) => name === day);
 
       if (transactionCount) {
         list.push({
@@ -46,7 +59,7 @@ const OverviewChart = () => {
     }
 
     return list;
-  }, [transactionCounts]);
+  }, [endDate, startDate, transactions]);
 
   return (
     <ResponsiveContainer width="100%" height={350}>
@@ -72,4 +85,4 @@ const OverviewChart = () => {
   );
 };
 
-export default OverviewChart;
+export default TransactionsCountChart;

@@ -5,7 +5,7 @@ import { Entity } from 'src/constants/entities';
 
 import { useQuery } from '@tanstack/react-query';
 
-const AvailedServiceCount = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
+const AvailedServiceCount = ({ startDate, endDate }: { startDate: string; endDate: string }) => {
   const { data: records = [], isLoading } = useQuery({
     queryKey: [Entity.Metrics, Entity.TransactionServices, 'availment-count', startDate, endDate],
     queryFn: async () => {
@@ -18,7 +18,7 @@ const AvailedServiceCount = ({ startDate, endDate }: { startDate: Date; endDate:
   });
 
   return (
-    <div className="max-h-[390px] space-y-8 overflow-auto">
+    <div className="max-h-[390px] min-h-[144px] space-y-8 overflow-auto">
       {isLoading &&
         Array(5)
           .fill(null)
@@ -43,6 +43,9 @@ const AvailedServiceCount = ({ startDate, endDate }: { startDate: Date; endDate:
             <div className="ml-auto font-medium">{record.serviceCount}</div>
           </div>
         ))}
+      {!isLoading && records.length === 0 && (
+        <div className="py-12 text-center text-muted-foreground">No results found</div>
+      )}
     </div>
   );
 };

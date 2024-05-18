@@ -6,6 +6,7 @@ import useSetParams from 'src/hooks/use-set-params';
 import AnalyticsTab from './analytics-tab';
 import CrewEarningsTab from './crew-earnings-tab';
 import OverviewTab from './overview-tab';
+import TransactionsTab from './transactions-tab';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -13,6 +14,7 @@ export enum DashboardTab {
   Overview = 'overview',
   Analytics = 'analytics',
   CrewEarnings = 'crew-earnings',
+  Transactions = 'transactions',
 }
 export enum DashboardParam {
   Tab = 'tab',
@@ -40,6 +42,12 @@ const TabsContainer = () => {
           Crew Earnings
         </TabsTrigger>
         <TabsTrigger
+          value={DashboardTab.Transactions}
+          onClick={() => setParams(DashboardParam.Tab, DashboardTab.Transactions)}
+        >
+          Transactions
+        </TabsTrigger>
+        <TabsTrigger
           value={DashboardTab.Analytics}
           onClick={() => setParams(DashboardParam.Tab, DashboardTab.Analytics)}
           disabled
@@ -50,6 +58,7 @@ const TabsContainer = () => {
       <OverviewTab />
       <CrewEarningsTab />
       <AnalyticsTab />
+      <TransactionsTab />
     </Tabs>
   );
 };
