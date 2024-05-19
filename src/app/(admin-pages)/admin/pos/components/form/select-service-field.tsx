@@ -70,9 +70,7 @@ const SelectServiceField = ({
             <span className="font-semibold">{option.serviceName}</span>
             <span className="mx-1 text-muted-foreground">{formatAmount(price || 0)}</span>
             <span className="mx-1">-</span>
-            <span className="text-muted-foreground">
-              {option.description?.slice(0, 100 - option.serviceName.length)}
-            </span>
+            <span className="text-muted-foreground">{option.description}</span>
           </>
         ),
       };
