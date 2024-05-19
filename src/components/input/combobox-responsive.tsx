@@ -61,7 +61,7 @@ const List = ({ onSelect, groupedOptions, value }: ListProps) => {
       for (const option of options) {
         const textContent = extractTextFromJSX(option.label);
 
-        if (textContent.toLowerCase().includes(search)) {
+        if (textContent.toLowerCase().includes(search.toLowerCase())) {
           if (!results[groupKey]) {
             results[groupKey] = [option];
           } else {
@@ -84,13 +84,14 @@ const List = ({ onSelect, groupedOptions, value }: ListProps) => {
             <CommandGroup key={groupLabel} heading={groupLabel}>
               {options.map((option) => (
                 <CommandItem
+                  className="max-w-[600px]"
                   key={option.value}
                   value={option.value}
                   onSelect={(selectValue) => {
                     onSelect(selectValue);
                   }}
                 >
-                  {option.label}
+                  <div className="w-full">{option.label}</div>
                   <CheckIcon
                     className={cn(
                       'ml-auto h-4 w-4',

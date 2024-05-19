@@ -67,9 +67,7 @@ const SelectCrewField = ({
         <>
           <span className="font-semibold">{option.name}</span>
           <span className="mx-1">-</span>
-          <span className="text-muted-foreground">
-            {option.role?.slice(0, 100 - option.name.length)}
-          </span>
+          <span className="text-muted-foreground">{option.role}</span>
         </>
       ),
     });
