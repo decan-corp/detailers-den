@@ -11,6 +11,7 @@ import {
 import { Icons } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
 import { addUser } from 'src/actions/users/add-user';
+import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
 import { Entity } from 'src/constants/entities';
 import { createUserSchema, userSchema } from 'src/schemas/users';
 import { handleSafeActionError } from 'src/utils/error-handling';
@@ -68,7 +69,9 @@ const AddUserForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem className="space-y-0">
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="relative">
+                Password <RequiredIndicatorIcon />
+              </FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
@@ -81,7 +84,9 @@ const AddUserForm = () => {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem className="space-y-0">
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel className="relative">
+                Confirm Password <RequiredIndicatorIcon />
+              </FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>

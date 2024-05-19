@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
 import { VehicleSize } from 'src/constants/common';
 
 import { ServiceFormValues } from './service-form';
@@ -59,7 +60,9 @@ const ServiceMatrixForm = ({ form }: { form: UseFormReturn<ServiceFormValues> })
                 name={`priceMatrix.${index}.vehicleSize`}
                 render={({ field }) => (
                   <FormItem className="space-y-0">
-                    <FormLabel>Vehicle Size</FormLabel>
+                    <FormLabel className="relative">
+                      Vehicle Size <RequiredIndicatorIcon />
+                    </FormLabel>
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);

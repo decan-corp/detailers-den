@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { addService } from 'src/actions/services/add-service';
 import { updateService } from 'src/actions/services/update-service';
+import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
 import { VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { createServiceSchema } from 'src/schemas/services';
@@ -98,7 +99,9 @@ const ServiceForm = ({
           name="serviceName"
           render={({ field }) => (
             <FormItem className="space-y-0">
-              <FormLabel>Service Name</FormLabel>
+              <FormLabel className="relative">
+                Service Name <RequiredIndicatorIcon />
+              </FormLabel>
               <FormControl>
                 <Input {...field} value={field.value || ''} />
               </FormControl>
