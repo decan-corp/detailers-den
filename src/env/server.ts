@@ -3,11 +3,11 @@ import { z } from 'zod';
 
 export const serverEnv = createEnv({
   server: {
-    RESEND_API_KEY: z.string().min(1),
     DATABASE_URL: z.string().min(1),
+    SENDGRID_API_KEY: z.string().min(1),
   },
   runtimeEnv: {
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
     DATABASE_URL: process.env.DATABASE_URL,
+    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
   },
 });

@@ -1,15 +1,14 @@
 'use server';
 
 import { AdminRoute } from 'src/constants/routes';
-import { serverEnv } from 'src/env/server';
 import { resetPasswordTokensTable, usersTable } from 'src/schema';
 import { db } from 'src/utils/db';
 import { SafeActionError, action } from 'src/utils/safe-action';
+import { makeVerifiedSender, sendgrid } from 'src/utils/sendgrid';
 
 import dayjs from 'dayjs';
 import { and, eq, gt } from 'drizzle-orm';
 import { headers } from 'next/headers';
-import { Resend } from 'resend';
 import { z } from 'zod';
 
 export const forgotPassword = action(
@@ -56,10 +55,8 @@ export const forgotPassword = action(
     const appUrl = headersList.get('origin');
     const resetPasswordLink = `${appUrl}${AdminRoute.ResetPassword}/${resetPasswordTokenId}`;
 
-    const resend = new Resend(serverEnv.RESEND_API_KEY);
-
-    await resend.emails.send({
-      from: 'no-reply@185dd.pro',
+    await sendgrid.send({
+      from: makeVerifiedSender('no-reply'),
       to: email,
       subject: 'Reset Your 185 Detailers Den Password',
       html: `

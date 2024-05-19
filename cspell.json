@@ -30,7 +30,8 @@
     "turso",
     "libsql",
     "unixepoch",
-    "neondatabase"
+    "neondatabase",
+    "sendgrid"
   ],
   "ignorePaths": [
     "node_modules/",
