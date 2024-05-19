@@ -1,6 +1,9 @@
+import { AdminRoute } from 'src/constants/routes';
+
 import LoginForm from './components/login-form';
 
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Login',
@@ -23,14 +26,14 @@ const Login = () => (
           Enter your credentials below to login
         </div>
         <LoginForm />
-        {/* <div className="mt-4 text-center"> */}
-        {/*   <Link */}
-        {/*     className="text-sm text-muted-foreground underline hover:brightness-125" */}
-        {/*     href={AdminRoute.ForgotPassword} */}
-        {/*   > */}
-        {/*     Forgot Password */}
-        {/*   </Link> */}
-        {/* </div> */}
+        <div className="mt-4 text-center">
+          <Link
+            className="text-sm text-muted-foreground underline hover:brightness-125"
+            href={AdminRoute.ForgotPassword}
+          >
+            Forgot Password
+          </Link>
+        </div>
       </div>
     </div>
   </main>
