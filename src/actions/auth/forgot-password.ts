@@ -16,6 +16,7 @@ export const forgotPassword = action(
     email: z.string().email(),
   }),
   async ({ email }) => {
+    // TODO: implement rate limit using upstash
     const [user] = await db
       .select({ id: usersTable.id, name: usersTable.name })
       .from(usersTable)

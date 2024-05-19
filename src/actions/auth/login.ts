@@ -20,6 +20,7 @@ export const login = action(
     password: z.string().min(1),
   }),
   async ({ email, password }) => {
+    // TODO: implement rate limit using upstash
     const [user] = await db
       .select()
       .from(usersTable)

@@ -31,7 +31,8 @@
     "libsql",
     "unixepoch",
     "neondatabase",
-    "sendgrid"
+    "sendgrid",
+    "upstash"
   ],
   "ignorePaths": [
     "node_modules/",

@@ -1,39 +1,16 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
+import { ComboBoxResponsive } from 'src/components/input/combobox-responsive';
 import { LocalStorageKey } from 'src/constants/storage-keys';
 import { useRecentOptions } from 'src/hooks/use-recent-options';
 import { useServiceOptions } from 'src/queries/services';
 import { transactionSchema } from 'src/schemas/transactions';
+import { formatAmount } from 'src/utils/format';
 
 import { useMemo } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-
-const ServiceOption = ({
-  id,
-  serviceName,
-  description,
-}: {
-  id: string;
-  serviceName: string;
-  description?: string | null;
-}) => (
-  <SelectItem value={id}>
-    <span className="font-semibold">{serviceName}</span> -{' '}
-    <span className="text-muted-foreground">{description?.slice(0, 100 - serviceName.length)}</span>
-  </SelectItem>
-);
 
 const SelectServiceField = ({
   index,
@@ -57,7 +34,7 @@ const SelectServiceField = ({
   const serviceState = formState.transactionServices[index];
   const selectedServiceIds = formState.transactionServices.map(({ serviceId }) => serviceId);
 
-  const filteredOptionsBySize = useMemo(
+  const filteredBySize = useMemo(
     () =>
       optionsRef.filter(({ priceMatrix }) =>
         priceMatrix.map(({ vehicleSize }) => vehicleSize).includes(formState.vehicleSize)
@@ -67,10 +44,10 @@ const SelectServiceField = ({
 
   const options = useMemo(
     () =>
-      filteredOptionsBySize.filter(
+      filteredBySize.filter(
         (option) => option.id === serviceState.serviceId || !selectedServiceIds.includes(option.id)
       ),
-    [filteredOptionsBySize, serviceState.serviceId, selectedServiceIds]
+    [filteredBySize, serviceState.serviceId, selectedServiceIds]
   );
 
   const mostRecentOptions = useMemo(
@@ -82,10 +59,32 @@ const SelectServiceField = ({
     [storedRecentSelections, options]
   );
 
-  const hasBothOptions = mostRecentOptions.length > 0 && leastRecentOptions.length > 0;
+  const groupedOptions = useMemo(() => {
+    const mapBy = (option: (typeof optionsRef)[number]) => {
+      const { price } =
+        option.priceMatrix.find(({ vehicleSize }) => vehicleSize === formState.vehicleSize) || {};
+      return {
+        value: option.id,
+        label: (
+          <>
+            <span className="font-semibold">{option.serviceName}</span>
+            <span className="mx-1 text-muted-foreground">{formatAmount(price || 0)}</span>
+            <span className="mx-1">-</span>
+            <span className="text-muted-foreground">
+              {option.description?.slice(0, 100 - option.serviceName.length)}
+            </span>
+          </>
+        ),
+      };
+    };
+    return {
+      'Most Recent': mostRecentOptions.map(mapBy),
+      Options: leastRecentOptions.map(mapBy),
+    };
+  }, [formState.vehicleSize, leastRecentOptions, mostRecentOptions]);
 
   const onSelect = (serviceId: string, idx: number) => {
-    const service = filteredOptionsBySize.find(({ id }) => id === serviceId);
+    const service = filteredBySize.find(({ id }) => id === serviceId);
     const priceMatrix = service?.priceMatrix.find(
       ({ vehicleSize }) => vehicleSize === formState.vehicleSize
     );
@@ -110,39 +109,12 @@ const SelectServiceField = ({
           <FormLabel className="relative">
             Service <RequiredIndicatorIcon />
           </FormLabel>
-          <Select onValueChange={(value) => onSelect(value, index)} value={field.value}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select service..." />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectGroup>
-                {hasBothOptions && (
-                  <SelectLabel className="text-muted-foreground/60">Most Recent</SelectLabel>
-                )}
-                {mostRecentOptions.map(({ id, serviceName, description }) => (
-                  <ServiceOption
-                    key={id}
-                    id={id}
-                    serviceName={serviceName}
-                    description={description}
-                  />
-                ))}
-              </SelectGroup>
-              {hasBothOptions && <Separator className="my-1" />}
-              <SelectGroup>
-                {leastRecentOptions.map(({ id, serviceName, description }) => (
-                  <ServiceOption
-                    key={id}
-                    id={id}
-                    serviceName={serviceName}
-                    description={description}
-                  />
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <ComboBoxResponsive
+            value={field.value}
+            onSelect={(value) => onSelect(value, index)}
+            placeholder="Select service..."
+            groupedOptions={groupedOptions}
+          />
           <FormMessage />
         </FormItem>
       )}
