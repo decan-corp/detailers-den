@@ -28,7 +28,7 @@ const TabsContainer = () => {
 
   return (
     <Tabs value={tab || DashboardTab.Overview} className="space-y-4">
-      <TabsList>
+      <TabsList className="grid h-full grid-cols-2 gap-y-2 sm:flex sm:w-fit">
         <TabsTrigger
           value={DashboardTab.Overview}
           onClick={() => setParams(DashboardParam.Tab, DashboardTab.Overview)}
