@@ -1,4 +1,5 @@
-import { FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
 import { ComboBoxResponsive } from 'src/components/input/combobox-responsive';
 import { LocalStorageKey } from 'src/constants/storage-keys';
 import { useRecentOptions } from 'src/hooks/use-recent-options';
@@ -85,6 +86,9 @@ const SelectCrewField = ({
       disabled={isFetching}
       render={({ field }) => (
         <FormItem>
+          <FormLabel className="relative">
+            Crew <RequiredIndicatorIcon />
+          </FormLabel>
           <ComboBoxResponsive
             value={field.value}
             onSelect={(value) => onSelect(value, index)}
