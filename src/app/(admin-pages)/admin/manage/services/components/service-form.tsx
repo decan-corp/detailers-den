@@ -138,7 +138,10 @@ const ServiceForm = ({
         <ServiceMatrixForm form={form} />
 
         <DialogFooter>
-          <Button type="submit" disabled={isAddingService || isUpdatingService}>
+          <Button
+            type="submit"
+            disabled={isAddingService || isUpdatingService || !form.formState.isDirty}
+          >
             {(isAddingService || isUpdatingService) && (
               <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
             )}

@@ -130,7 +130,7 @@ const EditTransactionForm = ({ data }: { data?: UpdateTransactionFormValues }) =
                 <ServiceList form={form as UseFormReturn<z.input<typeof transactionSchema>>} />
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button type="submit" disabled={isPending}>
+                <Button type="submit" disabled={isPending || !form.formState.isDirty}>
                   {isPending && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
                   Save
                 </Button>

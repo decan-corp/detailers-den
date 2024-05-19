@@ -23,7 +23,9 @@ export const priceMatrixSchema = z
     }
   );
 
-export const serviceSchema = createInsertSchema(servicesTable)
+export const serviceSchema = createInsertSchema(servicesTable, {
+  serviceName: (schema) => schema.serviceName.min(1),
+})
   .merge(
     z.object({
       priceMatrix: priceMatrixSchema,
