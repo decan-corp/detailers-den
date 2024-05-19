@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
 import { Role } from 'src/constants/common';
 import { userSchema } from 'src/schemas/users';
 
@@ -22,7 +23,9 @@ const BaseUserForm = ({ form }: { form: UseFormReturn<z.input<typeof userSchema>
       name="name"
       render={({ field }) => (
         <FormItem className="space-y-0">
-          <FormLabel>Name</FormLabel>
+          <FormLabel className="relative">
+            Name <RequiredIndicatorIcon />
+          </FormLabel>
           <FormControl>
             <Input {...field} />
           </FormControl>
@@ -35,7 +38,9 @@ const BaseUserForm = ({ form }: { form: UseFormReturn<z.input<typeof userSchema>
       name="email"
       render={({ field }) => (
         <FormItem className="space-y-0">
-          <FormLabel>Email</FormLabel>
+          <FormLabel className="relative">
+            Email <RequiredIndicatorIcon />
+          </FormLabel>
           <FormControl>
             <Input type="email" {...field} />
           </FormControl>
@@ -49,7 +54,9 @@ const BaseUserForm = ({ form }: { form: UseFormReturn<z.input<typeof userSchema>
         name="role"
         render={({ field }) => (
           <FormItem className="w-full space-y-0">
-            <FormLabel>Role</FormLabel>
+            <FormLabel className="relative">
+              Role <RequiredIndicatorIcon />
+            </FormLabel>
             <Select
               onValueChange={(value) => form.setValue('role', value as Role)}
               value={field.value}

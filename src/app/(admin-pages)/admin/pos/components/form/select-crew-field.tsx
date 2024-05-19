@@ -1,14 +1,6 @@
-import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
+import { ComboBoxResponsive } from 'src/components/input/combobox-responsive';
 import { LocalStorageKey } from 'src/constants/storage-keys';
 import { useRecentOptions } from 'src/hooks/use-recent-options';
 import { useCrewOptions } from 'src/queries/users';
@@ -20,19 +12,6 @@ import { UseFormReturn, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 export const defaultTransactionCrewItem = { id: createId() };
-const ServiceOption = ({
-  id,
-  crewName,
-  role,
-}: {
-  id: string;
-  crewName: string;
-  role?: string | null;
-}) => (
-  <SelectItem value={id}>
-    {crewName} - {role?.slice(0, 100 - crewName.length)}
-  </SelectItem>
-);
 
 const SelectCrewField = ({
   index,
@@ -67,16 +46,38 @@ const SelectCrewField = ({
     saveRecentSelections(crewId);
   };
 
-  const options = optionsRef.filter(
-    ({ id }) => id === serviceBy.crewId || !selectedCrews.includes(id)
+  const options = useMemo(
+    () => optionsRef.filter(({ id }) => id === serviceBy.crewId || !selectedCrews.includes(id)),
+    [optionsRef, selectedCrews, serviceBy.crewId]
   );
 
-  const mostRecentOptions = options.filter((option) => storedRecentSelections.includes(option.id));
-  const leastRecentOptions = options.filter(
-    (option) => !storedRecentSelections.includes(option.id)
+  const mostRecentOptions = useMemo(
+    () => options.filter((option) => storedRecentSelections.includes(option.id)),
+    [options, storedRecentSelections]
+  );
+  const leastRecentOptions = useMemo(
+    () => options.filter((option) => !storedRecentSelections.includes(option.id)),
+    [options, storedRecentSelections]
   );
 
-  const hasBothOptions = mostRecentOptions.length > 0 && leastRecentOptions.length > 0;
+  const groupedOptions = useMemo(() => {
+    const mapBy = (option: (typeof optionsRef)[number]) => ({
+      value: option.id,
+      label: (
+        <>
+          <span className="font-semibold">{option.name}</span>
+          <span className="mx-1">-</span>
+          <span className="text-muted-foreground">
+            {option.role?.slice(0, 100 - option.name.length)}
+          </span>
+        </>
+      ),
+    });
+    return {
+      'Most Recent': mostRecentOptions.map(mapBy),
+      Options: leastRecentOptions.map(mapBy),
+    };
+  }, [leastRecentOptions, mostRecentOptions]);
 
   return (
     <FormField
@@ -85,29 +86,15 @@ const SelectCrewField = ({
       disabled={isFetching}
       render={({ field }) => (
         <FormItem>
-          <Select onValueChange={(value) => onSelect(value, index)} value={field.value || ''}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select crew..." />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectGroup>
-                {hasBothOptions && (
-                  <SelectLabel className="text-muted-foreground/60">Most Recent</SelectLabel>
-                )}
-                {mostRecentOptions.map(({ id, role, name }) => (
-                  <ServiceOption key={id} id={id} crewName={name} role={role} />
-                ))}
-              </SelectGroup>
-              {hasBothOptions && <Separator className="my-1" />}
-              <SelectGroup>
-                {leastRecentOptions.map(({ id, role, name }) => (
-                  <ServiceOption key={id} id={id} crewName={name} role={role} />
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <FormLabel className="relative">
+            Crew <RequiredIndicatorIcon />
+          </FormLabel>
+          <ComboBoxResponsive
+            value={field.value}
+            onSelect={(value) => onSelect(value, index)}
+            placeholder="Select crew..."
+            groupedOptions={groupedOptions}
+          />
           <FormMessage />
         </FormItem>
       )}

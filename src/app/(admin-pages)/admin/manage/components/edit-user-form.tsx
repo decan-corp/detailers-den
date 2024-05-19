@@ -58,7 +58,7 @@ const EditUserForm = ({ user }: { user?: EditUserFormValues }) => {
         <BaseUserForm form={form as unknown as UseFormReturn<z.input<typeof userSchema>>} />
 
         <DialogFooter>
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
             {isSaving && <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />}
             Save
           </Button>
