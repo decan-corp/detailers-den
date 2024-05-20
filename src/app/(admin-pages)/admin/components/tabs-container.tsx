@@ -72,7 +72,7 @@ const TabsContainer = () => {
               key={value}
               className={twJoin(
                 'text-2xl font-medium text-muted-foreground transition-colors hover:text-primary hover:no-underline',
-                tab === value && 'font-bold text-primary'
+                value === selectedTab.value && 'font-bold text-primary'
               )}
               variant="link"
               disabled={disabled}
