@@ -68,6 +68,8 @@ const TabsContainer = () => {
         <DrawerContent className="space-y-6 pb-6 text-center">
           {tabsList.map(({ value, label, disabled }) => (
             <Button
+              asChild
+              key={value}
               className={twJoin(
                 'text-2xl font-medium text-muted-foreground transition-colors hover:text-primary hover:no-underline',
                 tab === value && 'font-bold text-primary'
@@ -85,6 +87,7 @@ const TabsContainer = () => {
       <TabsList className="hidden sm:flex sm:w-fit">
         {tabsList.map(({ label, value, disabled }) => (
           <TabsTrigger
+            key={value}
             value={value}
             disabled={disabled}
             onClick={() => setParams(DashboardParam.Tab, value)}
