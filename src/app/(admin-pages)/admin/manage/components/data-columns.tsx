@@ -40,9 +40,7 @@ export const userColumns: ColumnDef<
   },
   {
     accessorKey: 'serviceCutModifier',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Service Cut % Modifier" />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Cut Modifier" />,
   },
   {
     accessorKey: 'createdAt',
