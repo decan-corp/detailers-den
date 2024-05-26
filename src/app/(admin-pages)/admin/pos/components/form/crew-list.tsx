@@ -2,8 +2,10 @@ import { Button } from '@/components/ui/button';
 import { transactionSchema } from 'src/schemas/transactions';
 
 import CrewFormItem from './crew-form-item';
-import { defaultServiceByItem } from './service-list';
+import { makeDefaultServiceByItem } from './service-list';
 
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { cloneDeep } from 'lodash';
 import { PlusCircleIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
@@ -16,6 +18,9 @@ const CrewList = ({
   serviceIndex: number;
   form: UseFormReturn<z.input<typeof transactionSchema>>;
 }) => {
+  const [parent] = useAutoAnimate({
+    duration: 250,
+  });
   const watchedData = useWatch();
 
   const formState = useMemo(
@@ -29,21 +34,26 @@ const CrewList = ({
   const serviceState = formState.transactionServices[serviceIndex];
 
   const onAddCrew = () => {
-    // TODO: auto compute/auto fill crew earned amount field upon adding crew in edit transaction form
-    // TODO: do not recompute crew earned amount when change the service price since the computation will already handle
-    // it and since this is override. They just have to enter the desired override amount.
-    // TODO: do not recompute crew earned amount when adding a crew
-    const state = [...formState.transactionServices];
-    state[serviceIndex].serviceBy.push(defaultServiceByItem);
-    form.setValue('transactionServices', state);
+    const serviceBy = cloneDeep(serviceState.serviceBy);
+    const defaultServiceByItem = makeDefaultServiceByItem();
+
+    serviceBy.push(defaultServiceByItem);
+    form.setValue(`transactionServices.${serviceIndex}.serviceBy`, serviceBy);
   };
+
+  const crewListError = form.formState.errors.transactionServices?.[serviceIndex]?.serviceBy?.root;
 
   return (
     <div className="space-y-4">
-      <div className="font-semibold">Assign Crews</div>
-      <div className="space-y-2">
+      <div>
+        <div className="font-semibold">Assign Crews</div>
+        {crewListError && (
+          <div className="text-sm font-medium text-destructive">{crewListError.message}</div>
+        )}
+      </div>
+      <div className="space-y-2" ref={parent}>
         {serviceState.serviceBy.map(({ id }, index) => (
-          <CrewFormItem key={id} index={index} serviceIndex={serviceIndex} form={form} />
+          <CrewFormItem key={id || index} index={index} serviceIndex={serviceIndex} form={form} />
         ))}
       </div>
       <Button className="w-full" type="button" variant="outline" onClick={onAddCrew}>

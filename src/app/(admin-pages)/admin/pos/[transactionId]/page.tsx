@@ -12,13 +12,16 @@ import {
 } from '@/components/ui/table';
 import { getEarningsPerService } from 'src/actions/crew-earnings/get-earnings-per-service';
 import { getTransaction } from 'src/actions/transactions/get-transactions';
+import { Role } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
+import useClientSession from 'src/hooks/use-client-session';
 
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { notFound } from 'next/navigation';
 
 const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
+  const { data: session, isLoading: isSessionLoading } = useClientSession();
   const { data: transaction, isLoading: isTransactionsLoading } = useQuery({
     queryKey: [Entity.Transactions, params.transactionId],
     queryFn: async () => {
@@ -39,7 +42,7 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
     enabled: !!params.transactionId,
   });
 
-  const isLoading = isTransactionsLoading || isTransactionServicesLoading;
+  const isLoading = isTransactionsLoading || isTransactionServicesLoading || isSessionLoading;
 
   if (isLoading) {
     return (
@@ -137,62 +140,84 @@ const ViewTransaction = ({ params }: { params: { transactionId: string } }) => {
           <h2 className="text-2xl font-bold tracking-tight">Availed Services</h2>
         </div>
         <div className="space-y-10">
-          {transactionServices?.map((transactionService, index) => (
-            <Card key={transactionService.id} className="">
-              <CardHeader>
-                <CardTitle>Service #{index + 1}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex flex-col gap-x-32 gap-y-6 py-4 sm:flex-row">
-                  <div className="space-y-1">
-                    <Label>Service Name</Label>
-                    <div className="mt-2 text-sm text-muted-foreground">
-                      {transactionService.serviceName}
+          {transactionServices?.map((transactionService, index) => {
+            const { serviceCutMatrix } = transactionService;
+            return (
+              <Card key={transactionService.id}>
+                <CardHeader>
+                  <CardTitle>Service #{index + 1}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex flex-col gap-x-32 gap-y-6 py-4 sm:flex-row">
+                    <div className="space-y-1">
+                      <Label>Service Name</Label>
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        {transactionService.serviceName}
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Price</Label>
-                    <div className="mt-2 text-sm text-muted-foreground">
-                      {transactionService.price}
+                    <div className="space-y-1">
+                      <Label>Price</Label>
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        {transactionService.price}
+                      </div>
                     </div>
+                    {[Role.Admin, Role.Accountant, Role.Cashier].includes(
+                      session?.role as Role
+                    ) && (
+                      <div className="space-y-1">
+                        <Label>Service Cut Matrix</Label>
+                        <div>
+                          {serviceCutMatrix.map((item) => (
+                            <div key={item.role} className="grid grid-cols-2 gap-4">
+                              <div className="mt-2 text-sm text-muted-foreground">{item.role}</div>
+                              <div className="mt-2 text-sm text-muted-foreground">
+                                {item.cutPercentage}%
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-1">
-                    <Label>Service Cut % Modifier</Label>
-                    <div className="mt-2 text-sm text-muted-foreground">
-                      {transactionService.serviceCutPercentage}%
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-2 space-y-2">
-                  <CardTitle>Crew Earnings</CardTitle>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[100px]">Crew Name</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Crew Service Cut %</TableHead>
-                        <TableHead>Computed Cut %</TableHead>
-                        <TableHead className="text-right">Amount Earned</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {transactionService.crewEarnings.map((crewEarning) => (
-                        <TableRow key={crewEarning.id}>
-                          <TableCell className="font-medium">{crewEarning.crewName}</TableCell>
-                          <TableCell>{crewEarning.role}</TableCell>
-                          <TableCell>{crewEarning.crewCutPercentage}%</TableCell>
-                          <TableCell>{crewEarning.computedServiceCutPercentage}%</TableCell>
-                          <TableCell className="text-right">
-                            PHP {crewEarning.amountEarned}
-                          </TableCell>
+                  <div className="mt-2 space-y-2">
+                    <CardTitle>Crew Earnings</CardTitle>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">Crew Name</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Modifier + Service Cut %</TableHead>
+                          <TableHead>Computed Cut %</TableHead>
+                          <TableHead className="text-right">Amount Earned</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                      </TableHeader>
+                      <TableBody>
+                        {transactionService.crewEarnings.map((crewEarning) => (
+                          <TableRow key={crewEarning.id}>
+                            <TableCell className="font-medium">{crewEarning.crewName}</TableCell>
+                            <TableCell>
+                              <span>{crewEarning.role}</span>
+                              <span className="ml-1 text-muted-foreground">
+                                (
+                                {serviceCutMatrix.find(({ role }) => role === crewEarning.role)
+                                  ?.cutPercentage || 0}
+                                %)
+                              </span>
+                            </TableCell>
+                            <TableCell>{crewEarning.crewCutPercentage}%</TableCell>
+                            <TableCell>{crewEarning.computedServiceCutPercentage}%</TableCell>
+                            <TableCell className="text-right">
+                              PHP {crewEarning.amountEarned}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>

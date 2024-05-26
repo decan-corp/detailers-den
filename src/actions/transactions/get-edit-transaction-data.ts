@@ -34,7 +34,7 @@ export const getEditTransactionData = authAction(z.string().cuid2(), async (tran
       id: crewEarningsTable.id,
       crewId: crewEarningsTable.crewId,
       transactionServiceId: crewEarningsTable.transactionServiceId,
-      ...([Role.Admin, Role.Accounting].includes(role) && {
+      ...([Role.Admin, Role.Accountant].includes(role) && {
         amount: crewEarningsTable.amount,
       }),
     })

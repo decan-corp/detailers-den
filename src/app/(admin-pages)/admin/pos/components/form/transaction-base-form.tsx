@@ -46,7 +46,7 @@ const TransactionBaseForm = ({
 
     const state = transactionServices
       .filter(({ serviceId }) => {
-        if (serviceId === '') return true;
+        if (!serviceId) return true;
 
         const service = serviceOptions.find(({ id }) => id === serviceId);
         const priceMatrix = service?.priceMatrix.find(

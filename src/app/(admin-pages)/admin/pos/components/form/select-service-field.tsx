@@ -1,9 +1,11 @@
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
 import { ComboBoxResponsive } from 'src/components/input/combobox-responsive';
+import { CrewRole } from 'src/constants/common';
 import { LocalStorageKey } from 'src/constants/storage-keys';
 import { useRecentOptions } from 'src/hooks/use-recent-options';
 import { useServiceOptions } from 'src/queries/services';
+import { useCrewOptions } from 'src/queries/users';
 import { transactionSchema } from 'src/schemas/transactions';
 import { formatAmount } from 'src/utils/format';
 
@@ -20,6 +22,7 @@ const SelectServiceField = ({
   form: UseFormReturn<z.input<typeof transactionSchema>>;
 }) => {
   const { data: optionsRef = [], isLoading: isFetching } = useServiceOptions();
+  const { data: crewOptions = [], isLoading: isFetchingCrew } = useCrewOptions();
   const { storedRecentSelections, saveRecentSelections } = useRecentOptions(
     LocalStorageKey.RecentSelectedService
   );
@@ -34,20 +37,12 @@ const SelectServiceField = ({
   const serviceState = formState.transactionServices[index];
   const selectedServiceIds = formState.transactionServices.map(({ serviceId }) => serviceId);
 
-  const filteredBySize = useMemo(
-    () =>
-      optionsRef.filter(({ priceMatrix }) =>
-        priceMatrix.map(({ vehicleSize }) => vehicleSize).includes(formState.vehicleSize)
-      ),
-    [formState.vehicleSize, optionsRef]
-  );
-
   const options = useMemo(
     () =>
-      filteredBySize.filter(
+      optionsRef.filter(
         (option) => option.id === serviceState.serviceId || !selectedServiceIds.includes(option.id)
       ),
-    [filteredBySize, serviceState.serviceId, selectedServiceIds]
+    [optionsRef, serviceState.serviceId, selectedServiceIds]
   );
 
   const mostRecentOptions = useMemo(
@@ -63,15 +58,19 @@ const SelectServiceField = ({
     const mapBy = (option: (typeof optionsRef)[number]) => {
       const { price } =
         option.priceMatrix.find(({ vehicleSize }) => vehicleSize === formState.vehicleSize) || {};
+
+      const isDisabled = price === undefined;
       return {
         value: option.id,
+        disabled: isDisabled,
         label: (
-          <>
+          <div className="space-x-2">
             <span className="font-semibold">{option.serviceName}</span>
-            <span className="mx-1 text-muted-foreground">{formatAmount(price || 0)}</span>
-            <span className="mx-1">-</span>
+            <span className="font-medium text-muted-foreground">{formatAmount(price || 0)}</span>
+            {isDisabled && <span className="text-muted-foreground">(not allowed)</span>}
+            <span>-</span>
             <span className="text-muted-foreground">{option.description}</span>
-          </>
+          </div>
         ),
       };
     };
@@ -82,7 +81,7 @@ const SelectServiceField = ({
   }, [formState.vehicleSize, leastRecentOptions, mostRecentOptions]);
 
   const onSelect = (serviceId: string, idx: number) => {
-    const service = filteredBySize.find(({ id }) => id === serviceId);
+    const service = optionsRef.find(({ id }) => id === serviceId);
     const priceMatrix = service?.priceMatrix.find(
       ({ vehicleSize }) => vehicleSize === formState.vehicleSize
     );
@@ -92,8 +91,21 @@ const SelectServiceField = ({
       return;
     }
 
+    const allowedRoles = service.serviceCutMatrix.map(({ role }) => role);
+
+    const { serviceBy } = formState.transactionServices[index];
+
+    const filteredServiceBy = serviceBy.filter(({ crewId }) => {
+      // allow an empty crew form
+      if (!crewId) return true;
+      const crew = crewOptions.find(({ id }) => id === crewId);
+
+      return allowedRoles.includes(crew?.role as CrewRole);
+    });
+
     form.setValue(`transactionServices.${idx}.serviceId`, serviceId);
-    form.setValue(`transactionServices.${idx}.price`, priceMatrix.price);
+    form.setValue(`transactionServices.${idx}.price`, priceMatrix.price.toFixed(2));
+    form.setValue(`transactionServices.${idx}.serviceBy`, filteredServiceBy);
     saveRecentSelections(serviceId);
   };
 
@@ -101,14 +113,14 @@ const SelectServiceField = ({
     <FormField
       control={form.control}
       name={`transactionServices.${index}.serviceId`}
-      disabled={isFetching}
+      disabled={isFetching || isFetchingCrew}
       render={({ field }) => (
         <FormItem className="w-full ">
           <FormLabel className="relative">
             Service <RequiredIndicatorIcon />
           </FormLabel>
           <ComboBoxResponsive
-            value={field.value}
+            {...field}
             onSelect={(value) => onSelect(value, index)}
             placeholder="Select service..."
             groupedOptions={groupedOptions}

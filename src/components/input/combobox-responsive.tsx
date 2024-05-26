@@ -16,10 +16,12 @@ import { cn } from '@/lib/utils';
 
 import { CheckIcon } from 'lucide-react';
 import { Children, isValidElement, useCallback, useMemo, useState } from 'react';
+import { twJoin } from 'tailwind-merge';
 
 interface Option {
   value: string;
   label: string | JSX.Element;
+  disabled?: boolean;
 }
 
 export interface GroupedOptions {
@@ -84,9 +86,13 @@ const List = ({ onSelect, groupedOptions, value }: ListProps) => {
             <CommandGroup key={groupLabel} heading={groupLabel}>
               {options.map((option) => (
                 <CommandItem
-                  className="max-w-[600px]"
+                  className={twJoin(
+                    'max-w-[600px]',
+                    option.disabled && 'cursor-not-allowed opacity-45'
+                  )}
                   key={option.value}
                   value={option.value}
+                  disabled={option.disabled}
                   onSelect={(selectValue) => {
                     onSelect(selectValue);
                   }}
@@ -113,7 +119,8 @@ export const ComboBoxResponsive = ({
   groupedOptions,
   value,
   placeholder,
-}: Omit<ListProps, 'setOpen'> & { value: string; placeholder?: string }) => {
+  disabled,
+}: Omit<ListProps, 'setOpen'> & { value: string; placeholder?: string; disabled?: boolean }) => {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
@@ -154,7 +161,11 @@ export const ComboBoxResponsive = ({
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full justify-start overflow-hidden">
+          <Button
+            variant="outline"
+            className="w-full justify-start overflow-hidden"
+            disabled={disabled}
+          >
             {label}
           </Button>
         </PopoverTrigger>
@@ -168,7 +179,11 @@ export const ComboBoxResponsive = ({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant="outline" className="w-full justify-start overflow-hidden">
+        <Button
+          variant="outline"
+          className="w-full justify-start overflow-hidden"
+          disabled={disabled}
+        >
           {label}
         </Button>
       </DrawerTrigger>

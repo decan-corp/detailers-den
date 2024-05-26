@@ -23,7 +23,7 @@ import { MoreHorizontal } from 'lucide-react';
 export const userColumns: ColumnDef<
   Pick<
     typeof usersTable.$inferSelect,
-    'id' | 'name' | 'email' | 'createdAt' | 'updatedAt' | 'role' | 'serviceCutPercentage'
+    'id' | 'name' | 'email' | 'createdAt' | 'updatedAt' | 'role' | 'serviceCutModifier'
   >
 >[] = [
   {
@@ -39,8 +39,10 @@ export const userColumns: ColumnDef<
     header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
   },
   {
-    accessorKey: 'serviceCutPercentage',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Cut %" />,
+    accessorKey: 'serviceCutModifier',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Service Cut % Modifier" />
+    ),
   },
   {
     accessorKey: 'createdAt',

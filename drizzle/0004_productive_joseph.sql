@@ -1,0 +1,2 @@
+ALTER TABLE "transaction_services" ADD COLUMN "service_cut_matrix" jsonb DEFAULT '[{"role":"crew","cutPercentage":40},{"role":"stay-in-crew","cutPercentage":30},{"role":"detailer","cutPercentage":50}]'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "transaction_services" DROP COLUMN IF EXISTS "service_cut_percentage";

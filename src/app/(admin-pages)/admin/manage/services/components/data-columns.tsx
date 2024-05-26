@@ -25,19 +25,15 @@ import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { MoreHorizontal } from 'lucide-react';
 
-export type ServiceColumnsType = Pick<
+export type ServiceColumnType = Pick<
   typeof servicesTable.$inferSelect,
   'id' | 'serviceName' | 'description' | 'createdAt' | 'updatedAt' | 'priceMatrix'
-> & { serviceCutPercentage?: number };
+> & { serviceCutMatrix?: typeof servicesTable.$inferSelect.serviceCutMatrix };
 
-export const serviceColumns: ColumnDef<ServiceColumnsType>[] = [
+export const serviceColumns: ColumnDef<ServiceColumnType>[] = [
   {
     accessorKey: 'serviceName',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Service Name" />,
-  },
-  {
-    accessorKey: 'serviceCutPercentage',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Cut %" />,
   },
   {
     accessorKey: 'description',
@@ -49,8 +45,27 @@ export const serviceColumns: ColumnDef<ServiceColumnsType>[] = [
     },
   },
   {
+    accessorKey: 'serviceCutMatrix',
+    enableSorting: false,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Cut %" />,
+    cell: ({ row }) => {
+      const { serviceCutMatrix } = row.original;
+      return (
+        <div className="space-y-1">
+          {serviceCutMatrix?.map((serviceCut) => (
+            <div key={serviceCut.role} className="flex place-content-between gap-2">
+              <div>{serviceCut.role}</div>
+              <div>{serviceCut.cutPercentage}%</div>
+            </div>
+          ))}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: 'priceMatrix',
     enableSorting: false,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Price Matrix" />,
     cell: ({ row }) => {
       const { priceMatrix } = row.original;
       return (
@@ -64,7 +79,6 @@ export const serviceColumns: ColumnDef<ServiceColumnsType>[] = [
         </div>
       );
     },
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Price Matrix" />,
   },
   {
     accessorKey: 'createdAt',

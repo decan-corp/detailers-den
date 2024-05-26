@@ -15,12 +15,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { addService } from 'src/actions/services/add-service';
 import { updateService } from 'src/actions/services/update-service';
 import { RequiredIndicatorIcon } from 'src/components/form/required-indicator';
-import { VehicleSize } from 'src/constants/common';
+import { CrewRole, VehicleSize } from 'src/constants/common';
 import { Entity } from 'src/constants/entities';
 import { createServiceSchema } from 'src/schemas/services';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
 import { useServiceFormStore } from './data-form-dialog';
+import ServiceCutMatrixForm from './service-cut-matrix-form';
 import ServiceMatrixForm from './service-matrix-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,9 +33,19 @@ import { z } from 'zod';
 const formSchema = createServiceSchema;
 export type ServiceFormValues = z.input<typeof formSchema>;
 
+export const defaultPriceMatrix = {
+  price: 0,
+  vehicleSize: undefined as unknown as VehicleSize,
+} satisfies ServiceFormValues['priceMatrix'][number];
+
+export const defaultServiceCutMatrix = {
+  role: undefined as unknown as CrewRole,
+  cutPercentage: 0,
+} satisfies ServiceFormValues['serviceCutMatrix'][number];
+
 const defaultValues: Partial<ServiceFormValues> = {
-  serviceCutPercentage: 0,
-  priceMatrix: [{ price: 0, vehicleSize: VehicleSize.Motorcycle }],
+  priceMatrix: [defaultPriceMatrix],
+  serviceCutMatrix: [defaultServiceCutMatrix],
 };
 
 const ServiceForm = ({
@@ -122,19 +133,10 @@ const ServiceForm = ({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="serviceCutPercentage"
-          render={({ field }) => (
-            <FormItem className="space-y-0">
-              <FormLabel>Service Cut %</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        <Separator className="my-4" />
+
+        <ServiceCutMatrixForm form={form} />
 
         <Separator className="my-4" />
 

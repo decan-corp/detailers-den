@@ -8,7 +8,7 @@ import { z } from 'zod';
 export const userSchema = createInsertSchema(usersTable, {
   name: (schema) => schema.name.min(1).trim(),
   email: (schema) => schema.email.email().min(1).toLowerCase().trim(),
-  serviceCutPercentage: z.coerce
+  serviceCutModifier: z.coerce
     .number()
     .int({ message: 'Must not contain decimal values' })
     .min(0)
@@ -34,18 +34,6 @@ export const createUserSchema = userSchema
       confirmPassword: z.string().min(8, { message: 'Must contain at least 8 characters' }),
     })
   )
-  .refine(
-    (value) => {
-      if ([Role.StayInCrew, Role.Crew, Role.Detailer].includes(value.role)) {
-        return Boolean(value.serviceCutPercentage);
-      }
-      return true;
-    },
-    {
-      message: 'Service cut percentage is required for crew, detailer, and stay-in-crew roles.',
-      path: ['serviceCutPercentage'],
-    }
-  )
   .refine((value) => value.confirmPassword === value.password, {
     message:
       'The passwords you entered do not match. Please ensure that both passwords are identical before proceeding.',
@@ -63,19 +51,7 @@ export const updateUserSchema = userSchema
   })
   .extend({
     id: z.string().cuid2(),
-  })
-  .refine(
-    (value) => {
-      if ([Role.StayInCrew, Role.Crew, Role.Detailer].includes(value.role)) {
-        return Boolean(value.serviceCutPercentage);
-      }
-      return true;
-    },
-    {
-      message: 'Service cut percentage is required for crew, detailer, and stay-in-crew roles.',
-      path: ['serviceCutPercentage'],
-    }
-  );
+  });
 
 export const updateAccountSchema = userSchema
   .omit({

@@ -2,10 +2,12 @@ export enum Role {
   StayInCrew = 'stay-in-crew',
   Crew = 'crew',
   Cashier = 'cashier',
-  Accounting = 'accounting',
+  Accountant = 'accountant',
   Detailer = 'detailer',
   Admin = 'admin',
 }
+
+export type CrewRole = Role.Crew | Role.StayInCrew | Role.Detailer;
 
 export enum TransactionStatus {
   Pending = 'pending',

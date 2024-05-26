@@ -9,14 +9,11 @@ export const getIncreaseInPercentage = (previousValue: number, currentValue: num
 };
 
 export const getComputedCutPercentage = (params: {
-  crewCutPercentage: number;
   serviceCutPercentage: number;
   numberOfCrews: number;
-}) =>
-  clamp((params.crewCutPercentage + params.serviceCutPercentage) / params.numberOfCrews, 0, 100);
+}) => clamp(params.serviceCutPercentage / params.numberOfCrews, 0, 100);
 
 export const computeCrewEarnedAmount = (params: {
-  crewCutPercentage: number;
   serviceCutPercentage: number;
   numberOfCrews: number;
   servicePrice: number;

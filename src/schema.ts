@@ -36,9 +36,9 @@ export const usersTable = pgTable('users', {
   email: varchar('email').notNull().unique(),
   role: varchar('role', {
     length: 64,
-    enum: [Role.StayInCrew, Role.Crew, Role.Cashier, Role.Accounting, Role.Detailer, Role.Admin],
+    enum: [Role.StayInCrew, Role.Crew, Role.Cashier, Role.Accountant, Role.Detailer, Role.Admin],
   }).notNull(),
-  serviceCutPercentage: integer('service_cut_percentage').default(0),
+  serviceCutModifier: integer('service_cut_modifier').default(0),
   image: varchar('image'),
   isFirstTimeLogin: boolean('is_first_time_login').notNull().default(true),
   hashedPassword: varchar('hashed_password').notNull(),
@@ -99,7 +99,6 @@ export const servicesTable = pgTable('services', {
     .notNull(),
   serviceName: varchar('service_name').notNull(),
   description: text('description'),
-  serviceCutPercentage: integer('service_cut_percentage').notNull().default(0),
   priceMatrix: jsonb('price_matrix')
     .$type<
       {
@@ -108,6 +107,20 @@ export const servicesTable = pgTable('services', {
       }[]
     >()
     .notNull(),
+  serviceCutMatrix: jsonb('service_cut_matrix')
+    .$type<
+      {
+        cutPercentage: number;
+        role: Role.Crew | Role.StayInCrew | Role.Detailer;
+      }[]
+    >()
+    .notNull()
+    // TODO: remove default once deployed in PROD
+    .default([
+      { role: Role.Crew, cutPercentage: 40 },
+      { role: Role.StayInCrew, cutPercentage: 30 },
+      { role: Role.Detailer, cutPercentage: 50 },
+    ]),
   ...commonSchema,
 });
 
@@ -126,7 +139,20 @@ export const transactionServicesTable = pgTable(
       .notNull(),
     price: real('price').notNull(),
     serviceBy: jsonb('service_by').$type<string[]>().notNull(),
-    serviceCutPercentage: integer('service_cut_percentage').notNull().default(0),
+    serviceCutMatrix: jsonb('service_cut_matrix')
+      .$type<
+        {
+          cutPercentage: number;
+          role: Role.Crew | Role.StayInCrew | Role.Detailer;
+        }[]
+      >()
+      .notNull()
+      // TODO: remove default once deployed in PROD
+      .default([
+        { role: Role.Crew, cutPercentage: 40 },
+        { role: Role.StayInCrew, cutPercentage: 30 },
+        { role: Role.Detailer, cutPercentage: 50 },
+      ]),
     ...commonSchema,
   },
   (table) => ({

@@ -17,7 +17,7 @@ export const getEarningsPerService = authAction(z.string().cuid2(), async (trans
       id: transactionServicesTable.id,
       transactionId: transactionServicesTable.transactionId,
       price: transactionServicesTable.price,
-      serviceCutPercentage: transactionServicesTable.serviceCutPercentage,
+      serviceCutMatrix: transactionServicesTable.serviceCutMatrix,
       serviceName: servicesTable.serviceName,
     })
     .from(transactionServicesTable)

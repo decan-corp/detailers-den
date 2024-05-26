@@ -11,7 +11,7 @@ import { z } from 'zod';
 export const recoverTransaction = authAction(z.string().cuid2(), async (id, ctx) => {
   const { role } = ctx.user;
 
-  if (![Role.Admin, Role.Cashier, Role.Accounting].includes(role)) {
+  if (![Role.Admin, Role.Cashier, Role.Accountant].includes(role)) {
     throw new SafeActionError('Forbidden access');
   }
 

@@ -43,7 +43,7 @@ export const getUsers = authAction(
         role: usersTable.role,
         createdAt: usersTable.createdAt,
         updatedAt: usersTable.updatedAt,
-        serviceCutPercentage: usersTable.serviceCutPercentage,
+        serviceCutModifier: usersTable.serviceCutModifier,
       })
       .from(usersTable)
       .$dynamic();
@@ -138,6 +138,7 @@ export const getUserOptions = authAction(
         id: usersTable.id,
         name: usersTable.name,
         role: usersTable.role,
+        serviceCutModifier: usersTable.serviceCutModifier,
       })
       .from(usersTable)
       .$dynamic();
