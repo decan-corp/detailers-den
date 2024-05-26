@@ -47,7 +47,7 @@ export const serviceColumns: ColumnDef<ServiceColumnType>[] = [
   {
     accessorKey: 'serviceCutMatrix',
     enableSorting: false,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Cut %" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service Cut Matrix" />,
     cell: ({ row }) => {
       const { serviceCutMatrix } = row.original;
       return (
