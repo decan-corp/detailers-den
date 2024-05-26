@@ -14,12 +14,8 @@ export const transactionSchema = createInsertSchema(transactionsTable)
       discount: z.union([z.string(), z.number()]).pipe(z.coerce.number()),
       tip: z.union([z.string(), z.number()]).pipe(z.coerce.number()),
       transactionServices: z
-        .array(
-          transactionServicesSchema.extend({
-            id: z.string().cuid2().optional(),
-          })
-        )
-        .min(1)
+        .array(transactionServicesSchema)
+        .min(1, { message: 'Must contain at least 1 service entry.' })
         .refine(
           (value) => {
             const uniqueServiceIds = uniqBy(value, 'serviceId');

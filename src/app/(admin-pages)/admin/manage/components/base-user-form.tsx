@@ -82,7 +82,7 @@ const BaseUserForm = ({ form }: { form: UseFormReturn<z.input<typeof userSchema>
       />
       <FormField
         control={form.control}
-        name="serviceCutPercentage"
+        name="serviceCutModifier"
         render={({ field }) => (
           <FormItem className="w-full space-y-0">
             <FormLabel>Service Cut %</FormLabel>

@@ -19,7 +19,7 @@ import { AdminRoute } from 'src/constants/routes';
 import { createTransactionSchema } from 'src/schemas/transactions';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
-import ServiceList, { defaultTransactionServiceItem } from '../components/form/service-list';
+import ServiceList, { makeDefaultTransactionServiceItem } from '../components/form/service-list';
 import TransactionBaseForm from '../components/form/transaction-base-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -48,7 +48,7 @@ const Page = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...defaultValues,
-      transactionServices: [defaultTransactionServiceItem],
+      transactionServices: [makeDefaultTransactionServiceItem()],
     },
     shouldFocusError: true,
   });

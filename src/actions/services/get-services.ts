@@ -27,7 +27,7 @@ export const getServices = authAction(
         createdAt: servicesTable.createdAt,
         updatedAt: servicesTable.updatedAt,
         priceMatrix: servicesTable.priceMatrix,
-        ...(role === Role.Admin && { serviceCutPercentage: servicesTable.serviceCutPercentage }),
+        ...(role === Role.Admin && { serviceCutMatrix: servicesTable.serviceCutMatrix }),
       })
       .from(servicesTable)
       .$dynamic();
@@ -93,6 +93,7 @@ export const getServiceOptions = authAction(
         id: servicesTable.id,
         serviceName: servicesTable.serviceName,
         priceMatrix: servicesTable.priceMatrix,
+        serviceCutMatrix: servicesTable.serviceCutMatrix,
         description: servicesTable.description,
       })
       .from(servicesTable)

@@ -26,7 +26,7 @@ export const roleOptions = [
     icon: BrushIcon,
   },
   {
-    value: Role.Accounting,
+    value: Role.Accountant,
     label: 'Accounting',
     icon: BackpackIcon,
   },

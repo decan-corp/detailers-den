@@ -43,7 +43,7 @@ const ServiceFormItem = ({
 
   const isEdit = pathname.startsWith(AdminRoute.EditTransaction);
   const allowedToEditPrice =
-    !!session && [Role.Admin, Role.Accounting, Role.Cashier].includes(session?.role);
+    !!session && [Role.Admin, Role.Accountant, Role.Cashier].includes(session?.role);
 
   const selectedService = useMemo(
     () => serviceOptions.find(({ id }) => id === itemState.serviceId),
@@ -58,7 +58,7 @@ const ServiceFormItem = ({
   );
 
   return (
-    <div className="space-y-4 rounded-lg border p-4">
+    <div className="space-y-4 rounded-lg border-2 border-dashed p-4">
       <div className="flex place-content-between">
         <div className="font-semibold">Service {index + 1}</div>
         <Button

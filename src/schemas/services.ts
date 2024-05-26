@@ -1,4 +1,4 @@
-import { VehicleSize } from 'src/constants/common';
+import { Role, VehicleSize } from 'src/constants/common';
 import { servicesTable } from 'src/schema';
 
 import { createInsertSchema } from 'drizzle-zod';
@@ -23,13 +23,31 @@ export const priceMatrixSchema = z
     }
   );
 
+export const serviceCutMatrixSchema = z
+  .array(
+    z.object({
+      role: z.enum([Role.Crew, Role.StayInCrew, Role.Detailer]),
+      cutPercentage: z.coerce.number().int().min(0),
+    })
+  )
+  .refine(
+    (value) => {
+      const uniqueCutMatrix = uniqBy(value, 'role');
+      return uniqueCutMatrix.length === value.length;
+    },
+    {
+      message: 'Roles must be unique',
+      path: ['serviceCutMatrix'],
+    }
+  );
+
 export const serviceSchema = createInsertSchema(servicesTable, {
   serviceName: (schema) => schema.serviceName.min(1),
 })
   .merge(
     z.object({
       priceMatrix: priceMatrixSchema,
-      serviceCutPercentage: z.coerce.number().int().optional(),
+      serviceCutMatrix: serviceCutMatrixSchema,
     })
   )
   .omit({

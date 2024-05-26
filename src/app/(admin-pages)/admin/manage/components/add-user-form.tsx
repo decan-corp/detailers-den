@@ -29,7 +29,7 @@ const formSchema = createUserSchema;
 export type AddUserFormValues = z.input<typeof formSchema>;
 
 const defaultValues: Partial<AddUserFormValues> = {
-  serviceCutPercentage: 0,
+  serviceCutModifier: 0,
 };
 
 const AddUserForm = () => {

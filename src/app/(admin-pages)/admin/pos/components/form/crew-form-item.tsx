@@ -8,6 +8,7 @@ import { transactionSchema } from 'src/schemas/transactions';
 
 import SelectCrewField from './select-crew-field';
 
+import { cloneDeep } from 'lodash';
 import { XIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
@@ -38,9 +39,9 @@ const CrewFormItem = ({
   );
 
   const onDelete = () => {
-    const state = [...formState.transactionServices];
-    state[serviceIndex].serviceBy.splice(index, 1);
-    form.setValue('transactionServices', state);
+    const serviceBy = cloneDeep(formState.transactionServices[serviceIndex].serviceBy);
+    serviceBy.splice(index, 1);
+    form.setValue(`transactionServices.${serviceIndex}.serviceBy`, serviceBy);
   };
 
   return (
@@ -58,7 +59,7 @@ const CrewFormItem = ({
         </Button>
       </div>
       <SelectCrewField index={index} serviceIndex={serviceIndex} form={form} />
-      {isEdit && session && [Role.Admin, Role.Cashier, Role.Accounting].includes(session.role) && (
+      {isEdit && session && [Role.Admin, Role.Accountant].includes(session.role) && (
         <FormField
           control={form.control}
           name={`transactionServices.${serviceIndex}.serviceBy.${index}.amount`}

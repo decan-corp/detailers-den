@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { transactionServicesSchema } from 'src/schemas/transaction-services';
 import { transactionSchema } from 'src/schemas/transactions';
 
 import ServiceFormItem from './service-form-item';
@@ -9,12 +10,15 @@ import { PlusCircleIcon } from 'lucide-react';
 import { UseFormReturn, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 
-export const defaultServiceByItem = { id: createId(), crewId: '' };
-export const defaultTransactionServiceItem = {
+export const makeDefaultServiceByItem = (): z.input<
+  typeof transactionServicesSchema
+>['serviceBy'][number] => ({ id: createId(), crewId: '', amount: 0 });
+
+export const makeDefaultTransactionServiceItem = (): z.input<typeof transactionServicesSchema> => ({
   id: createId(),
   serviceId: '',
-  serviceBy: [defaultServiceByItem],
-};
+  serviceBy: [makeDefaultServiceByItem()],
+});
 
 const ServiceList = ({ form }: { form: UseFormReturn<z.input<typeof transactionSchema>> }) => {
   const [parent] = useAutoAnimate({
@@ -25,30 +29,29 @@ const ServiceList = ({ form }: { form: UseFormReturn<z.input<typeof transactionS
     name: 'transactionServices',
   });
 
+  const serviceListError = form.formState.errors.transactionServices?.root;
   return (
-    <div className="space-y-6">
-      <div className="font-semibold leading-none tracking-tight">Services</div>
-      <div className="space-y-4">
-        <div className="space-y-4" ref={parent}>
-          {fields.map((item, index) => (
-            <ServiceFormItem
-              key={item.id}
-              form={form}
-              index={index}
-              onDelete={() => remove(index)}
-            />
-          ))}
-        </div>
-        <Button
-          className="w-full"
-          type="button"
-          variant="outline"
-          onClick={() => append(defaultTransactionServiceItem)}
-        >
-          <PlusCircleIcon className="mr-1 size-4 text-muted-foreground" />
-          Add Service
-        </Button>
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <div className="font-semibold leading-none tracking-tight">Services</div>
+        {serviceListError && (
+          <div className="text-sm font-medium text-destructive">{serviceListError.message}</div>
+        )}
       </div>
+      <div className="space-y-8" ref={parent}>
+        {fields.map((item, index) => (
+          <ServiceFormItem key={item.id} form={form} index={index} onDelete={() => remove(index)} />
+        ))}
+      </div>
+      <Button
+        className="w-full"
+        type="button"
+        variant="outline"
+        onClick={() => append(makeDefaultTransactionServiceItem())}
+      >
+        <PlusCircleIcon className="mr-1 size-4 text-muted-foreground" />
+        Add Service
+      </Button>
     </div>
   );
 };

@@ -65,16 +65,19 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
         createdBy: userId,
         price: priceMatrix.price,
         transactionId,
-        serviceCutPercentage: service.serviceCutPercentage,
+        serviceCutMatrix: service.serviceCutMatrix,
         serviceBy: transactionService.serviceBy.map(({ crewId }) => crewId),
       });
 
       transactionService.serviceBy.forEach(({ crewId }) => {
         const crew = usersRef.find(({ id }) => crewId === id);
+        const serviceCutMatrix = service.serviceCutMatrix.find(({ role }) => role === crew?.role);
+
+        const crewCutPercentage =
+          (crew?.serviceCutModifier || 0) + (serviceCutMatrix?.cutPercentage || 0);
 
         const { computedServiceCutPercentage, amount } = computeCrewEarnedAmount({
-          crewCutPercentage: crew?.serviceCutPercentage || 0,
-          serviceCutPercentage: service?.serviceCutPercentage || 0,
+          serviceCutPercentage: crewCutPercentage,
           numberOfCrews: transactionService.serviceBy.length,
           servicePrice: priceMatrix.price,
         });
@@ -82,7 +85,7 @@ export const addTransaction = authAction(createTransactionSchema, (data, { sessi
         insertCrewEarnings.push({
           transactionServiceId,
           computedServiceCutPercentage: computedServiceCutPercentage.toFixed(2),
-          crewCutPercentage: crew?.serviceCutPercentage || 0,
+          crewCutPercentage,
           crewId,
           amount: amount.toFixed(2),
           createdBy: userId,

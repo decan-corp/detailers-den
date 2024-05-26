@@ -23,9 +23,8 @@ import { omit, uniq } from 'lodash';
 
 export const updateTransaction = authAction(updateTransactionSchema, async (data, ctx) => {
   const { userId } = ctx.session;
-  const { role } = ctx.user;
 
-  if (![Role.Admin, Role.Accounting, Role.Cashier].includes(role)) {
+  if (![Role.Admin, Role.Accountant, Role.Cashier].includes(ctx.user.role)) {
     delete data.createdAt;
   }
 
@@ -47,7 +46,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
 
   const crewUpdateThreshold = 20;
   if (
-    ![Role.Admin, Role.Cashier].includes(role) &&
+    ![Role.Admin, Role.Cashier].includes(ctx.user.role) &&
     dayjs().diff(dayjs(transaction.createdAt), 'minutes') > crewUpdateThreshold
   ) {
     throw new SafeActionError(
@@ -57,7 +56,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
 
   const cashierUpdateThreshold = 7;
   if (
-    role === Role.Cashier &&
+    ctx.user.role === Role.Cashier &&
     dayjs().diff(dayjs(transaction.createdAt), 'days') > cashierUpdateThreshold
   ) {
     throw new SafeActionError(
@@ -103,8 +102,6 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
       const savedTransactionServiceRef = transactionServicesRef.find(
         ({ id }) => id === transactionService.id
       );
-      const serviceCutModifier =
-        (savedTransactionServiceRef?.serviceCutPercentage ?? service?.serviceCutPercentage) || 0;
 
       if (!priceMatrix) {
         throw new SafeActionError('Invalid price matrix');
@@ -127,7 +124,7 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         price: derivedPrice,
         transactionId: payload.id,
         createdAt: data.createdAt,
-        serviceCutPercentage: serviceCutModifier,
+        serviceCutMatrix: savedTransactionServiceRef?.serviceCutMatrix ?? service?.serviceCutMatrix,
         serviceBy: transactionService.serviceBy.map(({ crewId }) => crewId),
       } satisfies typeof transactionServicesTable.$inferInsert;
 
@@ -146,23 +143,36 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         });
 
       for (const item of transactionService.serviceBy) {
+        // Do not override amount if you're not an admin or accountant
+        if (![Role.Admin, Role.Accountant].includes(ctx.user.role)) {
+          delete item.amount;
+        }
+
         const { crewId, amount: overrideAmount } = item;
+
         const crewEarning = crewEarningsRef.find(
           (earning) =>
             earning.crewId === crewId &&
             earning.transactionServiceId === createTransactionService.id
         );
         const crew = usersRef.find(({ id }) => crewId === id);
+        const serviceCutMatrix = service.serviceCutMatrix.find(({ role }) => role === crew?.role);
 
-        const crewCutPercentage =
-          (crewEarning?.crewCutPercentage ?? crew?.serviceCutPercentage) || 0;
-        let amount = 0;
-        let computedServiceCutPercentage = 0;
+        // We set the default value from crew earning record for editing a transaction for non-admin roles.
+        // So that when they update the transaction, they won't be able to override the amount earned and the computed cut %.
+        let crewCutPercentage = crewEarning?.crewCutPercentage || 0;
+        let amount = Number(crewEarning?.amount || 0);
+        let computedServiceCutPercentage = Number(crewEarning?.computedServiceCutPercentage || 0);
 
-        if (overrideAmount === undefined) {
+        // If amount (renamed as overrideAmount) is undefined, this indicates that a new crew/service has been added in a transaction.
+        // Since we are now automatically computing the amount in the front end when selecting a crew, this code block won't be executed.
+        // We check the crewEarning record to see if it exists, to avoid overriding the amount for non-admin roles.
+        if (overrideAmount === undefined && !crewEarning) {
+          crewCutPercentage =
+            (crew?.serviceCutModifier || 0) + (serviceCutMatrix?.cutPercentage || 0);
+
           const results = computeCrewEarnedAmount({
-            crewCutPercentage,
-            serviceCutPercentage: serviceCutModifier,
+            serviceCutPercentage: crewCutPercentage,
             numberOfCrews: transactionService.serviceBy.length,
             servicePrice: derivedPrice,
           });
@@ -172,6 +182,11 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         }
 
         if (overrideAmount !== undefined) {
+          if (crewCutPercentage === 0) {
+            crewCutPercentage =
+              (crew?.serviceCutModifier || 0) + (serviceCutMatrix?.cutPercentage || 0);
+          }
+
           amount = overrideAmount;
           const computedCut = (overrideAmount / derivedPrice) * 100;
           computedServiceCutPercentage = Number(computedCut);

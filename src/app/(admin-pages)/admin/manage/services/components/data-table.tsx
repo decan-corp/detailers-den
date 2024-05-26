@@ -20,7 +20,7 @@ import useQueryParams from 'src/hooks/use-query-params';
 import useSetSearchParams from 'src/hooks/use-set-search-params';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
-import { ServiceColumnsType, serviceColumns } from './data-columns';
+import { ServiceColumnType, serviceColumns } from './data-columns';
 import { ServiceToolbar } from './data-table-toolbar';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -46,7 +46,7 @@ export const useServiceAlertDialogStore = create<{
   serviceIdToDelete: null,
 }));
 
-const emptyArray: ServiceColumnsType[] = [];
+const emptyArray: ServiceColumnType[] = [];
 
 const ServiceTable = () => {
   const queryClient = useQueryClient();
@@ -69,7 +69,9 @@ const ServiceTable = () => {
 
   useEffect(() => {
     if (user && user.role !== Role.Admin) {
-      setColumnVisibility({ serviceCutPercentage: false });
+      setColumnVisibility({ serviceCutMatrix: false } satisfies {
+        [T in keyof ServiceColumnType]?: boolean;
+      });
     }
   }, [user]);
 

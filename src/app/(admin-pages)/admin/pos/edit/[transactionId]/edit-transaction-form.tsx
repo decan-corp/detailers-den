@@ -28,7 +28,7 @@ import useClientSession from 'src/hooks/use-client-session';
 import { transactionSchema, updateTransactionSchema } from 'src/schemas/transactions';
 import { handleSafeActionError } from 'src/utils/error-handling';
 
-import ServiceList, { defaultTransactionServiceItem } from '../../components/form/service-list';
+import ServiceList, { makeDefaultTransactionServiceItem } from '../../components/form/service-list';
 import TransactionBaseForm from '../../components/form/transaction-base-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -59,7 +59,7 @@ const EditTransactionForm = ({ data }: { data?: UpdateTransactionFormValues }) =
     resolver: zodResolver(formSchema),
     defaultValues: data || {
       ...defaultValues,
-      transactionServices: [defaultTransactionServiceItem],
+      transactionServices: [makeDefaultTransactionServiceItem()],
     },
     shouldFocusError: true,
   });
@@ -101,7 +101,7 @@ const EditTransactionForm = ({ data }: { data?: UpdateTransactionFormValues }) =
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
-                {session && [Role.Admin, Role.Cashier, Role.Accounting].includes(session.role) && (
+                {session && [Role.Admin, Role.Cashier, Role.Accountant].includes(session.role) && (
                   <FormField
                     control={form.control}
                     name="createdAt"
