@@ -164,13 +164,15 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         let amount = Number(crewEarning?.amount || 0);
         let computedServiceCutPercentage = Number(crewEarning?.computedServiceCutPercentage || 0);
 
+        if (crewCutPercentage === 0) {
+          crewCutPercentage =
+            (crew?.serviceCutModifier || 0) + (serviceCutMatrix?.cutPercentage || 0);
+        }
+
         // If amount (renamed as overrideAmount) is undefined, this indicates that a new crew/service has been added in a transaction.
         // Since we are now automatically computing the amount in the front end when selecting a crew, this code block won't be executed.
         // We check the crewEarning record to see if it exists, to avoid overriding the amount for non-admin roles.
         if (overrideAmount === undefined && !crewEarning) {
-          crewCutPercentage =
-            (crew?.serviceCutModifier || 0) + (serviceCutMatrix?.cutPercentage || 0);
-
           const results = computeCrewEarnedAmount({
             serviceCutPercentage: crewCutPercentage,
             numberOfCrews: transactionService.serviceBy.length,
@@ -182,11 +184,6 @@ export const updateTransaction = authAction(updateTransactionSchema, async (data
         }
 
         if (overrideAmount !== undefined) {
-          if (crewCutPercentage === 0) {
-            crewCutPercentage =
-              (crew?.serviceCutModifier || 0) + (serviceCutMatrix?.cutPercentage || 0);
-          }
-
           amount = overrideAmount;
           const computedCut = (overrideAmount / derivedPrice) * 100;
           computedServiceCutPercentage = Number(computedCut);
