@@ -61,7 +61,7 @@ export const vehicleSizeOptions = [
   },
   {
     value: VehicleSize.ExtraExtraLarge,
-    label: 'XXL',
+    label: 'Extra Extra Large',
     icon: TruckIcon,
   },
 ] satisfies {
