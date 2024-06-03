@@ -15,6 +15,7 @@ import { formatAmount } from 'src/utils/format';
 
 import AvailedServiceCount from '../common/availed-service-count';
 import TransactionsCountChart from '../common/overview-chart';
+import VehicleSizeCount from '../common/vehicle-size-count';
 import { DashboardTab } from '../tabs-container';
 
 import { useQuery } from '@tanstack/react-query';
@@ -130,6 +131,22 @@ const TransactionsTab = () => {
           <CardContent>
             {date?.from && date?.to ? (
               <AvailedServiceCount startDate={date.from} endDate={date.to} />
+            ) : (
+              <div className="py-12 text-center text-muted-foreground">Select date range first</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-4 lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Vehicle Size Count</CardTitle>
+            <CardDescription>
+              Count of vehicles of each size that have been serviced within a specified date range
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {date?.from && date?.to ? (
+              <VehicleSizeCount startDate={date.from} endDate={date.to} />
             ) : (
               <div className="py-12 text-center text-muted-foreground">Select date range first</div>
             )}
