@@ -68,6 +68,7 @@ export const transactionsTable = pgTable(
         VehicleSize.Medium,
         VehicleSize.Large,
         VehicleSize.ExtraLarge,
+        VehicleSize.ExtraExtraLarge,
       ],
     }).notNull(),
     discount: decimal('discount', { scale: 2, precision: 10 }).notNull().default('0'),
