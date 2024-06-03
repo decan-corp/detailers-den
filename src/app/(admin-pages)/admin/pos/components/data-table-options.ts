@@ -4,6 +4,7 @@ import { transactionsTable } from 'src/schema';
 import {
   BikeIcon,
   BirdIcon,
+  BusFrontIcon,
   BusIcon,
   CarFrontIcon,
   CarIcon,
@@ -51,11 +52,16 @@ export const vehicleSizeOptions = [
   {
     value: VehicleSize.Large,
     label: 'Large',
-    icon: BusIcon,
+    icon: BusFrontIcon,
   },
   {
     value: VehicleSize.ExtraLarge,
     label: 'Extra Large',
+    icon: BusIcon,
+  },
+  {
+    value: VehicleSize.ExtraExtraLarge,
+    label: 'XXL',
     icon: TruckIcon,
   },
 ] satisfies {

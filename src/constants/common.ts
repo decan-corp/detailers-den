@@ -21,6 +21,7 @@ export enum VehicleSize {
   Medium = 'medium',
   Large = 'large',
   ExtraLarge = 'x-large',
+  ExtraExtraLarge = 'xxl',
 }
 
 export enum ModeOfPayment {
