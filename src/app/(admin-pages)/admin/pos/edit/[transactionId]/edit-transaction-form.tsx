@@ -107,7 +107,7 @@ const EditTransactionForm = ({ data }: { data?: UpdateTransactionFormValues }) =
                     name="createdAt"
                     render={({ field }) => (
                       <FormItem className="">
-                        <FormLabel>Customer Name</FormLabel>
+                        <FormLabel>Date Created</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
