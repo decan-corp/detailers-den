@@ -9,6 +9,30 @@ import UserNav from './user-nav';
 import { AlignJustifyIcon } from 'lucide-react';
 import Link from 'next/link';
 
+const getNavItems = (role: Role) =>
+  [
+    {
+      label: 'Dashboard',
+      route: AdminRoute.Dashboard,
+      isVisible: [Role.Admin, Role.Cashier].includes(role),
+    },
+    {
+      label: 'Manage',
+      route: AdminRoute.ManageUsers,
+      isVisible: true,
+    },
+    {
+      label: 'POS',
+      route: AdminRoute.POS,
+      isVisible: true,
+    },
+    {
+      label: 'Crew Earnings',
+      route: AdminRoute.CrewEarnings,
+      isVisible: true,
+    },
+  ] satisfies { label: string; route: AdminRoute; isVisible?: boolean }[];
+
 const Header = async () => {
   const { session, user } = await validateRequest();
 
@@ -24,28 +48,23 @@ const Header = async () => {
             <AlignJustifyIcon />
           </DrawerTrigger>
           <DrawerContent className="space-y-6 pb-6 text-center">
-            {[Role.Admin].includes(user.role) && (
-              <HeaderLink className="text-2xl" route={AdminRoute.Dashboard}>
-                <DrawerClose>Dashboard</DrawerClose>
-              </HeaderLink>
+            {getNavItems(user.role).map(
+              (nav) =>
+                nav.isVisible && (
+                  <HeaderLink className="text-2xl" route={nav.route}>
+                    <DrawerClose>{nav.label}</DrawerClose>
+                  </HeaderLink>
+                )
             )}
-            <HeaderLink className="text-2xl" route={AdminRoute.ManageUsers}>
-              <DrawerClose>Manage</DrawerClose>
-            </HeaderLink>
-            <HeaderLink className="text-2xl" route={AdminRoute.POS}>
-              <DrawerClose>POS</DrawerClose>
-            </HeaderLink>
           </DrawerContent>
         </Drawer>
         <div className="text-sm font-bold md:text-base">
           <Link href={AdminRoute.Dashboard}>185 Detailers Den</Link>
         </div>
         <nav className="hidden items-center space-x-4 sm:flex lg:space-x-6">
-          {[Role.Admin, Role.Cashier].includes(user.role) && (
-            <HeaderLink route={AdminRoute.Dashboard}>Dashboard</HeaderLink>
+          {getNavItems(user.role).map(
+            (nav) => nav.isVisible && <HeaderLink route={nav.route}>{nav.label}</HeaderLink>
           )}
-          <HeaderLink route={AdminRoute.ManageUsers}>Manage</HeaderLink>
-          <HeaderLink route={AdminRoute.POS}>POS</HeaderLink>
         </nav>
         <div className="md:ml-auto">
           <UserNav />

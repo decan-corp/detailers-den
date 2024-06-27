@@ -29,7 +29,7 @@ export interface GroupedOptions {
 }
 
 interface ListProps {
-  onSelect: (value: Option['value']) => void;
+  onSelect?: (value: Option['value']) => void;
   groupedOptions: GroupedOptions;
   value: Option['value'];
 }
@@ -94,7 +94,7 @@ const List = ({ onSelect, groupedOptions, value }: ListProps) => {
                   value={option.value}
                   disabled={option.disabled}
                   onSelect={(selectValue) => {
-                    onSelect(selectValue);
+                    onSelect?.(selectValue);
                   }}
                 >
                   <div className="w-full">{option.label}</div>
@@ -143,7 +143,7 @@ export const ComboBoxResponsive = ({
 
   const handleSelect = useCallback(
     (data: Option['value']) => {
-      onSelect(data);
+      onSelect?.(data);
       setOpen(false);
     },
     [onSelect]

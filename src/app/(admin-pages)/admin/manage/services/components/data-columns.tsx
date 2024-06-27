@@ -83,7 +83,7 @@ export const serviceColumns: ColumnDef<ServiceColumnType>[] = [
   {
     accessorKey: 'createdAt',
     accessorFn: ({ createdAt }) => dayjs(createdAt).format(DATE_TABLE_DATE_FORMAT),
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Date Created" />,
   },
   {
     accessorKey: 'updatedAt',

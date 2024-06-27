@@ -22,4 +22,5 @@ export enum AdminRoute {
   AddTransaction = '/admin/pos/add',
   EditTransaction = '/admin/pos/edit',
   AccountSetup = '/account-setup',
+  CrewEarnings = '/admin/crew-earnings',
 }

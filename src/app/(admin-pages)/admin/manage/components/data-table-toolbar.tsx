@@ -32,6 +32,7 @@ export const UserToolbar = <TData,>({ table }: DataTableToolbarProps<TData>) => 
           onChange={(event) => table.setGlobalFilter(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
         />
+
         {table.getColumn('role') && (
           <DataTableFacetedFilter
             column={table.getColumn('role')}

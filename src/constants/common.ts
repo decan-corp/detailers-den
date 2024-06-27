@@ -8,6 +8,7 @@ export enum Role {
 }
 
 export type CrewRole = Role.Crew | Role.StayInCrew | Role.Detailer;
+export const managerialRole = [Role.Admin, Role.Accountant, Role.Cashier];
 
 export enum TransactionStatus {
   Pending = 'pending',
