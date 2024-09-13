@@ -29,7 +29,7 @@ const HeroSection = () => (
       <div
         className={twJoin(
           bebasNeue.className,
-          'z-10 mx-6 mt-[100px] md:mx-16 md:mt-[150px] lg:mx-32 lg:mt-[210px] ',
+          'z-10 mx-6 mt-[100px] md:mx-16 md:mt-[150px] lg:mx-32 lg:mt-[210px]',
           'grid max-w-[1240px] grid-cols-1 justify-center gap-x-16 gap-y-10 lg:grid-cols-5'
         )}
       >
@@ -117,7 +117,7 @@ const HeroSection = () => (
           className={twJoin(
             cabin.className,
             'relative flex w-[293px] flex-col items-center justify-center gap-[10px]',
-            ' text-center text-[26px] font-bold tracking-[3.12px] text-white'
+            'text-center text-[26px] font-bold tracking-[3.12px] text-white'
           )}
         >
           <FacebookLogo className="h-[50px] w-[50px]" />

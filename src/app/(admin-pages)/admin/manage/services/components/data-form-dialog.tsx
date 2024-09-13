@@ -72,7 +72,7 @@ export const ServiceFormDialog = () => {
         )}
       </DialogTrigger>
       <DialogContent
-        className="max-h-full overflow-auto sm:max-w-[525px]  md:max-h-[720px]"
+        className="max-h-full overflow-auto sm:max-w-[525px] md:max-h-[720px]"
         onInteractOutside={(e) => {
           e.preventDefault();
         }}

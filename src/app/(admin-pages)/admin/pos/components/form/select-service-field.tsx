@@ -115,7 +115,7 @@ const SelectServiceField = ({
       name={`transactionServices.${index}.serviceId`}
       disabled={isFetching || isFetchingCrew}
       render={({ field }) => (
-        <FormItem className="w-full ">
+        <FormItem className="w-full">
           <FormLabel className="relative">
             Service <RequiredIndicatorIcon />
           </FormLabel>

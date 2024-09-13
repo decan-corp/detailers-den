@@ -122,7 +122,7 @@ const TransactionBaseForm = ({
           control={form.control}
           name="vehicleSize"
           render={({ field }) => (
-            <FormItem className="w-full ">
+            <FormItem className="w-full">
               <FormLabel className="relative">
                 Vehicle Size <RequiredIndicatorIcon />
               </FormLabel>
@@ -153,7 +153,7 @@ const TransactionBaseForm = ({
           control={form.control}
           name="status"
           render={({ field }) => (
-            <FormItem className="w-full ">
+            <FormItem className="w-full">
               <FormLabel className="relative">
                 Status <RequiredIndicatorIcon />
               </FormLabel>
@@ -183,7 +183,7 @@ const TransactionBaseForm = ({
           control={form.control}
           name="modeOfPayment"
           render={({ field }) => (
-            <FormItem className="w-full ">
+            <FormItem className="w-full">
               <FormLabel className="relative">
                 Mode of Payment <RequiredIndicatorIcon />
               </FormLabel>
