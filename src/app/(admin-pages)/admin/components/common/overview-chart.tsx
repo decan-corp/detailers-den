@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-continue */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable @typescript-eslint/no-for-in-array */
+
 import { getPerDayTransactionsCount } from 'src/actions/transactions/get-per-day-transactions-count';
 import { Entity } from 'src/constants/entities';
 
@@ -10,7 +8,7 @@ import dayjs from 'dayjs';
 import { ReactElement, useMemo } from 'react';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-const dateFormat = 'MM-DD';
+const dateFormat = 'YYYY-MM-DD';
 
 const TransactionsCountChart = ({
   startDate,
@@ -48,12 +46,12 @@ const TransactionsCountChart = ({
 
     for (let key = diff; key !== -1; key -= 1) {
       const day = dayjs(derivedEndDate).subtract(key, 'day').format(dateFormat);
-      const transactionCount = transactions.find(({ name }) => name === day);
+      const record = transactions.find(({ name }) => name === day);
 
-      if (transactionCount) {
+      if (record) {
         list.push({
-          ...transactionCount,
-          name: day === now.format(dateFormat) ? 'Now' : transactionCount.name,
+          ...record,
+          name: day === now.format(dateFormat) ? 'Now' : record.name,
         });
       } else {
         list.push({
@@ -69,14 +67,21 @@ const TransactionsCountChart = ({
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>
-        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+        <XAxis
+          dataKey="name"
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickFormatter={CustomXLabel}
+        />
         <YAxis
           className=""
           stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${value}`}
+          tickFormatter={(value) => value}
         />
         <Tooltip content={CustomTooltip as unknown as ReactElement} />
         <Bar
@@ -88,6 +93,11 @@ const TransactionsCountChart = ({
       </BarChart>
     </ResponsiveContainer>
   );
+};
+
+const CustomXLabel = (props: string) => {
+  const format = 'MM-DD';
+  return props === 'Now' ? 'Now' : dayjs(props, dateFormat).format(format);
 };
 
 const CustomTooltip = ({
@@ -103,7 +113,7 @@ const CustomTooltip = ({
     return (
       <div className="space-y-1 rounded-lg border border-border bg-background p-4 opacity-90">
         <div className="font-medium">
-          {dayjs(label === 'Now' ? dayjs() : label, 'MM-DD').format('MMM DD (dddd)')}
+          {dayjs(label === 'Now' ? dayjs() : label, dateFormat).format('MMM DD (dddd)')}
         </div>
         <div className="font-medium">Count: {payload?.[0]?.value}</div>
       </div>
