@@ -11,7 +11,6 @@
     "typecheck": "tsc --noEmit -p tsconfig.eslint.json",
     "drizzle:generate": "bun drizzle-kit generate:pg",
     "drizzle:migrate": "bunx tsx ./scripts/migrate.ts",
-    "script:migrate": "bunx tsx ./scripts/migrate-to-neon-db.ts",
     "prepare": "husky install"
   },
   "lint-staged": {
