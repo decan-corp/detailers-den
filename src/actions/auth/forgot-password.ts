@@ -7,7 +7,7 @@ import { SafeActionError, action } from 'src/utils/safe-action';
 import { makeVerifiedSender, sendgrid } from 'src/utils/sendgrid';
 
 import dayjs from 'dayjs';
-import { and, eq, gt } from 'drizzle-orm';
+import { and, eq, gt, isNull } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 
@@ -20,10 +20,10 @@ export const forgotPassword = action(
     const [user] = await db
       .select({ id: usersTable.id, name: usersTable.name })
       .from(usersTable)
-      .where(eq(usersTable.email, email));
+      .where(and(eq(usersTable.email, email), isNull(usersTable.deletedAt)));
 
     if (!user) {
-      throw new SafeActionError('Email not registered.');
+      throw new SafeActionError('User may have been deleted or does not exist.');
     }
 
     const [existingResetPasswordToken] = await db
